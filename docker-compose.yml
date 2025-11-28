@@ -1,0 +1,57 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Servicio 1: Aplicación Node.js
+  web:
+    build: . # Construye la imagen con el Dockerfile que acabamos de crear
+    # ^--- MODIFICADO: Construye la imagen usando el Dockerfile en este mismo directorio
+    container_name: parking_web
+    
+    ports:
+      - "3000:3000" # Mapea el puerto 3000 de tu máquina al puerto 3000 del contenedor
+    # ^--- MODIFICADO: Mapeo de puertos para acceder a la aplicación en localhost:3000
+    
+    volumes:
+      - .:/usr/src/app # Monta el código fuente local. Útil para desarrollo.
+      - /usr/src/app/node_modules # Evita que la carpeta node_modules local sobrescriba la del contenedor
+    # ^--- MODIFICADO: Volumen de montaje para desarrollo y exclusión de node_modules
+
+    environment: # Configura las variables de entorno del archivo .env
+      PORT: 3000
+      JWT_SECRET: tu_secreto_jwt_de_desarrollo # ¡CÁMBIALO!
+      DB_HOST: db # El nombre del servicio DB en docker-compose
+      DB_USER: user_parqueo # Usuario para la DB de Docker
+      DB_PASSWORD: password_secret_parqueo # Contraseña para la DB de Docker
+      DB_NAME: parking
+    # ^--- MODIFICADO: Variables de entorno para la conexión a la DB y JWT
+
+    depends_on:
+      - db # Asegura que la DB inicie antes que la aplicación
+  
+  # Servicio 2: Base de datos MariaDB (MySQL compatible)
+  db:
+    ports:
+        - "3306:3306" 
+    image: mariadb:10.4 # Recomendado por el README (MariaDB/MySQL 10.4+)
+    # ^--- MODIFICADO: Imagen de MariaDB 10.4
+
+    container_name: parking_bd
+    
+    restart: always # Intenta reiniciar si el contenedor falla
+    
+    environment:
+      MARIADB_ROOT_PASSWORD: root_password_segura # Contraseña del usuario 'root' de la DB
+      MARIADB_USER: user_parqueo # Coincide con DB_USER en el servicio 'web'
+      MARIADB_PASSWORD: password_secret_parqueo # Coincide con DB_PASSWORD en el servicio 'web'
+      MARIADB_DATABASE: parqueadero # Coincide con DB_NAME en el servicio 'web'
+    # ^--- MODIFICADO: Variables de entorno estándar de MariaDB
+
+    volumes:
+      - db_data:/var/lib/mysql # Persistencia de los datos de la DB
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql # EJECUCIÓN INICIAL DEL SCRIPT SQL
+    # ^--- MODIFICADO: **INYECCIÓN CRUCIAL**: Ejecuta el schema.sql al iniciar el contenedor por primera vez
+
+# Volúmenes para persistencia
+volumes:
+  db_data: # Define el volumen de persistencia para los datos de MariaDB
