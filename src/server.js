@@ -3,6 +3,9 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const sequelize = require('./config/db');
+const errorHandler = require('./middlewares/errorHandler');
+
 const app = express();
 
 // Determina ruta base según entorno (desarrollo vs ejecutable pkg)
@@ -87,7 +90,15 @@ app.use((req, res) => {
     res.status(404).sendFile(path.join(publicDir, '404.html'));
 });
 
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+sequelize.authenticate()
+  .then(() => {
+    console.log('✓ Conexión a MySQL establecida')
+    app.listen(PORT, () => console.log(`✓ Servidor corriendo en :${PORT}`))
+  })
+  .catch(err => {
+    console.error('✗ Error conectando a la BD:', err.message)
+    process.exit(1)
+  })

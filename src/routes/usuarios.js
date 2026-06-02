@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const verifyToken = require('../middleware/auth');
-const requireAdmin = require('../middleware/requireAdmin');
+const verifyToken = require('../middlewares/auth');
+const requireAdmin = require('../middlewares/requireAdmin');
 const { sanitizeIdParam } = require('../utils/sanitize');
 
 // Todas estas rutas requieren autenticación y rol admin

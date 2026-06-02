@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../middlewares/auth');
 const { sanitizeIdParam } = require('../utils/sanitize');
 
 // Middleware para verificar si el vehículo pertenece a la empresa del usuario

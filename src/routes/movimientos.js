@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../middlewares/auth');
 
 // Obtener tarifa activa por tipo de vehículo para la empresa
 async function obtenerTarifaActiva(idEmpresa, tipoVehiculo) {

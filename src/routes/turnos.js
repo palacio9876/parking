@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const auth = require('../middleware/auth');
+const auth = require('../middlewares/auth');
 const { sanitizeIdParam } = require('../utils/sanitize');
 
 // Middleware de autenticación

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../middlewares/auth');
 
 // Obtener tarifas activas por tipo para la empresa
 router.get('/current', verifyToken, async (req, res) => {

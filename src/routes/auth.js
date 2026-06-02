@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
-const validateLoginData = require('../middleware/validateLogin');
+const validateLoginData = require('../middlewares/validateLogin');
 
 // Middleware para registrar intentos de inicio de sesión
 const logLoginAttempt = async (id_empresa, usuario, exitoso, ip) => {
@@ -124,6 +124,7 @@ router.post('/login', validateLoginData, async (req, res) => {
         // Registrar inicio de sesión exitoso
         await logLoginAttempt(id_empresa, usuario, true, ip);
 
+        
         // Enviar respuesta exitosa
         res.json({
             success: true,

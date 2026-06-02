@@ -4,7 +4,7 @@ const pool = require('../config/db');
 const { toSafeInt } = require('../utils/sanitize');
 
 // Middleware para verificar el token
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../middlewares/auth');
 
 // Obtener estadísticas del dashboard
 router.get('/stats', verifyToken, async (req, res) => {

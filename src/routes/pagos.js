@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../middlewares/auth');
 
 // Insertar múltiples pagos para un movimiento ya finalizado
 router.post('/bulk', verifyToken, async (req, res) => {
