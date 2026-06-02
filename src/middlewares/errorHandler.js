@@ -1,12 +1,16 @@
-const AppError = require('../utils/AppError')
-const logger = require('../utils/logger')
+// src/middlewares/errorHandler.js
+const { logger } = require('../utils/logger')
 
-function errorHandler(err, req, res, next) {
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({ error: err.message })
+const errorHandler = (err, req, res, next) => {
+  if (err.isOperational) {
+    return res.status(err.statusCode).json({
+      success: false,
+      error:   err.message,
+      ...(err.errors && { errors: err.errors })
+    })
   }
   logger.error(err)
-  res.status(500).json({ error: 'Error interno del servidor' })
+  res.status(500).json({ success: false, error: 'Internal server error' })
 }
 
-module.exports = errorHandler
+module.exports = { errorHandler }   // ← antes exportaba sin destructuring

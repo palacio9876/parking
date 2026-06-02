@@ -1,28 +1,24 @@
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken')
+const { AppError } = require('../utils/AppError')
 
-const verifyToken = (req, res, next) => {
-    const bearerHeader = req.headers['authorization'];
+const auth = (req, res, next) => {
+  const header = req.headers.authorization
+  if (!header?.startsWith('Bearer ')) {
+    return next(new AppError(401, 'No token provided'))
+  }
+  try {
+    req.user = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET)
+    next()
+  } catch {
+    next(new AppError(401, 'Invalid or expired token'))
+  }
+}
 
-    if (!bearerHeader) {
-        return res.status(401).json({
-            success: false,
-            message: 'No se proporcionó token de acceso'
-        });
-    }
+const requireAdmin = (req, res, next) => {
+  if (req.user?.role !== 'admin') {
+    return next(new AppError(403, 'Admin access required'))
+  }
+  next()
+}
 
-    try {
-        const bearer = bearerHeader.split(' ');
-        const token = bearer[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tu_secreto_jwt');
-        
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(401).json({
-            success: false,
-            message: 'Token inválido o expirado'
-        });
-    }
-};
-
-module.exports = verifyToken;
+module.exports = { auth, requireAdmin }

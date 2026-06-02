@@ -5,4 +5,5 @@ const logger = winston.createLogger({
   format: winston.format.combine(winston.format.timestamp(), winston.format.simple()),
   transports: [new winston.transports.Console()],
 })
-module.exports = logger
+
+module.exports = { logger }   // ← antes exportaba sin destructuring
