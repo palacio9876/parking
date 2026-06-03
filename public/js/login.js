@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Validar el formulario usando las clases de Bootstrap
         if (loginForm.checkValidity()) {
             // Obtener los valores del formulario
-            const empresa = document.getElementById('empresa').value;
-            const usuario = document.getElementById('usuario').value;
+            const tax_id = document.getElementById('tax_id').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const recordar = document.getElementById('recordar').checked;
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ empresa, usuario, password })
+                    body: JSON.stringify({ tax_id, username, password })
                 });
 
                 const data = await response.json();
@@ -61,10 +61,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Guardar token y datos del usuario
                 localStorage.setItem('token', data.data.token);
-                localStorage.setItem('userName', data.data.nombre);
-                localStorage.setItem('userRole', data.data.rol);
-                localStorage.setItem('empresaId', data.data.id_empresa);
-                localStorage.setItem('empresaNit', empresa);
+                localStorage.setItem('userName', data.data.user.name);
+                localStorage.setItem('userRole', data.data.user.role);
+                localStorage.setItem('userId', data.data.user.id_user);
+                localStorage.setItem('empresaId', data.data.user.id_company);
+                localStorage.setItem('empresaNit', tax_id);
 
                 // Marcar el día de login (YYYY-MM-DD) para mostrar el banner diario una vez
                 try {
@@ -79,15 +80,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Guardar datos si recordar está marcado
                 if (recordar) {
-                    localStorage.setItem('savedUsername', usuario);
-                    localStorage.setItem('savedEmpresa', empresa);
+                    localStorage.setItem('savedUsername', username);
+                    localStorage.setItem('savedTaxId', tax_id);
                 } else {
                     localStorage.removeItem('savedUsername');
-                    localStorage.removeItem('savedEmpresa');
+                    localStorage.removeItem('savedTaxId');
                 }
 
                 // Redireccionar según el rol
-                redirectToDashboard(data.data.rol);
+                redirectToDashboard(data.data.role);
 
             } catch (error) {
                 mostrarError(error.message);
@@ -99,9 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Función para redireccionar al dashboard
-    function redirectToDashboard(rol) {
+    function redirectToDashboard(role) {
         const baseUrl = window.location.origin;
-        const dashboardUrl = rol === 'admin' ? '/admin/dashboard' : '/operador/dashboard';
+        const dashboardUrl = role === 'admin' ? '/admin/dashboard' : '/operator/dashboard';
         window.location.href = baseUrl + dashboardUrl;
     }
 
@@ -144,11 +145,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Cargar datos guardados si existen
     const usuarioGuardado = localStorage.getItem('savedUsername');
-    const empresaGuardada = localStorage.getItem('savedEmpresa');
+    const taxIdGuardado = localStorage.getItem('savedTaxId');
     
-    if (usuarioGuardado && empresaGuardada) {
-        document.getElementById('usuario').value = usuarioGuardado;
-        document.getElementById('empresa').value = empresaGuardada;
+    if (usuarioGuardado && taxIdGuardado) {
+        document.getElementById('username').value = usuarioGuardado;
+        document.getElementById('tax_id').value = taxIdGuardado;
         document.getElementById('recordar').checked = true;
     }
 });

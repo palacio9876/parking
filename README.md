@@ -155,7 +155,7 @@ schema.sql             # Esquema, vistas, procedimiento y datos seed
 - Rutas actualizadas para sanitizar filtros/paginación e IDs:
   - `reportes.js`, `dashboard.js`, `movimientos.js`, `turnos.js`, `vehiculos.js`, `usuarios.js`.
 - Login reforzado: normalización de entradas (trim), validación previa y auditoría.
-- UI: En `public/admin/ingreso-salida.html` el combo de tipo se reemplazó por botones de selección (Carro/Moto/Bici) con diseño moderno y responsivo.
+- UI: En `public/admin/entry-exit.html` el combo de tipo se reemplazó por botones de selección (Carro/Moto/Bici) con diseño moderno y responsivo.
 
 ### Licencia
 ISC © Ciscode

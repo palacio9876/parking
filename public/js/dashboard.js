@@ -1,11 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si el usuario está autenticado
+    // Adjust sidebar links based on role
+    const role = localStorage.getItem('userRole')
+    if (role === 'operator') {
+        document.querySelectorAll('.sidebar-nav a[href^="/admin/"]').forEach(link => {
+            // Operators only see dashboard and entry-exit
+            const href = link.getAttribute('href')
+            if (href === '/admin/dashboard') {
+                link.setAttribute('href', '/operator/dashboard')
+            } else if (href === '/admin/entry-exit') {
+                link.setAttribute('href', '/operator/entry-exit')
+            }
+        })
+    }
+    // Check if user is authenticated
     if (!localStorage.getItem('token')) {
         window.location.href = '/';
         return;
     }
 
-    // Configuración del sidebar
+    // Sidebar configuration
     const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
@@ -16,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Cerrar sidebar al hacer clic fuera en dispositivos móviles
+    // Close sidebar when clicking outside on mobile devices
     document.addEventListener('click', (e) => {
         if (window.innerWidth < 992 && 
             !sidebar.contains(e.target) && 
@@ -25,24 +38,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Mostrar nombre del usuario y ocultar menús admin para operadores
+    // Show user name and hide admin menus for operators
     const nameEl = document.getElementById('userName');
     if (nameEl) {
-        nameEl.textContent = localStorage.getItem('userName') || 'Usuario';
+        nameEl.textContent = localStorage.getItem('userName') || 'User';
     }
     const role = localStorage.getItem('userRole');
     if (role !== 'admin') {
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('d-none'));
     }
 
-    // Manejo del logout
+    // Logout handling
     const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
+        localStorage.removeItem('user');
         localStorage.removeItem('userName');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('empresaId');
-        localStorage.removeItem('empresaNit');
+        localStorage.removeItem('companyId');
+        localStorage.removeItem('companyTax');
         window.location.href = '/';
     };
 
@@ -51,22 +64,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutDropdown = document.getElementById('logoutDropdown');
     if (logoutDropdown) logoutDropdown.addEventListener('click', handleLogout);
 
-    // Cargar datos del dashboard
+    // Load dashboard data
     loadDashboardData();
 });
 
 let __page = 0;
 
-// Cache simple de empresa para impresión
-let __empresaInfo = null;
-async function getEmpresaInfo() {
-    if (__empresaInfo) return __empresaInfo;
+// Simple company cache for printing
+let __companyInfo = null;
+async function getCompanyInfo() {
+    if (__companyInfo) return __companyInfo;
     try {
-        const r = await fetch('/api/empresa/me', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const r = await fetch('/api/companies/me', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
         const j = await r.json();
-        if (r.ok) __empresaInfo = j.data;
+        if (r.ok) __companyInfo = j.data;
     } catch (_) {}
-    return __empresaInfo;
+    return __companyInfo;
 }
 
 // Función para cargar los datos del dashboard
