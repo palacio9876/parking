@@ -56,6 +56,28 @@ class CompanyService {
       message: 'Settings updated successfully'
     }
   }
+
+  async getLogo(id_company) {
+    const company = await companyRepo.findById(id_company)
+    return {
+      success: true,
+      data: { logo_url: company?.logo_url }
+    }
+  }
+
+  async uploadLogo(id_company, buffer) {
+    if (!buffer) {
+      throw new AppError(400, 'No logo file provided')
+    }
+    const affectedRows = await companyRepo.updateCompany(id_company, { logo_url: buffer })
+    if (affectedRows === 0) {
+      throw new AppError(404, 'Company not found')
+    }
+    return {
+      success: true,
+      message: 'Logo uploaded successfully'
+    }
+  }
 }
 
 module.exports = new CompanyService()

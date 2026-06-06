@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
             minute_rate: parseFloat(document.getElementById('minute_rate').value||0),
             hourly_rate: parseFloat(document.getElementById('hourly_rate').value||0),
             full_day_rate: parseFloat(document.getElementById('full_day_rate').value||0),
-            minute_to_hour_threshold: parseInt(document.getElementById('minute_to_hour_threshold').value||0, 10),
-            hour_to_day_threshold: parseInt(document.getElementById('hour_to_day_threshold').value||0, 10),
-            hour_rounding: document.getElementById('hour_rounding').value,
-            day_rounding: document.getElementById('day_rounding').value
+            minutes_to_hours_threshold: parseInt(document.getElementById('minute_to_hour_threshold').value||0, 10),
+            hours_to_days_threshold: parseInt(document.getElementById('hour_to_day_threshold').value||0, 10),
+            hourly_rounding: document.getElementById('hour_rounding').value,
+            daily_rounding: document.getElementById('day_rounding').value
         };
         try{
             const res = await fetch('/api/rates', {
@@ -68,7 +68,7 @@ async function loadRates(){
                     <span class="badge bg-primary">${t.billing_mode}</span>
                 </div>
                 <small>Min: ${t.minute_rate} | Hour: ${t.hourly_rate} | Day: ${t.full_day_rate}</small>
-                <small>Scales → min→hr: ${t.minute_to_hour_threshold} min, hr→day: ${t.hour_to_day_threshold} h</small>
+                <small>Scales → min→hr: ${t.minutes_to_hours_threshold} min, hr→day: ${t.hours_to_days_threshold} h</small>
             </li>
         `).join('');
     }catch(err){

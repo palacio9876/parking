@@ -37,6 +37,29 @@ class CompanyController {
       next(err)
     }
   }
+
+  async getLogo(req, res, next) {
+    try {
+      const result = await companyService.getLogo(req.user.id_company)
+      if (result.data?.logo_url) {
+        res.set('Content-Type', 'image/png')
+        res.send(result.data.logo_url)
+      } else {
+        res.status(404).json({ success: false, error: 'Logo not found' })
+      }
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async uploadLogo(req, res, next) {
+    try {
+      const result = await companyService.uploadLogo(req.user.id_company, req.file?.buffer)
+      res.json(result)
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 
 module.exports = new CompanyController()

@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/dashboard.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
     <style>
         body { font-family: 'Poppins', sans-serif; }
         .card { border: none; box-shadow: 0 0 15px rgba(0,0,0,.05); }
@@ -81,13 +83,13 @@
                                     <label class="form-label">Tipo</label>
                                     <!-- Reemplazo del combo por selector de un clic con radios + botones Bootstrap -->
                                     <div class="veh-tipo-toggle d-flex">
-                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoCarro" autocomplete="off" value="carro">
+                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoCarro" autocomplete="off" value="car">
                                         <label class="btn btn-outline-primary" for="tipoCarro" title="Carro"><i class="fas fa-car-side"></i><span class="d-none d-md-inline">Carro</span></label>
 
-                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoMoto" autocomplete="off" value="moto">
+                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoMoto" autocomplete="off" value="motorcycle">
                                         <label class="btn btn-outline-primary" for="tipoMoto" title="Moto"><i class="fas fa-motorcycle"></i><span class="d-none d-md-inline">Moto</span></label>
 
-                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoBici" autocomplete="off" value="bici">
+                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoBici" autocomplete="off" value="bicycle">
                                         <label class="btn btn-outline-primary" for="tipoBici" title="Bicicleta"><i class="fas fa-bicycle"></i><span class="d-none d-md-inline">Bici</span></label>
                                     </div>
                                 </div>
@@ -120,8 +122,8 @@
                                 <div class="col-md-4">
                                     <label class="form-label">Método de pago</label>
                                     <select id="salMetodo" class="form-select">
-                                        <option value="efectivo">Efectivo</option>
-                                        <option value="tarjeta">Tarjeta</option>
+                                        <option value="cash">Efectivo</option>
+                                        <option value="card">Tarjeta</option>
                                         <option value="QR">QR</option>
                                     </select>
                                 </div>
@@ -172,6 +174,8 @@
         </div>
     </div>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Footer global (reutilizable). Relacionado con public/js/footer.js -->
     <script src="/js/footer.js"></script>
@@ -179,14 +183,13 @@
     <script src="/js/shifts.js"></script>
     <script>
         const token = localStorage.getItem('token');
-        let empresaInfo = null;
+        let companyInfo = null;
         let ultimoIngreso = null;
         let ultimaSalida = null;
         document.getElementById('userName').textContent = localStorage.getItem('userName') || 'Usuario';
         document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
         document.getElementById('btnLogout').addEventListener('click',()=>{localStorage.clear(); location.href='/';});
 
-        // Mostrar nombre y ocultar admin-only si no es admin
         (function(){
             const role = localStorage.getItem('userRole');
             if (role !== 'admin') {
@@ -194,28 +197,25 @@
             }
         })();
 
-        // Cargar info empresa para incluir en los comprobantes
         (async ()=>{
             try{
-                const r = await fetch('/api/empresa/me',{headers:{'Authorization':`Bearer ${token}`}});
+                const r = await fetch('/api/companies/me',{headers:{'Authorization':`Bearer ${token}`}});
                 const j = await r.json();
-                if(r.ok){ empresaInfo = j.data; }
-                // Cargar configuración (operacion_24h y horarios) para el ticket
+                if(r.ok){ companyInfo = j.data; }
                 try{
-                    const cr = await fetch('/api/empresa/config',{headers:{'Authorization':`Bearer ${token}`}});
+                    const cr = await fetch('/api/companies/config',{headers:{'Authorization':`Bearer ${token}`}});
                     const cj = await cr.json();
                     if (cr.ok && cj && cj.data){
-                        empresaInfo.operacion_24h = cj.data.operacion_24h;
-                        empresaInfo.horario_apertura = cj.data.horario_apertura;
-                        empresaInfo.horario_cierre = cj.data.horario_cierre;
+                        companyInfo.operation_24h = cj.data.operation_24h;
+                        companyInfo.opening_time = cj.data.opening_time;
+                        companyInfo.closing_time = cj.data.closing_time;
                     }
                 }catch(e){}
-                // Intentar cargar logo BLOB para mostrar en ticket
                 try{
-                    const lr = await fetch('/api/empresa/logo',{headers:{'Authorization':`Bearer ${token}`}});
+                    const lr = await fetch('/api/companies/logo',{headers:{'Authorization':`Bearer ${token}`}});
                     if (lr.ok){
                         const blob = await lr.blob();
-                        empresaInfo.logo_url = await new Promise((resolve)=>{
+                        companyInfo.logo_url = await new Promise((resolve)=>{
                             const fr = new FileReader();
                             fr.onload = ()=> resolve(fr.result);
                             fr.readAsDataURL(blob);
@@ -225,20 +225,25 @@
             }catch(e){ console.warn('No se pudo cargar la empresa', e); }
         })();
 
-        // Asegurar que la configuración esté cargada antes de renderizar tickets
-        async function ensureEmpresaConfig(){
-            if (!empresaInfo) return;
-            if (typeof empresaInfo.operacion_24h === 'undefined'){
+        async function ensureCompanyConfig(){
+            if (!companyInfo) return;
+            if (typeof companyInfo.operation_24h === 'undefined'){
                 try{
-                    const cr = await fetch('/api/empresa/config',{headers:{'Authorization':`Bearer ${token}`}});
+                    const cr = await fetch('/api/companies/config',{headers:{'Authorization':`Bearer ${token}`}});
                     const cj = await cr.json();
                     if (cr.ok && cj && cj.data){
-                        empresaInfo.operacion_24h = cj.data.operacion_24h;
-                        empresaInfo.horario_apertura = cj.data.horario_apertura;
-                        empresaInfo.horario_cierre = cj.data.horario_cierre;
+                        companyInfo.operation_24h = cj.data.operation_24h;
+                        companyInfo.opening_time = cj.data.opening_time;
+                        companyInfo.closing_time = cj.data.closing_time;
                     }
                 }catch(e){}
             }
+        }
+
+        // Map vehicle type from Spanish UI to English API
+        function mapVehicleType(esType) {
+            const map = { carro: 'car', moto: 'motorcycle', bici: 'bicycle', car: 'car', motorcycle: 'motorcycle', bicycle: 'bicycle' };
+            return map[esType] || esType;
         }
 
         function fmtTime(t){
@@ -247,74 +252,78 @@
             return s.length>=5 ? s.substring(0,5) : s;
         }
 
-        // Ingreso
+        // Entry
         document.getElementById('formIngreso').addEventListener('submit', async (e)=>{
             e.preventDefault();
-            await ensureEmpresaConfig();
-            const placa = document.getElementById('ingPlaca').value.trim().toUpperCase();
-            const tipo = (document.querySelector('input[name="ingTipo"]:checked')||{}).value || '';
-            const res = await fetch('/api/movimientos/ingreso',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({placa,tipo})});
+            await ensureCompanyConfig();
+            const license_plate = document.getElementById('ingPlaca').value.trim().toUpperCase();
+            const tipoRaw = (document.querySelector('input[name="ingTipo"]:checked')||{}).value || '';
+            const type = mapVehicleType(tipoRaw);
+            const res = await fetch('/api/movements/entry',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({license_plate, type})});
             const data = await res.json();
             if(!res.ok){alert(data.message||'Error');return;}
             const b = data.data;
             ultimoIngreso = b;
-            document.getElementById('compIngresoBody').innerHTML = renderComprobante('INGRESO', b, null, empresaInfo);
+            document.getElementById('compIngresoBody').innerHTML = renderComprobante('INGRESO', b, null, companyInfo);
             document.getElementById('compIngreso').classList.remove('d-none');
             document.getElementById('formIngreso').reset();
         });
 
-        // Salida
+        // Exit
         document.getElementById('formSalida').addEventListener('submit', async (e)=>{
             e.preventDefault();
-            await ensureEmpresaConfig();
-            const placa = document.getElementById('salPlaca').value.trim().toUpperCase();
+            await ensureCompanyConfig();
+            const license_plate = document.getElementById('salPlaca').value.trim().toUpperCase();
             const metodoPref = document.getElementById('salMetodo').value;
-            const res = await fetch('/api/movimientos/salida',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({placa})});
+            const res = await fetch('/api/movements/exit',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({license_plate})});
             const data = await res.json();
             if(!res.ok){alert(data.message||'Error');return;}
             const f = data.data;
             ultimaSalida = f;
-            document.getElementById('compSalidaBody').innerHTML = renderComprobante('SALIDA', null, f, empresaInfo);
+            document.getElementById('compSalidaBody').innerHTML = renderComprobante('SALIDA', null, f, companyInfo);
             document.getElementById('compSalida').classList.remove('d-none');
             document.getElementById('formSalida').reset();
 
-            // Abrir modal de pago avanzado con método por defecto
             abrirModalPago(f, metodoPref);
         });
 
-        // Botones de impresión dedicados con tamaños 58/80mm y QR
         document.getElementById('btnPrintIngreso58').addEventListener('click', ()=>{
-            const qr = JSON.stringify({t:'ingreso', e:empresaInfo?.nit, m:ultimoIngreso?.movimientoId, p:ultimoIngreso?.placa, fe:ultimoIngreso?.fechaEntrada});
+            const qr = JSON.stringify({t:'ingreso', e:companyInfo?.tax_id || companyInfo?.nit, m:ultimoIngreso?.id_movement || ultimoIngreso?.movementId, p:ultimoIngreso?.license_plate || ultimoIngreso?.placa, fe:ultimoIngreso?.entry_date || ultimoIngreso?.fechaEntrada});
             imprimirHTML(document.getElementById('compIngresoBody').innerHTML, 'Comprobante de Ingreso', 58, qr);
         });
         document.getElementById('btnPrintIngreso80').addEventListener('click', ()=>{
-            const qr = JSON.stringify({t:'ingreso', e:empresaInfo?.nit, m:ultimoIngreso?.movimientoId, p:ultimoIngreso?.placa, fe:ultimoIngreso?.fechaEntrada});
+            const qr = JSON.stringify({t:'ingreso', e:companyInfo?.tax_id || companyInfo?.nit, m:ultimoIngreso?.id_movement || ultimoIngreso?.movementId, p:ultimoIngreso?.license_plate || ultimoIngreso?.placa, fe:ultimoIngreso?.entry_date || ultimoIngreso?.fechaEntrada});
             imprimirHTML(document.getElementById('compIngresoBody').innerHTML, 'Comprobante de Ingreso', 80, qr);
         });
         document.getElementById('btnPrintSalida58').addEventListener('click', ()=>{
-            const qr = JSON.stringify({t:'salida', e:empresaInfo?.nit, m:ultimaSalida?.movimientoId, p:ultimaSalida?.placa, fs:ultimaSalida?.fechaSalida, total:ultimaSalida?.total});
+            const qr = JSON.stringify({t:'salida', e:companyInfo?.tax_id || companyInfo?.nit, m:ultimaSalida?.id_movement || ultimaSalida?.movementId, p:ultimaSalida?.license_plate || ultimaSalida?.placa, fs:ultimaSalida?.exit_date || ultimaSalida?.fechaSalida, total:ultimaSalida?.total_to_pay || ultimaSalida?.total});
             imprimirHTML(document.getElementById('compSalidaBody').innerHTML, 'Factura de Salida', 58, qr);
         });
         document.getElementById('btnPrintSalida80').addEventListener('click', ()=>{
-            const qr = JSON.stringify({t:'salida', e:empresaInfo?.nit, m:ultimaSalida?.movimientoId, p:ultimaSalida?.placa, fs:ultimaSalida?.fechaSalida, total:ultimaSalida?.total});
+            const qr = JSON.stringify({t:'salida', e:companyInfo?.tax_id || companyInfo?.nit, m:ultimaSalida?.id_movement || ultimaSalida?.movementId, p:ultimaSalida?.license_plate || ultimaSalida?.placa, fs:ultimaSalida?.exit_date || ultimaSalida?.fechaSalida, total:ultimaSalida?.total_to_pay || ultimaSalida?.total});
             imprimirHTML(document.getElementById('compSalidaBody').innerHTML, 'Factura de Salida', 80, qr);
         });
 
-        // Render de comprobante/factura compacto tipo ticket
-        function renderComprobante(tipo, ingreso, salida, empresa){
-            const e = empresa || {};
+        function renderComprobante(tipo, ingreso, salida, company){
+            const e = company || {};
+            const companyName = e.name || e.nombre || 'Empresa';
+            const taxId = e.tax_id || e.nit || '';
+            const address = e.address || e.direccion || '';
+            const phone = e.phone || e.telefono || '';
+            const is24h = e.operation_24h || e.operacion_24h;
+            const openTime = e.opening_time || e.horario_apertura;
+            const closeTime = e.closing_time || e.horario_cierre;
             const header = `
                 <div style="text-align:center">
                     ${e.logo_url ? `<img src="${e.logo_url}" alt="logo" style="max-height:60px">` : ''}
-                    <div><strong>${e.nombre||'Empresa'}</strong></div>
-                    <div>NIT: ${e.nit||''}</div>
-                    <div>${e.direccion||''} ${e.telefono? ' - '+e.telefono:''}</div>
-                    <div>Horario: <strong>${(empresa?.operacion_24h)?'24 horas':((fmtTime(empresa?.horario_apertura)||'')+' - '+(fmtTime(empresa?.horario_cierre)||''))}</strong></div>
+                    <div><strong>${companyName}</strong></div>
+                    <div>NIT: ${taxId}</div>
+                    <div>${address}${phone ? ' - '+phone : ''}</div>
+                    <div>Horario: <strong>${is24h ? '24 horas' : ((fmtTime(openTime)||'') + ' - ' + (fmtTime(closeTime)||''))}</strong></div>
                     <hr/>
                     <div><strong>${tipo}</strong></div>
                 </div>`;
 
-            // Pie de ticket con crédito y enlace/ícono de YouTube de Ciscode
             const ciscodeFooter = `
                 <hr/>
                 <div style="text-align:center;margin-top:6px">
@@ -334,19 +343,25 @@
                     </div>
                 </div>`;
 
+            function getVal(obj, path) {
+                const keys = path.split('.');
+                let cur = obj;
+                for (const k of keys) { if (cur) cur = cur[k]; else return ''; }
+                return cur;
+            }
+
             if (tipo === 'INGRESO') {
-                // Código de barras (placa)
-                const barcode = `<div style="text-align:center;margin-top:6px"><svg id="barcodeSvg"></svg><div style="font-size:12px">${ingreso.placa}</div></div>`;
+                const barcode = `<div style="text-align:center;margin-top:6px"><svg id="barcodeSvg"></svg><div style="font-size:12px">${ingreso.license_plate || ingreso.placa}</div></div>`;
                 return `${header}
-                    <div>Movimiento: <strong>#${ingreso.movimientoId}</strong></div>
-                    <div>Placa: <strong>${ingreso.placa}</strong></div>
-                    <div>Tipo: <strong>${ingreso.tipo}</strong></div>
-                    <div>Entrada: <strong>${new Date(ingreso.fechaEntrada).toLocaleString('es-CO')}</strong></div>
+                    <div>Movimiento: <strong>#${ingreso.id_movement || ingreso.movementId}</strong></div>
+                    <div>Placa: <strong>${ingreso.license_plate || ingreso.placa}</strong></div>
+                    <div>Tipo: <strong>${ingreso.type || ingreso.tipo}</strong></div>
+                    <div>Entrada: <strong>${new Date(ingreso.entry_date || ingreso.fechaEntrada || ingreso.entryDate).toLocaleString('es-CO')}</strong></div>
                     <hr/>
                     <div>Tarifas</div>
-                    <div>Minuto: <strong>${ingreso.tarifa.valor_minuto}</strong></div>
-                    <div>Hora: <strong>${ingreso.tarifa.valor_hora}</strong></div>
-                    <div>Día: <strong>${ingreso.tarifa.valor_dia_completo}</strong></div>
+                    <div>Minuto: <strong>${getVal(ingreso, 'rate.minute_rate') || ingreso.tarifa?.valor_minuto}</strong></div>
+                    <div>Hora: <strong>${getVal(ingreso, 'rate.hourly_rate') || ingreso.tarifa?.valor_hora}</strong></div>
+                    <div>Día: <strong>${getVal(ingreso, 'rate.full_day_rate') || ingreso.tarifa?.valor_dia_completo}</strong></div>
                     <hr/>
                     <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
                     <div>Fecha impresión: ${new Date().toLocaleString('es-CO')}</div>
@@ -354,33 +369,25 @@
                     ${ciscodeFooter}`;
             }
 
-            // Mostrar detalle de pagos si viene en salida.pagosList
-            const pagosHtml = (salida.pagosList && salida.pagosList.length)
-                ? `<div><strong>Pagos</strong></div>` + salida.pagosList.map(p=>`<div>${p.metodo_pago}: <strong>${new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(p.monto)}</strong></div>`).join('')
+            const paymentsHtml = (salida.paymentsList || salida.pagosList && salida.pagosList.length)
+                ? `<div><strong>Pagos</strong></div>` + (salida.paymentsList || salida.pagosList).map(p=>`<div>${p.payment_method || p.metodo_pago}: <strong>${new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(p.amount || p.monto)}</strong></div>`).join('')
                 : '';
             return `${header}
-                <div>Movimiento: <strong>#${salida.movimientoId}</strong></div>
-                <div>Placa: <strong>${salida.placa}</strong></div>
-                <div>Tipo: <strong>${salida.tipo}</strong></div>
-                <div>Entrada: <strong>${new Date(salida.fechaEntrada).toLocaleString('es-CO')}</strong></div>
-                <div>Salida: <strong>${new Date(salida.fechaSalida).toLocaleString('es-CO')}</strong></div>
-                <div>Tiempo: <strong>${salida.detalleTiempo.dias}d ${salida.detalleTiempo.horas}h ${salida.detalleTiempo.minutos}m</strong></div>
+                <div>Movimiento: <strong>#${salida.id_movement || salida.movementId}</strong></div>
+                <div>Placa: <strong>${salida.license_plate || salida.placa}</strong></div>
+                <div>Tipo: <strong>${salida.type || salida.tipo}</strong></div>
+                <div>Entrada: <strong>${new Date(salida.entry_date || salida.fechaEntrada || salida.entryDate).toLocaleString('es-CO')}</strong></div>
+                <div>Salida: <strong>${new Date(salida.exit_date || salida.fechaSalida || salida.exitDate).toLocaleString('es-CO')}</strong></div>
                 <hr/>
-                <div>Tarifas</div>
-                <div>Minuto: <strong>${salida.tarifa.valor_minuto}</strong></div>
-                <div>Hora: <strong>${salida.tarifa.valor_hora}</strong></div>
-                <div>Día: <strong>${salida.tarifa.valor_dia_completo}</strong></div>
-                <hr/>
-                <div>Total a pagar: <strong>$${new Intl.NumberFormat('es-CO').format(salida.total)}</strong></div>
-                ${pagosHtml}
+                <div>Total a pagar: <strong>${new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(salida.total_to_pay || salida.total || 0)}</strong></div>
+                ${paymentsHtml}
                 <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
                 <div>Fecha impresión: ${new Date().toLocaleString('es-CO')}</div>
                 ${ciscodeFooter}`;
         }
 
-        // Abrir ventana de impresión con solo el ticket
         function imprimirHTML(html, titulo, anchoMM, qrPayload){
-            const width = anchoMM || 58; // 58 o 80
+            const width = anchoMM || 58;
             const w = window.open('', '_blank', 'width=420,height=700');
             const payload = encodeURIComponent(JSON.stringify(qrPayload || {}));
             const doc = `<!DOCTYPE html><html><head><meta charset="utf-8" /><title>${titulo}</title>
@@ -399,10 +406,8 @@
             <script>(function(){
                 var ciscodeUrl = 'https://ciscodedev.netlify.app/';
                 try{
-                    // Parse payload (JSON) sólo para código de barras (placa)
                     var raw = JSON.parse(decodeURIComponent('${payload}'));
                     var payload = (typeof raw === 'string') ? JSON.parse(raw) : raw;
-                    // Mostrar QR sólo si se habilita explícitamente en el payload (qr|enableQR = true)
                     var enableQR = !!(payload && (payload.qr === true || payload.enableQR === true));
                     if (enableQR) {
                         try {
@@ -413,12 +418,9 @@
                             }
                         } catch(_e) {}
                     }
-                    // Render barcode si existe elemento (placa)
                     var svg = document.getElementById('barcodeSvg');
-                    if (svg) { JsBarcode(svg, (payload && (payload.p || payload.placa)) || '', {format:'code128', displayValue:false, height:40}); }
-                }catch(e){
-                    // Sin QR en fallback
-                }
+                    if (svg) { JsBarcode(svg, (payload && (payload.p || payload.placa || payload.license_plate)) || '', {format:'code128', displayValue:false, height:40}); }
+                }catch(e){}
                 setTimeout(function(){ window.print(); window.close(); }, 400);
             })();<\/script>
             </body></html>`;
@@ -427,20 +429,20 @@
             w.focus();
         }
 
-        // Modal de pago avanzado
         function abrirModalPago(factura, metodoPorDefecto){
             const modalEl = document.getElementById('pagoModal');
-            document.getElementById('pagoTotal').textContent = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(factura.total);
+            const total = factura.total_to_pay || factura.total || 0;
+            document.getElementById('pagoTotal').textContent = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(total);
             const cont = document.getElementById('pagosContainer');
             cont.innerHTML = '';
             const btnConfirm = document.getElementById('btnConfirmPagos');
-            const addRow = (metodo='efectivo', monto='') => {
+            const addRow = (metodo='cash', monto='') => {
                 const row = document.createElement('div');
                 row.className = 'd-flex gap-2';
                 row.innerHTML = `
                     <select class="form-select form-select-sm metodo" style="max-width:140px">
-                        <option value="efectivo" ${metodo==='efectivo'?'selected':''}>Efectivo</option>
-                        <option value="tarjeta" ${metodo==='tarjeta'?'selected':''}>Tarjeta</option>
+                        <option value="cash" ${metodo==='cash'?'selected':''}>Efectivo</option>
+                        <option value="card" ${metodo==='card'?'selected':''}>Tarjeta</option>
                         <option value="QR" ${metodo==='QR'?'selected':''}>QR</option>
                     </select>
                     <input type="number" class="form-control form-control-sm monto" min="0" step="0.01" placeholder="Monto" value="${monto}">
@@ -454,43 +456,41 @@
                 const montos = Array.from(cont.querySelectorAll('.monto')).map(i=>Number(i.value||0));
                 const sum = montos.reduce((a,b)=>a+b,0);
                 document.getElementById('pagoSum').textContent = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(sum);
-                const diff = sum - factura.total;
+                const diff = sum - total;
                 const sign = diff>=0? 'Vuelto: ' : 'Falta: ';
                 const diffEl = document.getElementById('pagoDiff');
                 diffEl.textContent = sign + new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(Math.abs(diff));
                 diffEl.className = diff>=0 ? 'text-success' : 'text-danger';
-                btnConfirm.disabled = (sum + 0.0001) < factura.total; // deshabilitar si no está totalmente pago
+                btnConfirm.disabled = (sum + 0.0001) < total;
             };
-            document.getElementById('btnAddPago').onclick = ()=>{ addRow('efectivo',''); };
-            addRow(metodoPorDefecto || 'efectivo', factura.total);
+            document.getElementById('btnAddPago').onclick = ()=>{ addRow('cash',''); };
+            addRow(metodoPorDefecto || 'cash', total);
             calc();
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
 
             btnConfirm.onclick = async ()=>{
                 const rows = Array.from(cont.querySelectorAll('.d-flex'));
-                const pagos = rows.map(r=>({
-                    metodo_pago: r.querySelector('.metodo').value,
-                    monto: Number(r.querySelector('.monto').value||0)
-                })).filter(p=>p.monto>0);
-                const totalPagado = pagos.reduce((a,b)=>a + Number(b.monto||0), 0);
-                if ((totalPagado + 0.0001) < factura.total) {
+                const payments = rows.map(r=>({
+                    payment_method: r.querySelector('.metodo').value,
+                    amount: Number(r.querySelector('.monto').value||0)
+                })).filter(p=>p.amount>0);
+                const totalPagado = payments.reduce((a,b)=>a + Number(b.amount||0), 0);
+                if ((totalPagado + 0.0001) < total) {
                     alert('Falta valor por pagar. Completa el pago para finalizar.');
                     return;
                 }
                 try{
-                    const res = await fetch('/api/pagos/bulk',{
+                    const res = await fetch('/api/payments/bulk',{
                         method:'POST',
                         headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-                        body: JSON.stringify({ id_movimiento: factura.movimientoId, pagos })
+                        body: JSON.stringify({ id_movement: factura.id_movement || factura.movementId, payments })
                     });
                     const j = await res.json();
                     if(!res.ok) throw new Error(j.message||'Error registrando pagos');
-                    // Reimprimir ticket con detalle de pagos
-                    const facturaConPagos = Object.assign({}, factura, { pagosList: pagos });
-                    const htmlTicket = renderComprobante('SALIDA', null, facturaConPagos, empresaInfo);
-                    imprimirHTML(htmlTicket, 'Factura de Salida', 80, { t:'salida', e:empresaInfo?.nit, m:factura.movimientoId, p:factura.placa, fs:factura.fechaSalida, total: factura.total });
-                    // Persistir la información de pagos en la vista para futuras reimpresiones
+                    const facturaConPagos = Object.assign({}, factura, { paymentsList: payments });
+                    const htmlTicket = renderComprobante('SALIDA', null, facturaConPagos, companyInfo);
+                    imprimirHTML(htmlTicket, 'Factura de Salida', 80, { t:'salida', e:companyInfo?.tax_id || companyInfo?.nit, m:factura.id_movement || factura.movementId, p:factura.license_plate || factura.placa, fs:factura.exit_date || factura.fechaSalida, total });
                     ultimaSalida = facturaConPagos;
                     document.getElementById('compSalidaBody').innerHTML = htmlTicket;
                     modal.hide();

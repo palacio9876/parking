@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Payment.init(
     {
-      id_pago: {
+      id_payment: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,

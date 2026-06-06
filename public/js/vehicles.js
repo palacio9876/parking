@@ -88,8 +88,17 @@ async function loadVehicles() {
             throw new Error('Error loading vehicles');
         }
 
-        const data = await response.json();
-        $('#vehiclesTable').DataTable().clear().rows.add(data).draw();
+        const result = await response.json();
+        const vehicles = (result.data || []).map(v => ({
+            id: v.id_vehicle,
+            license_plate: v.license_plate,
+            type: v.type,
+            color: v.color,
+            model: v.model,
+            created_at: v.registration_date,
+            status: v.status || 'inactive'
+        }));
+        $('#vehiclesTable').DataTable().clear().rows.add(vehicles).draw();
 
     } catch (error) {
         showError('Error loading vehicles');
@@ -149,10 +158,11 @@ async function editVehicle(id) {
             throw new Error('Error loading vehicle data');
         }
 
-        const vehicle = await response.json();
+        const result = await response.json();
+        const vehicle = result.data || result;
         
         // Fill form
-        document.getElementById('vehicleId').value = vehicle.id;
+        document.getElementById('vehicleId').value = vehicle.id_vehicle;
         document.getElementById('license_plate').value = vehicle.license_plate;
         document.getElementById('type').value = vehicle.type;
         document.getElementById('color').value = vehicle.color;
@@ -237,7 +247,7 @@ async function viewHistory(idVehicle, plate){
                     : (paid>0 ? `${fmt(paid)} ${r.payments?`(${r.payments})`:''}` : '-');
                 return `
                 <tr>
-                    <td>${r.id}</td>
+                    <td>${r.id_movement || r.id}</td>
                     <td>${new Date(r.entry_date).toLocaleString('en-US')}</td>
                     <td>${r.exit_date ? new Date(r.exit_date).toLocaleString('en-US') : '-'}</td>
                     <td><span class="badge bg-${badgeStatus}">${r.status}</span></td>

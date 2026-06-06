@@ -3,12 +3,23 @@ const { Op } = require('sequelize')
 
 class VehicleRepository {
 
-  findAllByCompany(id_company) {
-    return Vehicle.findAll({
+  async findAllByCompany(id_company) {
+    const vehicles = await Vehicle.findAll({
       where: { id_company },
       order: [['registration_date', 'DESC']],
       attributes: ['id_vehicle', 'license_plate', 'type', 'color', 'model', 'registration_date']
     })
+
+    // Add computed status field
+    const enriched = await Promise.all(vehicles.map(async (v) => {
+      const active = await Movement.count({ where: { id_vehicle: v.id_vehicle, exit_date: null } })
+      return {
+        ...v.get(),
+        status: active > 0 ? 'active' : 'inactive'
+      }
+    }))
+
+    return enriched
   }
 
   findById(id_vehicle, id_company) {

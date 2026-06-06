@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/dashboard.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
     <script>
         // Guard: requiere token y rol admin
         if (!localStorage.getItem('token')) { window.location.href = '/'; }
@@ -52,25 +54,25 @@
                     <div class="card">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-building me-2"></i>Datos de la Empresa</h5>
-                            <button class="btn btn-primary btn-sm" id="btnSaveEmpresa"><i class="fas fa-save me-1"></i>Guardar</button>
+                            <button class="btn btn-primary btn-sm" id="btnSaveCompany"><i class="fas fa-save me-1"></i>Guardar</button>
                         </div>
                         <div class="card-body">
                             <form id="formEmpresa" class="row g-3">
                                 <div class="col-md-8">
                                     <label class="form-label">Nombre</label>
-                                    <input type="text" id="e_nombre" class="form-control" required>
+                                    <input type="text" id="e_name" class="form-control" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">NIT</label>
-                                    <input type="text" id="e_nit" class="form-control" required>
+                                    <input type="text" id="e_tax_id" class="form-control" required>
                                 </div>
                                 <div class="col-md-8">
                                     <label class="form-label">Dirección</label>
-                                    <input type="text" id="e_direccion" class="form-control">
+                                    <input type="text" id="e_address" class="form-control">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Teléfono</label>
-                                    <input type="text" id="e_telefono" class="form-control">
+                                    <input type="text" id="e_phone" class="form-control">
                                 </div>
                                 <div class="col-md-8">
                                     <label class="form-label">Email</label>
@@ -85,7 +87,7 @@
                                     <button type="button" id="btnUploadLogo" class="btn btn-outline-secondary btn-sm mt-2"><i class="fas fa-upload me-1"></i>Subir</button>
                                 </div>
                                 <div class="col-12">
-                                    <div id="alertEmpresa" class="alert d-none" role="alert"></div>
+                                    <div id="alertCompany" class="alert d-none" role="alert"></div>
                                 </div>
                             </form>
                         </div>
@@ -97,13 +99,13 @@
                     <div class="card">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-sliders me-2"></i>Configuración</h5>
-                            <button class="btn btn-primary btn-sm" id="btnSaveConfig"><i class="fas fa-save me-1"></i>Guardar</button>
+                            <button class="btn btn-primary btn-sm" id="btnSaveSettings"><i class="fas fa-save me-1"></i>Guardar</button>
                         </div>
                         <div class="card-body">
                             <form id="formConfig" class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Cap. Carros</label>
-                                    <input type="number" min="0" id="c_carros" class="form-control" required>
+                                    <input type="number" min="0" id="c_cars" class="form-control" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Cap. Motos</label>
@@ -115,11 +117,11 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Apertura</label>
-                                    <input type="time" id="c_apertura" class="form-control" required>
+                                    <input type="time" id="c_opening" class="form-control" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Cierre</label>
-                                    <input type="time" id="c_cierre" class="form-control" required>
+                                    <input type="time" id="c_closing" class="form-control" required>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check form-switch">
@@ -129,18 +131,18 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">IVA (%)</label>
-                                    <input type="number" step="0.01" min="0" id="c_iva" class="form-control" required>
+                                    <input type="number" step="0.01" min="0" id="c_tax" class="form-control" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Moneda</label>
-                                    <input type="text" id="c_moneda" class="form-control" value="COP" required>
+                                    <input type="text" id="c_currency" class="form-control" value="COP" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Zona horaria</label>
                                     <input type="text" id="c_tz" class="form-control" value="America/Bogota" required>
                                 </div>
                                 <div class="col-12">
-                                    <div id="alertConfig" class="alert d-none" role="alert"></div>
+                                    <div id="alertSettings" class="alert d-none" role="alert"></div>
                                 </div>
                             </form>
                         </div>
@@ -152,6 +154,8 @@
 
     <div class="position-fixed top-0 end-0 p-3" style="z-index:1100"><div id="toastContainer"></div></div>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Footer global (reutilizable). Relacionado con public/js/footer.js -->
     <script src="/js/footer.js"></script>

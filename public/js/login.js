@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('userName', data.data.user.name);
                 localStorage.setItem('userRole', data.data.user.role);
                 localStorage.setItem('userId', data.data.user.id_user);
-                localStorage.setItem('empresaId', data.data.user.id_company);
-                localStorage.setItem('empresaNit', tax_id);
+                localStorage.setItem('companyId', data.data.user.id_company);
+                localStorage.setItem('companyTax', tax_id);
 
                 // Marcar el día de login (YYYY-MM-DD) para mostrar el banner diario una vez
                 try {

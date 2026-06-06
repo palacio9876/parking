@@ -1,17 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Adjust sidebar links based on role
-    const role = localStorage.getItem('userRole')
-    if (role === 'operator') {
-        document.querySelectorAll('.sidebar-nav a[href^="/admin/"]').forEach(link => {
-            // Operators only see dashboard and entry-exit
-            const href = link.getAttribute('href')
-            if (href === '/admin/dashboard') {
-                link.setAttribute('href', '/operator/dashboard')
-            } else if (href === '/admin/entry-exit') {
-                link.setAttribute('href', '/operator/entry-exit')
-            }
-        })
-    }
     // Check if user is authenticated
     if (!localStorage.getItem('token')) {
         window.location.href = '/';
@@ -44,6 +31,16 @@ document.addEventListener('DOMContentLoaded', function() {
         nameEl.textContent = localStorage.getItem('userName') || 'User';
     }
     const role = localStorage.getItem('userRole');
+    if (role === 'operator') {
+        document.querySelectorAll('.sidebar-nav a[href^="/admin/"]').forEach(link => {
+            const href = link.getAttribute('href')
+            if (href === '/admin/dashboard') {
+                link.setAttribute('href', '/operator/dashboard')
+            } else if (href === '/admin/entry-exit') {
+                link.setAttribute('href', '/operator/entry-exit')
+            }
+        })
+    }
     if (role !== 'admin') {
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('d-none'));
     }
@@ -127,12 +124,11 @@ async function loadDashboardData() {
 
 // Función para actualizar las estadísticas
 function updateDashboardStats(data) {
-    // Actualizar contadores por tipo
-    const map = { carro: 0, moto: 0, bici: 0 };
-    (data.currentVehiclesByType || []).forEach(r => { map[r.tipo] = r.count; });
-    document.getElementById('currCarros').textContent = map.carro || 0;
-    document.getElementById('currMotos').textContent = map.moto || 0;
-    document.getElementById('currBicis').textContent = map.bici || 0;
+    const map = { car: 0, motorcycle: 0, bicycle: 0 };
+    (data.currentVehiclesByType || []).forEach(r => { map[r.type || r.vehicle?.type] = r.count; });
+    document.getElementById('currCarros').textContent = Number(map.car || map.carro || 0);
+    document.getElementById('currMotos').textContent = Number(map.motorcycle || map.moto || 0);
+    document.getElementById('currBicis').textContent = Number(map.bicycle || map.bici || 0);
     document.getElementById('todayIncome').textContent = formatCurrency(data.todayIncome || 0);
     // Ocupación: consultar KPI de reportes para hoy
     setOcupacionKpi();
@@ -145,10 +141,10 @@ async function setOcupacionKpi(){
         const mm = String(d.getMonth()+1).padStart(2,'0');
         const dd = String(d.getDate()).padStart(2,'0');
         const hoy = `${yyyy}-${mm}-${dd}`;
-        const res = await fetch(`/api/reportes/kpis?desde=${hoy}&hasta=${hoy}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
+        const res = await fetch(`/api/reports/kpis?from=${hoy}&to=${hoy}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
         if (!res.ok) throw new Error(j.message||'Error KPI');
-        const ocup = (j.data && j.data.ocupacion!=null) ? j.data.ocupacion : 0;
+        const ocup = (j.data && j.data.occupancy!=null) ? j.data.occupancy : 0;
         const el = document.getElementById('kpiOcupacionDash');
         if (el) el.textContent = `${ocup}%`;
     }catch(_){
@@ -167,12 +163,12 @@ function updateRecentActivity(activities) {
 
     tableBody.innerHTML = activities.map(activity => `
         <tr>
-            <td>${activity.placa}</td>
-            <td>${activity.tipo}</td>
-            <td>${formatDateTime(activity.entrada)}</td>
-            <td><span class="badge bg-${activity.estado === 'activo' ? 'success' : 'secondary'}">${activity.estado}</span></td>
+            <td>${activity.vehicle?.license_plate || activity.placa || ''}</td>
+            <td>${activity.vehicle?.type || activity.tipo || ''}</td>
+            <td>${formatDateTime(activity.entry_date || activity.entrada)}</td>
+            <td><span class="badge bg-${(activity.status || activity.estado) === 'active' ? 'success' : 'secondary'}">${activity.status || activity.estado}</span></td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="viewDetails(${activity.id})">
+                <button class="btn btn-sm btn-primary" onclick="viewDetails(${activity.id_movement || activity.id})">
                     <i class="fas fa-eye"></i>
                 </button>
             </td>
@@ -180,30 +176,34 @@ function updateRecentActivity(activities) {
     `).join('');
 }
 
-// Ver detalle del movimiento y abrir modal
-window.viewDetails = async function(idMovimiento) {
+window.viewDetails = async function(idMovement) {
     try {
-        const res = await fetch(`/api/movimientos/detalle/${idMovimiento}`, {
+        const res = await fetch(`/api/movements/${idMovement}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Error obteniendo detalle');
+        if (!res.ok) throw new Error(data.message || 'Error obtaining detail');
 
         const m = data.data;
+        const plate = m.vehicle?.license_plate || m.license_plate || '';
+        const vehType = m.vehicle?.type || m.type || '';
+        const entryDate = m.entry_date || m.entryDate || '';
+        const exitDate = m.exit_date || m.exitDate || '';
+        const total = m.total_to_pay || m.total || 0;
         const modalHtml = `
-            <div class="modal fade" id="detalleModal" tabindex="-1">
+            <div class="modal fade" id="detailModal" tabindex="-1">
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Detalle Movimiento #${m.id_movimiento}</h5>
+                    <h5 class="modal-title">Detail Movement #${m.id_movement || idMovement}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                   </div>
                   <div class="modal-body">
-                    <div><strong>Placa:</strong> ${m.placa}</div>
-                    <div><strong>Tipo:</strong> ${m.tipo}</div>
-                    <div><strong>Entrada:</strong> ${new Date(m.fecha_entrada).toLocaleString('es-CO')}</div>
-                    ${m.fecha_salida ? `<div><strong>Salida:</strong> ${new Date(m.fecha_salida).toLocaleString('es-CO')}</div>` : ''}
-                    ${m.total_a_pagar ? `<div><strong>Total:</strong> ${formatCurrency(m.total_a_pagar)}</div>` : ''}
+                    <div><strong>Plate:</strong> ${plate}</div>
+                    <div><strong>Type:</strong> ${vehType}</div>
+                    <div><strong>Entry:</strong> ${entryDate ? new Date(entryDate).toLocaleString('es-CO') : ''}</div>
+                    ${exitDate ? `<div><strong>Exit:</strong> ${new Date(exitDate).toLocaleString('es-CO')}</div>` : ''}
+                    ${total ? `<div><strong>Total:</strong> ${formatCurrency(total)}</div>` : ''}
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -212,11 +212,10 @@ window.viewDetails = async function(idMovimiento) {
               </div>
             </div>`;
 
-        // Insertar y abrir modal
         const container = document.createElement('div');
         container.innerHTML = modalHtml;
         document.body.appendChild(container);
-        const modal = new bootstrap.Modal(container.querySelector('#detalleModal'));
+        const modal = new bootstrap.Modal(container.querySelector('#detailModal'));
         modal.show();
         container.addEventListener('hidden.bs.modal', () => container.remove());
     } catch (e) {
@@ -226,16 +225,19 @@ window.viewDetails = async function(idMovimiento) {
 }
 
 // Finalizar (checkout) un movimiento activo con confirmación + impresión
-window.checkoutVehicle = async function(idMovimiento) {
+window.checkoutVehicle = async function(idMovement) {
     try {
-        // Traer detalle
-        const resDet = await fetch(`/api/movimientos/detalle/${idMovimiento}`, {
+        const resDet = await fetch(`/api/movements/${idMovement}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const det = await resDet.json();
         if (!resDet.ok) throw new Error(det.message || 'Error');
         const m = det.data;
-        if (m.fecha_salida) {
+        const plate = m.vehicle?.license_plate || m.license_plate || '';
+        const vehType = m.vehicle?.type || m.type || '';
+        const entryDt = m.entry_date || '';
+        const exitDt = m.exit_date || '';
+        if (exitDt) {
             showToast('Aviso', 'Este vehículo ya tuvo salida.', 'warning');
             return;
         }
@@ -250,14 +252,14 @@ window.checkoutVehicle = async function(idMovimiento) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                   </div>
                   <div class="modal-body">
-                    <div class="mb-2"><strong>Placa:</strong> ${m.placa}</div>
-                    <div class="mb-2"><strong>Tipo:</strong> ${m.tipo}</div>
-                    <div class="mb-2"><strong>Entrada:</strong> ${new Date(m.fecha_entrada).toLocaleString('es-CO')}</div>
+                    <div class="mb-2"><strong>Placa:</strong> ${plate}</div>
+                    <div class="mb-2"><strong>Tipo:</strong> ${vehType}</div>
+                    <div class="mb-2"><strong>Entrada:</strong> ${new Date(entryDt).toLocaleString('es-CO')}</div>
                     <div class="mt-3">
                       <label class="form-label">Método de pago</label>
-                      <select class="form-select" id="checkoutMetodo">
-                        <option value="efectivo">Efectivo</option>
-                        <option value="tarjeta">Tarjeta</option>
+                      <select class="form-select" id="checkoutMethod">
+                        <option value="cash">Efectivo</option>
+                        <option value="card">Tarjeta</option>
                         <option value="QR">QR</option>
                       </select>
                     </div>
@@ -277,15 +279,15 @@ window.checkoutVehicle = async function(idMovimiento) {
         modal.show();
 
         container.querySelector('#btnConfirmCheckout').addEventListener('click', async () => {
-            const metodoPago = container.querySelector('#checkoutMetodo').value;
+            const paymentMethod = container.querySelector('#checkoutMethod').value;
             try {
-                const res = await fetch('/api/movimientos/salida', {
+                const res = await fetch('/api/movements/exit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
-                    body: JSON.stringify({ placa: m.placa, metodoPago })
+                    body: JSON.stringify({ license_plate: placa })
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -299,12 +301,11 @@ window.checkoutVehicle = async function(idMovimiento) {
                 // Refrescar dashboard
                 await loadDashboardData();
 
-                // Imprimir ticket
-                const empresa = await getEmpresaInfo();
+                const company = await getCompanyInfo();
                 const f = data.data;
-                const ticketHtml = renderTicketSalida(f, empresa);
-                imprimirHTML(ticketHtml, 'Factura de Salida', 80, {
-                    t: 'salida', e: empresa?.nit, m: f.movimientoId, p: f.placa, fs: f.fechaSalida, total: f.total
+                const ticketHtml = renderExitTicket(f, company);
+                printHTML(ticketHtml, 'Factura de Salida', 80, {
+                    t: 'exit', e: company?.tax_id, m: f.id_movement || f.movementId, p: f.license_plate, fs: f.exit_date || f.exitDate, total: f.total_to_pay || f.total
                 });
                 // Abrir modal de pago como en ingreso/salida
                 try {
@@ -333,18 +334,21 @@ window.checkoutVehicle = async function(idMovimiento) {
 }
 
 // Render del ticket de salida
-function renderTicketSalida(salida, empresa){
-    const e = empresa || {};
+function renderExitTicket(exitData, company){
+    const e = company || {};
+    const companyName = e.name || 'Empresa';
+    const taxId = e.tax_id || '';
+    const address = e.address || '';
+    const phone = e.phone || '';
     const header = `
         <div style="text-align:center">
             ${e.logo_url ? `<img src="${e.logo_url}" alt="logo" style="max-height:60px">` : ''}
-            <div><strong>${e.nombre||'Empresa'}</strong></div>
-            <div>NIT: ${e.nit||''}</div>
-            <div>${e.direccion||''} ${e.telefono? ' - '+e.telefono:''}</div>
+            <div><strong>${companyName}</strong></div>
+            <div>NIT: ${taxId}</div>
+            <div>${address}${phone ? ' - '+phone : ''}</div>
             <hr/>
             <div><strong>SALIDA</strong></div>
         </div>`;
-    // Pie de ticket con crédito y enlace/ícono de YouTube de Ciscode
     const ciscodeFooter = `
         <hr/>
         <div style="text-align:center;margin-top:6px">
@@ -363,27 +367,27 @@ function renderTicketSalida(salida, empresa){
                 </a>
             </div>
         </div>`;
+    const movId = exitData.id_movement || exitData.movementId || '';
+    const plate = exitData.license_plate || '';
+    const vtype = exitData.type || '';
+    const entryD = exitData.entry_date || exitData.entryDate || '';
+    const exitD = exitData.exit_date || exitData.exitDate || '';
+    const total = exitData.total_to_pay || exitData.total || 0;
     return `${header}
-        <div>Movimiento: <strong>#${salida.movimientoId}</strong></div>
-        <div>Placa: <strong>${salida.placa}</strong></div>
-        <div>Tipo: <strong>${salida.tipo}</strong></div>
-        <div>Entrada: <strong>${new Date(salida.fechaEntrada).toLocaleString('es-CO')}</strong></div>
-        <div>Salida: <strong>${new Date(salida.fechaSalida).toLocaleString('es-CO')}</strong></div>
-        <div>Tiempo: <strong>${salida.detalleTiempo.dias}d ${salida.detalleTiempo.horas}h ${salida.detalleTiempo.minutos}m</strong></div>
+        <div>Movimiento: <strong>#${movId}</strong></div>
+        <div>Placa: <strong>${plate}</strong></div>
+        <div>Tipo: <strong>${vtype}</strong></div>
+        <div>Entrada: <strong>${entryD ? new Date(entryD).toLocaleString('es-CO') : ''}</strong></div>
+        <div>Salida: <strong>${exitD ? new Date(exitD).toLocaleString('es-CO') : ''}</strong></div>
         <hr/>
-        <div>Tarifas</div>
-        <div>Minuto: <strong>${salida.tarifa.valor_minuto}</strong></div>
-        <div>Hora: <strong>${salida.tarifa.valor_hora}</strong></div>
-        <div>Día: <strong>${salida.tarifa.valor_dia_completo}</strong></div>
-        <hr/>
-        <div>Total a pagar: <strong>${formatCurrency(salida.total)}</strong></div>
+        <div>Total a pagar: <strong>${formatCurrency(total)}</strong></div>
         <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
         <div>Fecha impresión: ${new Date().toLocaleString('es-CO')}</div>
         ${ciscodeFooter}`;
 }
 
 // Ventana de impresión tipo ticket con QR opcional
-function imprimirHTML(html, titulo, anchoMM, qrPayload){
+function printHTML(html, titulo, anchoMM, qrPayload){
     const width = anchoMM || 58; // 58 o 80
     const w = window.open('', '_blank', 'width=420,height=700');
     const payload = encodeURIComponent(JSON.stringify(qrPayload || {}));
