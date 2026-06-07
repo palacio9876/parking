@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Error en el inicio de sesión');
+                    throw new Error(data.message || t('login.error'));
                 }
 
                 // Guardar token y datos del usuario
@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('userName', data.data.user.name);
                 localStorage.setItem('userRole', data.data.user.role);
                 localStorage.setItem('userId', data.data.user.id_user);
-                localStorage.setItem('empresaId', data.data.user.id_company);
-                localStorage.setItem('empresaNit', tax_id);
+                localStorage.setItem('companyId', data.data.user.id_company);
+                localStorage.setItem('companyTax', tax_id);
 
                 // Marcar el día de login (YYYY-MM-DD) para mostrar el banner diario una vez
                 try {
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const boton = loginForm.querySelector('button[type="submit"]');
         boton.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Iniciando sesión...
+            ${t('login.loading')}
         `;
         boton.disabled = true;
     }
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para restaurar el botón
     function restaurarBoton() {
         const boton = loginForm.querySelector('button[type="submit"]');
-        boton.innerHTML = 'Iniciar Sesión';
+        boton.innerHTML = t('login.button');
         boton.disabled = false;
     }
 

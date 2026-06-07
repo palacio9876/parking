@@ -11,7 +11,7 @@ class ReportRepository {
       },
       attributes: [
         [fn('SUM', col('amount')), 'income'],
-        [fn('COUNT', col('id_pago')), 'tickets']
+        [fn('COUNT', col('id_payment')), 'tickets']
       ],
       raw: true
     })
@@ -58,7 +58,7 @@ class ReportRepository {
       attributes: [
         'payment_method',
         [fn('SUM', col('amount')), 'total'],
-        [fn('COUNT', col('id_pago')), 'count']
+        [fn('COUNT', col('id_payment')), 'count']
       ],
       group: ['payment_method'],
       raw: true

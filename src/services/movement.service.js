@@ -3,23 +3,23 @@ const { AppError } = require('../utils/AppError')
 
 class MovementService {
 
-  async recordEntry(id_company, id_user, { license_plate, type }) {
+  async recordEntry(t, id_company, id_user, { license_plate, type }) {
     // Buscar vehículo
     const vehicle = await movementRepo.findByLicensePlate(license_plate, id_company)
     if (!vehicle) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.movement.vehicleNotFound'))
     }
 
     // Verificar si ya está adentro
     const activeMovement = await movementRepo.findActiveMovement(vehicle.id_vehicle)
     if (activeMovement) {
-      throw new AppError(409, 'Vehicle is already inside')
+      throw new AppError(409, t('server.movement.alreadyInside'))
     }
 
     // Obtener tarifa
     const rate = await movementRepo.getActiveRateByType(type, id_company)
     if (!rate) {
-      throw new AppError(400, 'No active rate for this vehicle type')
+      throw new AppError(400, t('server.movement.noActiveRate'))
     }
 
     // Crear movimiento
@@ -34,7 +34,7 @@ class MovementService {
 
     return {
       success: true,
-      message: 'Entry recorded successfully',
+      message: t('server.movement.entryRecorded'),
       data: {
         id_movement: movement.id_movement,
         license_plate: vehicle.license_plate,
@@ -43,23 +43,23 @@ class MovementService {
     }
   }
 
-  async recordExit(id_company, id_user, { license_plate }) {
+  async recordExit(t, id_company, id_user, { license_plate }) {
     // Buscar vehículo
     const vehicle = await movementRepo.findByLicensePlate(license_plate, id_company)
     if (!vehicle) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.movement.vehicleNotFound'))
     }
 
     // Buscar movimiento activo
     const movement = await movementRepo.findActiveMovement(vehicle.id_vehicle)
     if (!movement) {
-      throw new AppError(404, 'No active entry for this vehicle')
+      throw new AppError(404, t('server.movement.noActiveEntry'))
     }
 
     // Obtener tarifa
     const rate = await movementRepo.getActiveRateByType(vehicle.type, id_company)
     if (!rate) {
-      throw new AppError(400, 'No active rate available')
+      throw new AppError(400, t('server.movement.noRateAvailable'))
     }
 
     // Calcular total (básico, puede expandirse)
@@ -77,7 +77,7 @@ class MovementService {
 
     return {
       success: true,
-      message: 'Exit recorded successfully',
+      message: t('server.movement.exitRecorded'),
       data: {
         id_movement: movement.id_movement,
         license_plate,
@@ -87,10 +87,10 @@ class MovementService {
     }
   }
 
-  async getDetail(id_movement, id_company) {
+  async getDetail(t, id_movement, id_company) {
     const movement = await movementRepo.findById(id_movement, id_company)
     if (!movement) {
-      throw new AppError(404, 'Movement not found')
+      throw new AppError(404, t('server.movement.notFound'))
     }
     return {
       success: true,

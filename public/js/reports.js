@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) { window.location.href = '/'; return; }
 
-    document.getElementById('userName').textContent = localStorage.getItem('userName') || 'User';
+    document.getElementById('userName').textContent = localStorage.getItem('userName') || t('reports.user');
     document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
     document.getElementById('btnLogout').addEventListener('click',()=>{localStorage.clear(); location.href='/';});
     const role = localStorage.getItem('userRole');
@@ -97,7 +97,7 @@ function initShiftsView(){
         const btn = document.createElement('button');
         btn.id = 'btnShiftsModal';
         btn.className = 'btn btn-outline-dark btn-sm ms-2';
-        btn.innerHTML = '<i class="fas fa-cash-register me-1"></i>Shift Closures';
+        btn.innerHTML = '<i class="fas fa-cash-register me-1"></i>' + t('reports.shiftClosures');
         filtrosHeader.appendChild(btn);
         btn.addEventListener('click', ()=>{ loadShifts(); new bootstrap.Modal(document.getElementById('shiftsModal')).show(); });
     }
@@ -109,29 +109,29 @@ function initShiftsView(){
       '  <div class="modal-dialog modal-xl">',
       '    <div class="modal-content">',
       '      <div class="modal-header">',
-      '        <h5 class="modal-title"><i class="fas fa-cash-register me-2"></i>Shift Closures</h5>',
+      '        <h5 class="modal-title"><i class="fas fa-cash-register me-2"></i>' + t('reports.shiftClosures') + '</h5>',
       '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
       '      </div>',
       '      <div class="modal-body">',
       '        <div class="d-flex flex-wrap gap-2 mb-3">',
       '          <input type="date" id="tFrom" class="form-control form-control-sm" />',
       '          <input type="date" id="tTo" class="form-control form-control-sm" />',
-      '          <input type="text" id="tUser" class="form-control form-control-sm" placeholder="User" />',
-      '          <button class="btn btn-sm btn-primary" id="tSearch"><i class="fas fa-filter me-1"></i>Filter</button>',
-      '          <button class="btn btn-sm btn-outline-success" id="tExportXlsx"><i class="fas fa-file-excel me-1"></i>Excel</button>',
+'          <input type="text" id="tUser" class="form-control form-control-sm" placeholder="' + t('reports.searchUser') + '" />',
+'          <button class="btn btn-sm btn-primary" id="tSearch"><i class="fas fa-filter me-1"></i>' + t('common.filter') + '</button>',
+'          <button class="btn btn-sm btn-outline-success" id="tExportXlsx"><i class="fas fa-file-excel me-1"></i>' + t('reports.exportExcel') + '</button>',
       '        </div>',
       '        <div class="table-responsive">',
       '          <table class="table table-sm" id="tbShifts">',
       '            <thead><tr>',
-      '              <th>#</th><th>Opening</th><th>Closing</th><th>User</th>',
-      '              <th>Base</th><th>Cash</th><th>Card</th><th>QR</th><th>Total</th><th>Difference</th><th></th>',
+'              <th>#</th><th>' + t('reports.opening') + '</th><th>' + t('reports.closing') + '</th><th>' + t('reports.user') + '</th>',
+'              <th>' + t('reports.base') + '</th><th>' + t('payment.cash') + '</th><th>' + t('payment.card') + '</th><th>' + t('payment.qr') + '</th><th>' + t('common.total') + '</th><th>' + t('reports.difference') + '</th><th></th>',
       '            </tr></thead>',
       '            <tbody></tbody>',
       '          </table>',
       '        </div>',
       '      </div>',
       '      <div class="modal-footer">',
-      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>',
+      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">' + t('common.close') + '</button>',
       '      </div>',
       '    </div>',
       '  </div>',
@@ -155,7 +155,7 @@ function initShiftsView(){
       });
       const r = await fetch('/api/reports/shifts?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
       const j = await r.json();
-      if (!r.ok) { toast('Error', j.message||'Error listing shifts', 'error'); return; }
+      if (!r.ok) { toast(t('common.error'), j.message||t('reports.shiftsError'), 'error'); return; }
       const tb = document.querySelector('#tbShifts tbody');
       tb.innerHTML = '';
       j.data.forEach((t, idx)=>{
@@ -182,8 +182,8 @@ function initShiftsView(){
       });
     }
 
-    function fmt(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0}).format(Number(n||0)); }
-    function fmtDate(d){ return d ? new Date(d).toLocaleString('en-US') : ''; }
+    function fmt(n){ return fmtCurrency(n); }
+    function fmtDate(d){ return window.fmtDate ? window.fmtDate(d) : (d ? new Date(d).toLocaleString() : ''); }
     function escHtml(s){ return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
 
     // Excel export
@@ -194,7 +194,7 @@ function initShiftsView(){
         user: document.getElementById('tUser').value.trim()
       });
       const res = await fetch('/api/reports/shifts/export/xlsx?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
-      if (!res.ok) { const j = await res.json().catch(()=>({message:'Error exporting'})); toast('Error', j.message||'Error exporting', 'error'); return; }
+      if (!res.ok) { const j = await res.json().catch(()=>({message:t('reports.exportError')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -211,30 +211,30 @@ function initShiftsView(){
         if (window.printSummary){ window.printSummary(res); return; }
         const html = `
           <div style="font-family:Arial,sans-serif;font-size:12px">
-            <h3 style="margin:0 0 8px">Shift Closure</h3>
-            <div>Date: ${new Date().toLocaleString('en-US')}</div>
-            <div>Shift #${res.shift.id_shift} | User: ${escHtml(res.shift.user)}</div>
-            <div>Initial base: <strong>${fmt(res.base_initial)}</strong></div>
-            <div>Tickets: <strong>${res.stats.total}</strong> (Cars: ${res.stats.byType.car} | Motorcycles: ${res.stats.byType.motorcycle} | Bicycles: ${res.stats.byType.bicycle})</div>
+            <h3 style="margin:0 0 8px">${t('reports.shiftClosure')}</h3>
+            <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>
+            <div>${t('reports.shiftClosure')} #${res.shift.id_shift} | ${t('reports.user')}: ${escHtml(res.shift.user)}</div>
+            <div>${t('reports.initialBase')}: <strong>${fmt(res.base_initial)}</strong></div>
+            <div>${t('reports.totalTickets')}: <strong>${res.stats.total}</strong> (${t('reports.cars')}: ${res.stats.byType.car} | ${t('reports.motorcycles')}: ${res.stats.byType.motorcycle} | ${t('reports.bicycles')}: ${res.stats.byType.bicycle})</div>
             <hr/>
             <div style="display:flex;gap:16px">
               <div>
-                <div style="font-weight:bold">User Count</div>
-                <div>Cash: ${fmt(res.user.cash)}</div>
-                <div>Card: ${fmt(res.user.card)}</div>
-                <div>QR: ${fmt(res.user.qr)}</div>
-                <div><strong>Total: ${fmt(res.user.total)}</strong></div>
+                <div style="font-weight:bold">${t('reports.userCount')}</div>
+                <div>${t('payment.cash')}: ${fmt(res.user.cash)}</div>
+                <div>${t('payment.card')}: ${fmt(res.user.card)}</div>
+                <div>${t('payment.qr')}: ${fmt(res.user.qr)}</div>
+                <div><strong>${t('common.total')}: ${fmt(res.user.total)}</strong></div>
               </div>
               <div>
-                <div style="font-weight:bold">System</div>
-                <div>Cash: ${fmt(res.expected.cash)}</div>
-                <div>Card: ${fmt(res.expected.card)}</div>
-                <div>QR: ${fmt(res.expected.qr)}</div>
-                <div><strong>Total: ${fmt(res.expected.total)}</strong></div>
+                <div style="font-weight:bold">${t('reports.system')}</div>
+                <div>${t('payment.cash')}: ${fmt(res.expected.cash)}</div>
+                <div>${t('payment.card')}: ${fmt(res.expected.card)}</div>
+                <div>${t('payment.qr')}: ${fmt(res.expected.qr)}</div>
+                <div><strong>${t('common.total')}: ${fmt(res.expected.total)}</strong></div>
               </div>
             </div>
             <hr/>
-            <div><strong>Difference: ${fmt(res.diff)}</strong></div>
+            <div><strong>${t('reports.difference')}: ${fmt(res.diff)}</strong></div>
             ${res.obs?('<div>Obs.: '+escHtml(res.obs)+'</div>'):''}
           </div>`;
 
@@ -248,7 +248,7 @@ function initShiftsView(){
         b58.addEventListener('click', on58);
         b80.addEventListener('click', on80);
         m.show();
-      }catch(e){ toast('Error', e.message, 'error'); }
+      }catch(e){ toast(t('common.error'), e.message, 'error'); }
     }
 
     function printHtmlAtWidth(html, mm){
@@ -266,18 +266,18 @@ function initShiftsView(){
         '  <div class="modal-dialog">',
         '    <div class="modal-content">',
         '      <div class="modal-header">',
-        '        <h5 class="modal-title">Select print size</h5>',
+        '        <h5 class="modal-title">' + t('reports.selectPrintSize') + '</h5>',
         '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
         '      </div>',
         '      <div class="modal-body">',
-        '        <p class="mb-2">Choose the thermal paper width to print the closure.</p>',
+        '        <p class="mb-2">' + t('reports.printSizeHelp') + '</p>',
         '        <div class="d-flex gap-2">',
         '          <button type="button" id="btnShiftsPrint58" class="btn btn-primary">58 mm</button>',
         '          <button type="button" id="btnShiftsPrint80" class="btn btn-outline-primary">80 mm</button>',
         '        </div>',
         '      </div>',
         '      <div class="modal-footer">',
-        '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>',
+        '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">' + t('common.cancel') + '</button>',
         '      </div>',
         '    </div>',
         '  </div>',
@@ -294,13 +294,13 @@ async function loadKPIs(){
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error KPIs');
+        if(!res.ok) throw new Error(j.message||t('reports.kpiError'));
         const d = j.data || {};
         document.getElementById('kpiIncome').textContent = formatCurrency(d.income||0);
         document.getElementById('kpiTickets').textContent = String(d.tickets||0);
         document.getElementById('kpiAverage').textContent = formatCurrency(d.averageTicket||0);
         document.getElementById('kpiOccupancy').textContent = (d.occupancy!=null? d.occupancy:0) + '%';
-    }catch(e){ toast('Error', e.message, 'error'); }
+    }catch(e){ toast(t('common.error'), e.message, 'error'); }
 }
 
 async function loadChartIncome(){
@@ -311,11 +311,11 @@ async function loadChartIncome(){
         if (paymentMethod) q.append('paymentMethod', paymentMethod);
         const res = await fetch(`/api/reports/income-by-day?${q.toString()}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error income by day');
+        if(!res.ok) throw new Error(j.message||t('reports.incomeDayError'));
         const labels = j.data.map(r=>r.date);
         const data = j.data.map(r=>Number(r.total||0));
-        renderLineChart('chartIncome', labels, data, 'Income');
-    }catch(e){ toast('Error', e.message, 'error'); }
+        renderLineChart('chartIncome', labels, data, t('reports.income'));
+    }catch(e){ toast(t('common.error'), e.message, 'error'); }
 }
 
 async function loadChartPaymentMethod(){
@@ -323,11 +323,11 @@ async function loadChartPaymentMethod(){
         const { from, to } = baseParams();
         const res = await fetch(`/api/reports/income-by-payment-method?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error income by payment method');
+        if(!res.ok) throw new Error(j.message||t('reports.incomeMethodError'));
         const labels = j.data.map(r=>r.payment_method);
         const data = j.data.map(r=>Number(r.total||0));
         renderDoughnut('chartPaymentMethod', labels, data);
-    }catch(e){ toast('Error', e.message, 'error'); }
+    }catch(e){ toast(t('common.error'), e.message, 'error'); }
 }
 
 async function loadMovements(){
@@ -342,10 +342,10 @@ async function loadMovements(){
         if (plate) q.append('plate', plate);
         const res = await fetch(`/api/reports/movements?${q.toString()}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error movements');
+        if(!res.ok) throw new Error(j.message||t('reports.movementsError'));
         const tb = document.getElementById('tbMov');
         if (!j.data || j.data.length === 0){
-            tb.innerHTML = '<tr><td colspan="7" class="text-center">No records</td></tr>';
+            tb.innerHTML = '<tr><td colspan="7" class="text-center">' + t('common.noRecords') + '</td></tr>';
         } else {
             tb.innerHTML = j.data.map(r=>`
                 <tr>
@@ -366,9 +366,9 @@ async function loadMovements(){
         const maxPage = Math.max(0, Math.ceil(total / __pageSizeRep) - 1);
         document.getElementById('btnPrev').disabled = __pageRep <= 0;
         document.getElementById('btnNext').disabled = __pageRep >= maxPage;
-        document.getElementById('pageInfo').textContent = `Page ${__pageRep+1} of ${maxPage+1}`;
-        document.getElementById('movPaging').textContent = `Total: ${total}`;
-    }catch(e){ toast('Error', e.message, 'error'); }
+        document.getElementById('pageInfo').textContent = t('common.page') + ' ' + (__pageRep+1) + ' ' + t('common.of') + ' ' + (maxPage+1);
+        document.getElementById('movPaging').textContent = t('common.total') + ': ' + total;
+    }catch(e){ toast(t('common.error'), e.message, 'error'); }
 }
 
 // Reprint exit ticket from reports
@@ -377,7 +377,7 @@ window.reprintExit = async function(idMovement){
         // Get invoice with entry-exit structure
         const res = await fetch(`/api/movements/invoice/${idMovement}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.message||'Could not get invoice');
+        if (!res.ok) throw new Error(j.message||t('reports.reprintExit'));
         const f = j.data;
         // Company, logo (DataURL) and settings
         const company = await fetch('/api/companies/me',{ headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} }).then(r=>r.json()).then(x=>x.data).catch(()=>null);
@@ -393,39 +393,39 @@ window.reprintExit = async function(idMovement){
         // Reuse same entry-exit render if available
         if (window.renderReceipt && window.printHTML){
             const htmlTicket = renderReceipt('EXIT', null, f, companyInfo);
-            printHTML(htmlTicket, 'Exit Invoice', 80, { t:'exit', e:companyInfo?.tax_id, m:f.movementId, p:f.license_plate, fs:f.exitDate, total: f.total });
+            printHTML(htmlTicket, t('reprints.exitInvoice'), 80, { t:'exit', e:companyInfo?.tax_id, m:f.movementId, p:f.license_plate, fs:f.exitDate, total: f.total });
             return;
         }
         // Simple fallback (if reports is opened in isolation)
         const header = `
             <div style="text-align:center">
                 ${companyInfo.logo_url ? `<img src="${companyInfo.logo_url}" alt="logo" style="max-height:60px">` : ''}
-                <div><strong>${companyInfo.name||'Company'}</strong></div>
+                <div><strong>${companyInfo.name||t('company.name')}</strong></div>
                 <div>TAX ID: ${companyInfo.tax_id||''}</div>
                 <div>${companyInfo.address||''} ${companyInfo.phone? ' - '+companyInfo.phone:''}</div>
-                <div>Hours: <strong>${(companyInfo?.operation_24h)?'24 hours':((fmtTimeRS(companyInfo?.opening_time)||'')+' - '+(fmtTimeRS(companyInfo?.closing_time)||''))}</strong></div>
+                <div>${t('company.schedule')}: <strong>${(companyInfo?.operation_24h)?t('time.h24'):((fmtTimeRS(companyInfo?.opening_time)||'')+' - '+(fmtTimeRS(companyInfo?.closing_time)||''))}</strong></div>
                 <hr/>
-                <div><strong>EXIT</strong></div>
+                <div><strong>${t('dashboard.exitLabel')}</strong></div>
             </div>`;
         const paymentsHtml = (f.paymentsList && f.paymentsList.length)
-            ? `<div><strong>Payments</strong></div>` + f.paymentsList.map(p=>`<div>${p.payment_method}: <strong>${formatCurrency(Number(p.amount||0))}</strong></div>`).join('')
+            ? `<div><strong>${t('vehicles.historyPayments')}</strong></div>` + f.paymentsList.map(p=>`<div>${p.payment_method}: <strong>${formatCurrency(Number(p.amount||0))}</strong></div>`).join('')
             : '';
         const body = `
-            <div>Movement: <strong>#${f.movementId}</strong></div>
-            <div>Plate: <strong>${f.license_plate}</strong></div>
-            <div>Type: <strong>${f.type}</strong></div>
-            <div>Entry: <strong>${new Date(f.entryDate).toLocaleString('en-US')}</strong></div>
-            <div>Exit: <strong>${new Date(f.exitDate).toLocaleString('en-US')}</strong></div>
+            <div>${t('dashboard.movement')}: <strong>#${f.movementId}</strong></div>
+            <div>${t('dashboard.plate')}: <strong>${f.license_plate}</strong></div>
+            <div>${t('dashboard.type')}: <strong>${f.type}</strong></div>
+            <div>${t('dashboard.entry')}: <strong>${fmtDate(f.entryDate)}</strong></div>
+            <div>${t('dashboard.exit')}: <strong>${fmtDate(f.exitDate)}</strong></div>
             <hr/>
             <div>Rates</div>
             <div>Minute: <strong>${f.rate.minute_rate}</strong></div>
             <div>Hour: <strong>${f.rate.hourly_rate}</strong></div>
             <div>Day: <strong>${f.rate.full_day_rate}</strong></div>
             <hr/>
-            <div>Total to pay: <strong>${formatCurrency(f.total)}</strong></div>
+            <div>${t('dashboard.totalToPay')}: <strong>${formatCurrency(f.total)}</strong></div>
             ${paymentsHtml}
-            <div>Attended by: ${localStorage.getItem('userName')||''}</div>
-            <div>Reprint date: ${new Date().toLocaleString('en-US')}</div>`;
+            <div>${t('dashboard.attendedBy')}: ${localStorage.getItem('userName')||''}</div>
+            <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>`;
         const printWin = window.open('','_blank','width=420,height=700');
         const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Reprint</title>
             <style>@page{ size:80mm auto; margin: 3mm } body{ width:80mm; font-family: Arial, sans-serif; font-size:11px; margin:0 } .wrap{ padding:4mm } hr{ border:none; border-top:1px dashed #999; margin:6px 0 } img{ display:block; margin:0 auto 6px; max-width:100% } .qr{ display:flex; justify-content:center; margin-top:6px }</style>
@@ -436,7 +436,7 @@ window.reprintExit = async function(idMovement){
         printWin.document.write(doc);
         printWin.document.close();
         printWin.focus();
-    }catch(e){ toast('Error', e.message, 'error'); }
+    }catch(e){ toast(t('common.error'), e.message, 'error'); }
 }
 
 function fmtTimeRS(t){ if(!t) return ''; const s=String(t); return s.length>=5? s.substring(0,5): s; }
@@ -446,10 +446,10 @@ async function loadTopPlates(){
         const { from, to } = baseParams();
         const res = await fetch(`/api/reports/top-plates?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&limit=10`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error top plates');
+        if(!res.ok) throw new Error(j.message||t('reports.topPlatesError'));
         const tb = document.getElementById('tbTop');
         if (!j.data || j.data.length === 0){
-            tb.innerHTML = '<tr><td colspan="4" class="text-center">No records</td></tr>';
+            tb.innerHTML = '<tr><td colspan="4" class="text-center">' + t('common.noRecords') + '</td></tr>';
         } else {
             tb.innerHTML = j.data.map(r=>`
                 <tr>
@@ -460,7 +460,7 @@ async function loadTopPlates(){
                 </tr>
             `).join('');
         }
-    }catch(e){ toast('Error', e.message, 'error'); }
+    }catch(e){ toast(t('common.error'), e.message, 'error'); }
 }
 
 // Render charts
@@ -497,9 +497,9 @@ async function exportToPDF(){
         if (type) q.append('type', type);
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);
-        toast('Info', 'Generating PDF...', 'info');
+        toast(t('common.info'), t('reports.generatingPdf'), 'info');
     }catch(err){
-        toast('Error', err.message, 'error');
+        toast(t('common.error'), err.message, 'error');
     }
 }
 
@@ -514,13 +514,13 @@ async function exportToExcelBackend(){
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);
         const res = await fetch(`/api/reports/export/xlsx?${q.toString()}`, { headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` } });
-        if (!res.ok) { const j = await res.json().catch(()=>({message:'Error'})); toast('Error', j.message||'Export error', 'error'); return; }
+        if (!res.ok) { const j = await res.json().catch(()=>({message:t('common.error')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `reports_${Date.now()}.xlsx`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        toast('Success', 'File downloaded', 'success');
-    }catch(err){ toast('Error', err.message, 'error'); }
+        toast(t('common.success'), t('reports.fileDownloaded'), 'success');
+    }catch(err){ toast(t('common.error'), err.message, 'error'); }
 }
 
 function setToday(){ const d = new Date(); const s = d.toISOString().split('T')[0]; document.getElementById('fFrom').value = s; document.getElementById('fTo').value = s; }
@@ -528,18 +528,11 @@ function setLast7(){ const d = new Date(); const s = new Date(d.getTime()-6*24*3
 function setMonth(){ const d = new Date(); const s = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; document.getElementById('fFrom').value = s; document.getElementById('fTo').value = d.toISOString().split('T')[0]; }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0
-    }).format(amount);
+    return fmtCurrency(amount);
 }
 
 function formatDateTime(date) {
-    return new Date(date).toLocaleString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    return fmtDate(date);
 }
 
 function toast(title, message, type) {

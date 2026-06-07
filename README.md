@@ -1,163 +1,321 @@
-## Sistema de Parqueadero (Multi-empresa)
+# ParkSystem — Sistema de Gestión de Parqueaderos Multi-empresa
 
-Aplicación Node.js + Express para gestionar parqueaderos con múltiples empresas, usuarios y operaciones de ingreso/salida de vehículos, tarifas, pagos, reportes y turnos de caja. Incluye una interfaz estática en `public/` servida por el mismo servidor.
+Aplicación Node.js + Express para administrar parqueaderos con soporte multi-empresa:
+registro de vehículos, movimientos de ingreso/salida, tarifas flexibles, pagos,
+turnos de caja, reportes y dashboard. Incluye interfaz web estática en `public/`.
 
-### Características
-- Autenticación por JWT con control de intentos de login por IP/usuario.
-- Multi-empresa: aislamiento por `id_empresa` en todas las operaciones.
-- Gestión de vehículos, movimientos (ingresos/salidas), tarifas (minuto/hora/día/mixto).
-- Pagos por movimiento con métodos: efectivo, tarjeta y QR.
-- Reportes (KPIs, series por día, por método, exportación a Excel), dashboard con estadísticos.
-- Turnos de caja: apertura/cierre, totales por método, diferencias, exportación.
-- Subida y servido de logo de empresa como BLOB (sin depender de disco).
+---
 
-### Requisitos
-- Node.js 18+ y npm
-- MariaDB/MySQL 10.4+ (probado con MariaDB)
+## Características
 
-### Instalación
-1. Clonar el repositorio
-2. Instalar dependencias:
-   ```bash
-   npm install
-   ```
-3. Configurar variables de entorno creando un archivo `.env` en la raíz:
-   ```env
-   # Puerto del servidor
-   PORT=3000
+- **Autenticación JWT** con control de intentos fallidos por IP/usuario.
+- **Multi-empresa**: aislamiento total por `id_company` en todas las operaciones.
+- **Vehículos**: CRUD con historial de movimientos y pagos.
+- **Tarifas configurables**: por tipo de vehículo, modo de facturación (minuto/hora/día/mixto), redondeos y umbrales.
+- **Movimientos**: ingreso y salida con cálculo automático del total a pagar.
+- **Pagos**: soporte para efectivo, tarjeta y QR; pago único o múltiple por movimiento.
+- **Turnos de caja**: apertura/cierre, totales por método de pago, diferencia, exportación a Excel.
+- **Reportes**: KPIs, ingresos por día/método, movimientos paginados, top placas, turnos, exportación a Excel.
+- **Dashboard**: estadísticas en tiempo real (ocupación, ingresos del día, movimientos activos).
+- **Logo de empresa**: almacenado como BLOB en BD, sin depender del sistema de archivos.
+- **SweetAlert2** con tema Bootstrap 4 en toda la interfaz.
 
-   # JWT
-   JWT_SECRET=tu_secreto_jwt
+---
 
-   # Base de datos
-   DB_HOST=localhost
-   DB_USER=root
-   DB_PASSWORD=
-   DB_NAME=parqueadero
-   ```
-4. Crear la base de datos y datos iniciales ejecutando el script SQL:
-   - Abra su cliente de MariaDB/MySQL y ejecute el contenido de `schema.sql`.
-   - Esto creará la BD `parqueadero`, tablas, vistas, procedimiento y datos de ejemplo:
-     - Empresa: "Parqueadero Central" (id 1)
-     - Usuario admin: usuario `admin` con contraseña `admin123` (hash ya incluido)
-     - Tarifas base para carro/moto/bici
+## Tecnologías
 
-### Ejecución
-- Desarrollo (con recarga si usa nodemon):
-  ```bash
-  npm run dev
-  ```
-- Producción:
-  ```bash
-  npm start
-  ```
-El servidor sirve la UI desde `public/` y expone la API bajo `/api/*`.
+| Capa        | Tecnología                                         |
+|-------------|----------------------------------------------------|
+| Backend     | Node.js, Express                                   |
+| ORM         | Sequelize 6                                        |
+| Base de datos | MariaDB / MySQL 10.4+                            |
+| Autenticación | JWT (jsonwebtoken) + bcryptjs                    |
+| Validación  | Zod                                                |
+| Reportes    | ExcelJS                                            |
+| Frontend    | HTML5, CSS3, JavaScript vanilla, Bootstrap 4, SweetAlert2 |
 
-Página principal: `GET /` -> `public/index.html`
+---
 
-### Estructura del proyecto
+## Requisitos
+
+- Node.js 18+
+- MariaDB / MySQL 10.4+
+- npm
+
+---
+
+## Instalación
+
+```bash
+# 1. Clonar el repositorio
+git clone <repo-url> && cd parking
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Crear archivo .env (ver .env.example o usar el siguiente modelo)
+cat > .env << EOF
+PORT=3000
+NODE_ENV=development
+JWT_SECRET=tu_secreto_jwt_aqui
+DB_HOST=localhost
+DB_NAME=parking_system
+DB_USER=root
+DB_PASSWORD=
+EOF
+
+# 4. Crear la base de datos
+mysql -u root -p -e "CREATE DATABASE parking_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 5. Ejecutar migraciones (crea tablas, índices, FKs y vistas)
+npm run migrate
+
+# 6. Sembrar datos iniciales (empresa, admin, tarifas base)
+npm run seed
+```
+
+### Datos de acceso por defecto
+
+| Campo    | Valor            |
+|----------|------------------|
+| tax_id   | `900123456-7`    |
+| username | `admin`          |
+| password | `admin123`       |
+
+---
+
+## Ejecución
+
+```bash
+npm run dev      # Desarrollo con nodemon (recarga automática)
+npm start        # Producción
+```
+
+El servidor inicia en `http://localhost:3000`. Sirve la interfaz web desde `public/`
+y expone la API REST en `/api/*`.
+
+### Rutas de la interfaz web
+
+| Ruta               | Vista              |
+|--------------------|--------------------|
+| `/`                | Login              |
+| `/admin/dashboard` | Dashboard          |
+| `/admin/vehicles`  | Gestión de vehículos |
+| `/admin/users`     | Gestión de usuarios |
+| `/admin/rates`     | Tarifas            |
+| `/admin/reports`   | Reportes           |
+| `/admin/settings`  | Configuración      |
+| `/admin/entry-exit`| Ingreso/Salida     |
+| `/operator/*`      | (alias a las mismas vistas) |
+
+---
+
+## Estructura del proyecto
+
 ```
 src/
-  server.js            # Configura Express, CORS, JSON y rutas, sirve /public
-  config/db.js         # Pool MySQL/MariaDB usando mysql2/promise
-  middleware/
-    auth.js            # Verifica JWT en Authorization: Bearer <token>
-    requireAdmin.js    # Exige rol admin
-    validateLogin.js   # Valida payload de login
-  routes/
-    auth.js            # POST /api/auth/login
-    vehiculos.js       # CRUD + historial, scoping por empresa
-    movimientos.js     # Ingreso, salida (cálculo), factura/detalle
-    tarifas.js         # Consulta y actualización de vigencias
-    reportes.js        # KPIs, series, tablas, exportaciones a Excel
-    dashboard.js       # Estadísticas del tablero
-    turnos.js          # Apertura/cierre, resumen y detalle
-    empresa.js         # Perfil y configuración de empresa, logo BLOB
+  server.js                     # Express: middlewares, rutas, archivos estáticos
+  config/
+    db.js                       # Conexión Sequelize a MySQL
+    sequelize-config.js         # Config para sequelize-cli
+  models/
+    index.js                    # Asociaciones entre modelos
+    Company.js, User.js, LoginAttempt.js, CompanySetting.js,
+    Vehicle.js, Rate.js, Movement.js, Payment.js, Shift.js
+  migrations/                   # Migraciones Sequelize (una por tabla + vistas)
+    20260606010000-create-companies.js
+    20260606020000-create-company-settings.js
+    20260606030000-create-users.js
+    20260606040000-create-login-attempts.js
+    20260606050000-create-vehicles.js
+    20260606060000-create-rates.js
+    20260606070000-create-movements.js
+    20260606080000-create-payments.js
+    20260606090000-create-shifts.js
+    20260606100000-create-views.js
+  seeders/                      # Datos iniciales (empresa, admin, tarifas)
+    20260606040000-sample-data.js
+  controllers/                  # Lógica de controladores por recurso
+  services/                     # Lógica de negocio por recurso
+  repositories/                 # Acceso a datos (consultas Sequelize)
+  dtos/                         # Esquemas de validación Zod
+  routes/                       # Definición de rutas Express
+    auth.js, companies.js, dashboard.js, movements.js,
+    payments.js, rates.js, reports.js, shifts.js, users.js, vehicles.js
+  middlewares/
+    auth.js                     # Verificación JWT
+    requireAdmin.js             # Restricción de rol admin
+    errorHandler.js             # Manejo centralizado de errores
 public/
-  index.html           # Landing/login
-  admin/*.html         # Vistas de administración/operación
-  js/*.js, css/*.css   # Recursos de UI
-schema.sql             # Esquema, vistas, procedimiento y datos seed
+  index.html                    # Login
+  admin/
+    dashboard.html, vehicles.html, users.html, rates.html,
+    reports.html, settings.html, entry-exit.html
+  js/                           # Lógica frontend
+  css/                          # Estilos
+ 404.html                       # Página 404 personalizada
+tests/
+  test-api.sh                   # Suite de pruebas de API (51 tests)
+schema.sql                      # Esquema SQL de referencia (no usar para instalación)
 ```
 
-### Autenticación
-- Login: `POST /api/auth/login`
-  - Body: `{ empresa: <NIT>, usuario: <string>, password: <string> }`
-  - Valida intentos fallidos por ventana de 15 minutos y guarda auditoría en `login_attempts`.
-  - Respuesta exitosa: `{ success, data: { token, ... }, message }`.
-- Para acceder al resto de endpoints, incluya el header `Authorization: Bearer <token>`.
+---
 
-### Variables de entorno
-- `PORT`: Puerto del servidor (default 3000)
-- `JWT_SECRET`: Secreto para firmar/verificar JWT
-- `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: Conexión a la BD
+## API endpoints
 
-### Endpoints principales (resumen)
-- Vehículos `/api/vehiculos` (requiere token)
-  - `GET /` listar por empresa
-  - `GET /:id` obtener detalle
-  - `GET /:id/historial` historial de movimientos + pagos
-  - `POST /` crear
-  - `PUT /:id` actualizar
-  - `DELETE /:id` eliminar (si no tiene movimiento activo)
-- Movimientos `/api/movimientos` (requiere token)
-  - `POST /ingreso` registrar ingreso (auto-crea vehículo si no existe)
-  - `POST /salida` registrar salida, calcula total y opcionalmente registra pago
-  - `GET /detalle/:id` detalle
-  - `GET /factura/:id` factura completa (para reimpresión)
-- Tarifas `/api/tarifas` (requiere token; actualización típica para admin)
-  - `GET /current` tarifas activas por tipo
-  - `PUT /` crear nueva vigencia (desactiva la anterior del tipo)
-- Reportes `/api/reportes` (requiere token)
-  - `GET /kpis` KPIs del periodo
-  - `GET /ingresos-por-dia` serie temporal total o por método
-  - `GET /ingresos-por-metodo` distribución por método
-  - `GET /movimientos` tabla paginada/filtrada
-  - `GET /movimientos-ajustados` tabla con columnas por método prorrateadas
-  - `GET /turnos` cierres de turno
-  - `GET /turnos/export/xlsx` y `GET /export/xlsx` exportaciones a Excel
-- Dashboard `/api/dashboard/stats` (requiere token)
-- Turnos `/api/turnos` (requiere token)
-  - `GET /actual` turno abierto
-  - `GET /resumen` totales desde la apertura
-  - `POST /abrir` abrir turno
-  - `POST /cerrar` cerrar turno con totales del usuario
-- Empresa `/api/empresa` (requiere token; admin para cambios)
-  - `GET /me` datos de empresa
-  - `GET /config` configuración operativa
-  - `PUT /` actualizar datos básicos (admin)
-  - `PUT /config` actualizar configuración (admin)
-  - `GET /logo` devuelve logo (BLOB)
-  - `POST /logo` subir logo (admin). Form field: `logo`
+Todas las rutas requieren el header `Authorization: Bearer <token>`, excepto
+`POST /api/auth/login`.
 
-### Flujo típico de uso
-1. Ejecutar `schema.sql` en MariaDB/MySQL.
-2. Iniciar el servidor con `.env` configurado.
-3. Ingresar con NIT de la empresa (seed) y usuario `admin`.
-4. Ajustar tarifas según política (minuto/hora/día/mixto).
-5. Registrar ingresos/salidas y pagos.
-6. Consultar dashboard y reportes, exportar a Excel.
-7. Abrir/cerrar turnos para control de caja.
+### Auth
+| Método | Ruta              | Descripción                    |
+|--------|-------------------|--------------------------------|
+| POST   | `/api/auth/login` | Iniciar sesión                 |
+| GET    | `/api/auth/me`    | Datos del usuario autenticado  |
 
-### Scripts npm
-- `npm start`: inicia servidor en `PORT`
-- `npm run dev`: inicia con nodemon
+**Login body:**
+```json
+{ "tax_id": "900123456-7", "username": "admin", "password": "admin123" }
+```
 
-### Notas
-- `public/uploads/` (si existía en versiones previas) está ignorado; actualmente el logo se almacena como BLOB.
-- Asegúrese de configurar `JWT_SECRET` en producción.
+### Vehicles
+| Método | Ruta                      | Descripción                         |
+|--------|---------------------------|-------------------------------------|
+| GET    | `/api/vehicles`           | Listar vehículos de la empresa      |
+| GET    | `/api/vehicles/:id`       | Detalle de un vehículo              |
+| POST   | `/api/vehicles`           | Crear vehículo                      |
+| PUT    | `/api/vehicles/:id`       | Actualizar vehículo                 |
+| DELETE | `/api/vehicles/:id`       | Eliminar vehículo (sin movimientos) |
+| GET    | `/api/vehicles/:id/history` | Historial de movimientos + pagos  |
 
-### Endurecimiento contra SQLi y cambios recientes
-- Se añadió utilitario `src/utils/sanitize.js` con:
-  - `toSafeInt`, `toSafeLike` (usa `ESCAPE '\\'`), `toSafeTipoVehiculo`
-  - Middlewares `sanitizeReportFilters` y `sanitizeIdParam`
-- Se deshabilitó `multipleStatements` en `src/config/db.js`.
-- Rutas actualizadas para sanitizar filtros/paginación e IDs:
-  - `reportes.js`, `dashboard.js`, `movimientos.js`, `turnos.js`, `vehiculos.js`, `usuarios.js`.
-- Login reforzado: normalización de entradas (trim), validación previa y auditoría.
-- UI: En `public/admin/entry-exit.html` el combo de tipo se reemplazó por botones de selección (Carro/Moto/Bici) con diseño moderno y responsivo.
+### Users (solo admin)
+| Método | Ruta                | Descripción          |
+|--------|---------------------|----------------------|
+| GET    | `/api/users`        | Listar usuarios      |
+| GET    | `/api/users/:id`    | Detalle de usuario   |
+| POST   | `/api/users`        | Crear usuario        |
+| PUT    | `/api/users/:id`    | Actualizar usuario   |
+| DELETE | `/api/users/:id`    | Eliminar usuario     |
 
-### Licencia
-ISC © Ciscode
+### Rates
+| Método | Ruta                | Descripción                        |
+|--------|---------------------|------------------------------------|
+| GET    | `/api/rates/current`| Tarifas activas por tipo de vehículo |
+| PUT    | `/api/rates`        | Crear/actualizar tarifa (admin)    |
 
+### Movements
+| Método | Ruta                     | Descripción                         |
+|--------|--------------------------|-------------------------------------|
+| POST   | `/api/movements/entry`   | Registrar ingreso de vehículo       |
+| POST   | `/api/movements/exit`    | Registrar salida y calcular total   |
+| GET    | `/api/movements/:id`     | Detalle del movimiento              |
+| GET    | `/api/movements/:id/history` | Historial completo              |
 
+### Payments
+| Método | Ruta                    | Descripción                         |
+|--------|-------------------------|-------------------------------------|
+| POST   | `/api/payments/bulk`    | Registrar uno o varios pagos        |
+
+### Companies (solo admin para escritura)
+| Método | Ruta                     | Descripción                    |
+|--------|--------------------------|--------------------------------|
+| GET    | `/api/companies/me`      | Datos de la empresa            |
+| GET    | `/api/companies/config`  | Configuración operativa        |
+| PUT    | `/api/companies`         | Actualizar datos básicos       |
+| PUT    | `/api/companies/config`  | Actualizar configuración       |
+| GET    | `/api/companies/logo`    | Obtener logo (BLOB, image/png) |
+| POST   | `/api/companies/logo`    | Subir logo (multipart, admin)  |
+
+### Shifts
+| Método | Ruta                   | Descripción           |
+|--------|------------------------|-----------------------|
+| GET    | `/api/shifts/current`  | Turno abierto actual  |
+| GET    | `/api/shifts/summary`  | Totales del turno     |
+| POST   | `/api/shifts/open`     | Abrir turno           |
+| POST   | `/api/shifts/close`    | Cerrar turno          |
+
+### Reports
+| Método | Ruta                                      | Descripción                 |
+|--------|-------------------------------------------|-----------------------------|
+| GET    | `/api/reports/kpis`                       | KPIs del período            |
+| GET    | `/api/reports/income-by-day`              | Ingresos por día            |
+| GET    | `/api/reports/income-by-payment-method`   | Ingresos por método de pago |
+| GET    | `/api/reports/movements`                  | Movimientos paginados       |
+| GET    | `/api/reports/top-plates`                 | Top placas más frecuentes   |
+| GET    | `/api/reports/shifts`                     | Cierres de turno            |
+| GET    | `/api/reports/export/xlsx`                | Exportar reportes a Excel   |
+| GET    | `/api/reports/shifts/export/xlsx`         | Exportar turnos a Excel     |
+
+### Dashboard
+| Método | Ruta                     | Descripción                 |
+|--------|--------------------------|-----------------------------|
+| GET    | `/api/dashboard/stats`   | Estadísticas del dashboard  |
+
+### Parámetros comunes de reportes
+| Parámetro | Tipo   | Descripción                         |
+|-----------|--------|-------------------------------------|
+| `from`    | string | Fecha inicio (YYYY-MM-DD)           |
+| `to`      | string | Fecha fin (YYYY-MM-DD)              |
+| `page`    | int    | Número de página (default 0)        |
+| `pageSize`| int    | Tamaño de página (default 10)       |
+| `limit`   | int    | Límite de registros                 |
+
+---
+
+## Scripts npm
+
+| Script             | Comando                                    |
+|--------------------|--------------------------------------------|
+| `npm start`        | `node src/server.js`                       |
+| `npm run dev`      | `nodemon src/server.js`                    |
+| `npm run migrate`  | Ejecutar migraciones pendientes            |
+| `npm run migrate:undo` | Revertir última migración               |
+| `npm run migrate:undo:all` | Revertir todas las migraciones      |
+| `npm run migrate:status` | Ver estado de migraciones            |
+| `npm run seed`     | Ejecutar seeders                          |
+| `npm run seed:undo`| Revertir seeders                          |
+
+---
+
+## Migraciones y seeders
+
+El proyecto usa **Sequelize CLI** para gestionar el esquema de la base de datos.
+
+**Flujo para crear una base de datos desde cero:**
+```bash
+mysql -u root -p -e "CREATE DATABASE parking_system CHARACTER SET utf8mb4"
+npm run migrate
+npm run seed
+```
+
+**Flujo para agregar un cambio futuro:**
+```bash
+npx sequelize-cli migration:generate --name add-column-to-table
+# Editar el archivo generado en src/migrations/
+npm run migrate
+```
+
+**Revertir cambios:**
+```bash
+npm run migrate:undo           # Reversa la última migración
+npm run migrate:undo:all       # Reversa todas (vuelve a BD vacía)
+```
+
+---
+
+## Pruebas
+
+El proyecto incluye una suite de pruebas de API en `tests/test-api.sh` que
+cubre los 51 escenarios principales (auth, CRUD, validaciones, errores 404/401,
+reportes, dashboard).
+
+```bash
+bash tests/test-api.sh
+```
+
+Requiere el servidor corriendo en `localhost:3000` con la base de datos migrada y seedada.
+
+---
+
+## Licencia
+
+ISC © Cristian Palacio

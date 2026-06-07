@@ -5,12 +5,12 @@ const { AppError } = require('../utils/AppError')
 
 class AuthService {
 
-  async login({ tax_id, username, password, ip_address }) {
+  async login(t, { tax_id, username, password, ip_address }) {
 
     // 1. Verificar empresa
     const company = await authRepo.findCompanyByTaxId(tax_id)
     if (!company) {
-      throw new AppError(401, 'Company not found or inactive')
+      throw new AppError(401, t('server.auth.companyNotFound'))
     }
 
     // 2. Verificar intentos fallidos (máx 5 en 15 min)
@@ -24,7 +24,7 @@ class AuthService {
         successful: false,
         ip_address
       })
-      throw new AppError(429, 'Too many failed attempts. Please try again later.')
+      throw new AppError(429, t('server.auth.tooManyAttempts'))
     }
 
     // 3. Verificar usuario
@@ -36,7 +36,7 @@ class AuthService {
         successful: false,
         ip_address
       })
-      throw new AppError(401, 'Invalid credentials')
+      throw new AppError(401, t('server.auth.invalidCredentials'))
     }
 
     // 4. Verificar contraseña
@@ -48,7 +48,7 @@ class AuthService {
         successful: false,
         ip_address
       })
-      throw new AppError(401, 'Invalid credentials')
+      throw new AppError(401, t('server.auth.invalidCredentials'))
     }
 
     // 5. Actualizar último acceso y registrar intento exitoso
@@ -74,7 +74,7 @@ class AuthService {
 
     return {
       success: true,
-      message: 'Login successful',
+      message: t('server.auth.loginSuccess'),
       data: {
         token,
         user: {

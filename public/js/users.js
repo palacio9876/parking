@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) { window.location.href = '/'; return; }
     if (role !== 'admin') { window.location.href = '/admin/dashboard'; return; }
 
-    document.getElementById('userName').textContent = localStorage.getItem('userName') || 'User';
+    document.getElementById('userName').textContent = localStorage.getItem('userName') || t('users.name');
     document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
     document.getElementById('btnLogout').addEventListener('click',()=>{ localStorage.clear(); location.href='/'; });
 
@@ -23,7 +23,7 @@ async function loadUsers(){
     try{
         const res = await fetch('/api/users', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error listing users');
+        if(!res.ok) throw new Error(j.message||t('users.loadError'));
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = j.data.map(u => `
             <tr>
@@ -31,7 +31,7 @@ async function loadUsers(){
                 <td>${u.username}</td>
                 <td><span class="badge bg-${u.role==='admin'?'primary':'secondary'} text-uppercase">${u.role}</span></td>
                 <td>${u.active ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>'}</td>
-                <td>${u.last_access ? new Date(u.last_access).toLocaleString('en-US') : '-'}</td>
+                <td>${fmtDate(u.last_access)}</td>
                 <td>
                     <button class="btn btn-sm btn-info me-1" onclick='editUser(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-warning me-1" onclick='openPasswordChange(${JSON.stringify({id:u.id_user, login:u.username, name:u.name})})'><i class="fas fa-key"></i></button>
@@ -39,12 +39,12 @@ async function loadUsers(){
                 </td>
             </tr>
         `).join('');
-    }catch(err){ toast('Error', err.message, 'error'); }
+    }catch(err){ toast(t('common.error'), err.message, 'error'); }
 }
 
 function editUser(u){
     document.getElementById('userId').value = u.id_user;
-    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('userModalTitle').textContent = t('users.edit');
     document.getElementById('name').value = u.name;
     document.getElementById('username').value = u.username;
     document.getElementById('password').value = '';
@@ -55,14 +55,14 @@ function editUser(u){
 }
 
 async function deactivateUser(id){
-    if(!confirm('Deactivate this user?')) return;
+    if(!confirm(t('users.deactivateConfirm'))) return;
     try{
         const res = await fetch(`/api/users/${id}`, { method:'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||'Error');
-        toast('Success','User deactivated','success');
+        toast(t('common.success'),t('users.deactivated'),'success');
         loadUsers();
-    }catch(err){ toast('Error', err.message, 'error'); }
+    }catch(err){ toast(t('common.error'), err.message, 'error'); }
 }
 
 async function saveUser(){
@@ -77,12 +77,12 @@ async function saveUser(){
     // Frontend validations
     const errors = [];
     const usernameRegex = /^[A-Za-z0-9]+$/; // no spaces, dashes or special chars
-    if (!body.name) errors.push('Name is required.');
-    if (!body.username) errors.push('Username is required.');
-    if (body.username && !usernameRegex.test(body.username)) errors.push('Username can only have letters and numbers (no spaces or dashes).');
-    if (!id && !body.password) errors.push('Password is required.');
-    if (body.password && body.password.length < 6) errors.push('Password must have at least 6 characters.');
-    if (!['admin','operator'].includes(body.role)) errors.push('Select a valid role.');
+    if (!body.name) errors.push(t('users.nameRequired'));
+    if (!body.username) errors.push(t('users.usernameRequired'));
+    if (body.username && !usernameRegex.test(body.username)) errors.push(t('users.usernameRegex'));
+    if (!id && !body.password) errors.push(t('users.passwordRequired'));
+    if (body.password && body.password.length < 6) errors.push(t('users.passwordMinLength'));
+    if (!['admin','operator'].includes(body.role)) errors.push(t('users.roleRequired'));
     if (errors.length) { showFormErrors(errors); return; }
     clearFormErrors();
     
@@ -90,7 +90,7 @@ async function saveUser(){
     const btn = document.getElementById('btnSaveUser');
     const prevHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + t('common.saving');
     if (id) { if (!body.password) { delete body.password; } }
     try{
         const res = await fetch(id ? `/api/users/${id}` : '/api/users', {
@@ -100,10 +100,10 @@ async function saveUser(){
         });
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||'Error saving user');
-        toast('Success', id ? 'User updated' : 'User created', 'success');
+        toast(t('common.success'), id ? t('users.updated') : t('users.created'), 'success');
         document.getElementById('userForm').reset();
         document.getElementById('userId').value='';
-        document.getElementById('userModalTitle').textContent = 'New User';
+        document.getElementById('userModalTitle').textContent = t('users.new');
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
         loadUsers();
     }catch(err){ showFormErrors([err.message]); }
@@ -194,9 +194,9 @@ async function changePassword(){
     const alert = document.getElementById('pwd_alert');
     // Validations
     const msgs = [];
-    if (!pass1) msgs.push('New password is required.');
-    if (pass1 && pass1.length < 6) msgs.push('Password must have at least 6 characters.');
-    if (pass1 !== pass2) msgs.push('Passwords do not match.');
+    if (!pass1) msgs.push(t('users.passwordRequiredMsg'));
+    if (pass1 && pass1.length < 6) msgs.push(t('users.passwordMinMsg'));
+    if (pass1 !== pass2) msgs.push(t('users.passwordMismatch'));
     if (msgs.length){
         alert.className = 'alert alert-danger';
         alert.innerHTML = msgs.map(m=>`<div>${m}</div>`).join('');
@@ -206,7 +206,7 @@ async function changePassword(){
     const btn = document.getElementById('btnPwdSave');
     const prev = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + t('common.saving');
     try{
         const res = await fetch(`/api/users/${id}`,{
             method:'PUT',
@@ -214,9 +214,9 @@ async function changePassword(){
             body: JSON.stringify({ password: pass1 })
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Could not update password');
+        if(!res.ok) throw new Error(j.message||t('users.updatePasswordError'));
         alert.className = 'alert alert-success';
-        alert.textContent = 'Password updated successfully.';
+        alert.textContent = t('users.passwordUpdated');
         setTimeout(()=>{
             bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
         }, 600);

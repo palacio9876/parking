@@ -1,6 +1,3 @@
-// Company settings (admin)
-// Related to: public/admin/configuracion.html and API /api/companies
-
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('userRole');
@@ -11,15 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
     document.getElementById('btnLogout').addEventListener('click',()=>{ localStorage.clear(); location.href='/'; });
 
-    // Load data
     loadCompany();
     loadSettings();
 
-    // Save
     document.getElementById('btnSaveCompany').addEventListener('click', saveCompany);
     document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
 
-    // Logo: preview and upload
     const fileInput = document.getElementById('e_logo_file');
     const preview = document.getElementById('e_logo_preview');
     const uploadBtn = document.getElementById('btnUploadLogo');
@@ -27,11 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.addEventListener('change', () => {
             const f = fileInput.files && fileInput.files[0];
             if (!f) { preview.src=''; preview.classList.add('d-none'); return; }
-            // Validate size (<= 2MB) and type (PNG/JPG/GIF)
             const max = 2 * 1024 * 1024;
             const okType = ['image/png','image/jpeg','image/jpg','image/gif'].includes(f.type);
-            if (!okType) { setAlert('alertCompany','danger','File type not allowed. Use PNG/JPG.'); fileInput.value=''; return; }
-            if (f.size > max) { setAlert('alertCompany','danger','File exceeds 2MB.'); fileInput.value=''; return; }
+            if (!okType) { setAlert('alertCompany','danger',t('settings.logoTypeError')); fileInput.value=''; return; }
+            if (f.size > max) { setAlert('alertCompany','danger',t('settings.logoSizeError')); fileInput.value=''; return; }
             const reader = new FileReader();
             reader.onload = e => { preview.src = e.target.result; preview.classList.remove('d-none'); };
             reader.readAsDataURL(f);
@@ -46,7 +39,7 @@ async function loadCompany(){
     try{
         const r = await fetch('/api/companies/me',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error loading company');
+        if(!r.ok) throw new Error(j.message||t('settings.loadCompanyError'));
         const e = j.data;
         document.getElementById('e_name').value = e.name || '';
         document.getElementById('e_tax_id').value = e.tax_id || '';
@@ -55,7 +48,6 @@ async function loadCompany(){
         document.getElementById('e_email').value = e.email || '';
         const preview = document.getElementById('e_logo_preview');
         if (preview) {
-            // Try to load from BLOB endpoint; if 404, hide
             fetch('/api/companies/logo', { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} })
                 .then(r=> r.ok ? r.blob() : Promise.reject())
                 .then(b=>{ preview.src = URL.createObjectURL(b); preview.classList.remove('d-none'); })
@@ -68,16 +60,16 @@ async function loadSettings(){
     try{
         const r = await fetch('/api/companies/config',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error loading settings');
+        if(!r.ok) throw new Error(j.message||t('settings.loadSettingsError'));
         const c = j.data;
-        document.getElementById('c_cars').value = c.car_capacity ?? 0;
-        document.getElementById('c_motos').value = c.motorcycle_capacity ?? 0;
-        document.getElementById('c_bicis').value = c.bicycle_capacity ?? 0;
+        document.getElementById('c_cars').value = c.car_total_capacity || 0;
+        document.getElementById('c_motos').value = c.motorcycle_total_capacity || 0;
+        document.getElementById('c_bicis').value = c.bicycle_total_capacity || 0;
         document.getElementById('c_opening').value = (c.opening_time||'').toString().substring(0,5);
         document.getElementById('c_closing').value = (c.closing_time||'').toString().substring(0,5);
-        document.getElementById('c_tax').value = c.tax_percentage ?? 0;
-        document.getElementById('c_currency').value = c.currency || 'USD';
-        document.getElementById('c_tz').value = c.timezone || 'America/New_York';
+        document.getElementById('c_tax').value = c.vat_percentage || 0;
+        document.getElementById('c_currency').value = c.currency || 'COP';
+        document.getElementById('c_tz').value = c.timezone || 'America/Bogota';
         const chk = document.getElementById('c_24h');
         if (chk) {
             chk.checked = !!c.operation_24h;
@@ -90,45 +82,44 @@ async function loadSettings(){
 async function saveCompany(){
     const payload = {
         name: document.getElementById('e_name').value.trim(),
-        tax_id: document.getElementById('e_tax_id').value.trim(),
         address: document.getElementById('e_address').value.trim(),
         phone: document.getElementById('e_phone').value.trim(),
         email: document.getElementById('e_email').value.trim()
     };
     const btn = document.getElementById('btnSaveCompany');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Saving...');
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.saving'));
     try{
         const r = await fetch('/api/companies',{
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
         if(!r.ok) throw new Error(j.message||'Error saving');
-        setAlert('alertCompany', 'success', 'Company data updated.');
+        setAlert('alertCompany', 'success', t('settings.saved'));
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
 
 async function saveSettings(){
     const payload = {
-        car_capacity: Number(document.getElementById('c_cars').value||0),
-        motorcycle_capacity: Number(document.getElementById('c_motos').value||0),
-        bicycle_capacity: Number(document.getElementById('c_bicis').value||0),
+        car_total_capacity: Number(document.getElementById('c_cars').value||0),
+        motorcycle_total_capacity: Number(document.getElementById('c_motos').value||0),
+        bicycle_total_capacity: Number(document.getElementById('c_bicis').value||0),
         opening_time: document.getElementById('c_opening').value,
         closing_time: document.getElementById('c_closing').value,
-        tax_percentage: Number(document.getElementById('c_tax').value||0),
-        currency: document.getElementById('c_currency').value.trim()||'USD',
-        timezone: document.getElementById('c_tz').value.trim()||'America/New_York',
+        vat_percentage: Number(document.getElementById('c_tax').value||0),
+        currency: document.getElementById('c_currency').value.trim()||'COP',
+        timezone: document.getElementById('c_tz').value.trim()||'America/Bogota',
         operation_24h: document.getElementById('c_24h').checked
     };
     const btn = document.getElementById('btnSaveSettings');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Saving...');
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.saving'));
     try{
         const r = await fetch('/api/companies/config',{
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
         if(!r.ok) throw new Error(j.message||'Error saving');
-        setAlert('alertSettings', 'success', 'Settings updated.');
+        setAlert('alertSettings', 'success', t('settings.settingsSaved'));
     }catch(err){ setAlert('alertSettings','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
@@ -149,20 +140,18 @@ function spinner(text){
     return `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${text}`;
 }
 
-// Upload logo and place public URL in text field (not yet saved to DB)
 async function uploadLogo(){
     const file = document.getElementById('e_logo_file') && document.getElementById('e_logo_file').files[0];
-    if (!file) { setAlert('alertCompany','warning','Select a logo file.'); return; }
+    if (!file) { setAlert('alertCompany','warning',t('settings.selectLogo')); return; }
     const btn = document.getElementById('btnUploadLogo');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Uploading...');
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.uploading'));
     try{
         const form = new FormData();
         form.append('logo', file);
         const r = await fetch('/api/companies/logo', { method:'POST', headers:{ 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: form });
         const j = await r.json();
-        if (!r.ok) throw new Error(j.message||'Error uploading logo');
-        if (preview) { preview.src = j.url; preview.classList.remove('d-none'); }
-        setAlert('alertCompany','success','Logo uploaded and saved.');
+        if (!r.ok) throw new Error(j.message||t('settings.logoUploadError'));
+        setAlert('alertCompany','success',t('settings.logoUploaded'));
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }

@@ -11,10 +11,10 @@ class VehicleService {
     }
   }
 
-  async getById(id_vehicle, id_company) {
+  async getById(t, id_vehicle, id_company) {
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.vehicle.notFound'))
     }
     return {
       success: true,
@@ -22,11 +22,11 @@ class VehicleService {
     }
   }
 
-  async create(id_company, vehicleData) {
+  async create(t, id_company, vehicleData) {
     // Verificar si ya existe vehículo con esa placa
     const existing = await vehicleRepo.findByLicensePlate(vehicleData.license_plate, id_company)
     if (existing) {
-      throw new AppError(409, 'A vehicle with this license plate already exists')
+      throw new AppError(409, t('server.vehicle.alreadyExists'))
     }
 
     const vehicle = await vehicleRepo.create({
@@ -36,18 +36,18 @@ class VehicleService {
 
     return {
       success: true,
-      message: 'Vehicle created successfully',
+      message: t('server.vehicle.created'),
       data: {
         id_vehicle: vehicle.id_vehicle
       }
     }
   }
 
-  async update(id_vehicle, id_company, updates) {
+  async update(t, id_vehicle, id_company, updates) {
     // Verificar que vehículo existe
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.vehicle.notFound'))
     }
 
     // Si actualiza placa, verificar que no exista otra con la misma
@@ -58,50 +58,50 @@ class VehicleService {
         id_vehicle
       )
       if (existing) {
-        throw new AppError(409, 'A vehicle with this license plate already exists')
+        throw new AppError(409, t('server.vehicle.alreadyExists'))
       }
     }
 
     const affectedRows = await vehicleRepo.update(id_vehicle, id_company, updates)
     if (affectedRows === 0) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.vehicle.notFound'))
     }
 
     return {
       success: true,
-      message: 'Vehicle updated successfully'
+      message: t('server.vehicle.updated')
     }
   }
 
-  async delete(id_vehicle, id_company) {
+  async delete(t, id_vehicle, id_company) {
     // Verificar que vehículo existe
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.vehicle.notFound'))
     }
 
-    // Verificar que no tenga movimientos activos
-    const activeMovements = await vehicleRepo.countActiveMovements(id_vehicle)
-    if (activeMovements > 0) {
-      throw new AppError(400, 'Cannot delete vehicle with active movements')
+    // Verificar que no tenga movimientos asociados
+    const totalMovements = await vehicleRepo.countMovements(id_vehicle)
+    if (totalMovements > 0) {
+      throw new AppError(400, t('server.vehicle.cannotDeleteWithMovements'))
     }
 
     const deletedRows = await vehicleRepo.delete(id_vehicle, id_company)
     if (deletedRows === 0) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.vehicle.notFound'))
     }
 
     return {
       success: true,
-      message: 'Vehicle deleted successfully'
+      message: t('server.vehicle.deleted')
     }
   }
 
-  async getHistory(id_vehicle, id_company, limit = 50, offset = 0) {
+  async getHistory(t, id_vehicle, id_company, limit = 50, offset = 0) {
     // Verificar que vehículo existe y pertenece a la empresa
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, 'Vehicle not found')
+      throw new AppError(404, t('server.vehicle.notFound'))
     }
 
     const history = await vehicleRepo.getVehicleHistory(id_vehicle, limit, offset)
