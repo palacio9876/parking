@@ -6,13 +6,19 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "migrate:status": "npx sequelize-cli db:migrate:status",
+    "seed": "npx sequelize-cli db:seed:all",
+    "seed:undo": "npx sequelize-cli db:seed:undo:all",
     "build:clean": "rimraf dist && mkdirp dist",
     "build:exe": "pkg src/server.js --targets node18-win-x64 --output dist/parqueadero.exe",
     "build:copy": "cpy \"public/**\" dist/public --cwd=. --parents && cpy schema.sql .env* dist/ --cwd=.",
     "build": "npm run build:clean && npm run build:exe && npm run build:copy"
   },
   "keywords": [],
-  "author": "Cristian Cano",
+  "author": "Cristian Palacio",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -33,8 +39,6 @@
     "nodemon": "^3.1.10",
     "pkg": "^5.8.1",
     "rimraf": "^5.0.7",
-    "youtube-transcript": "^1.2.1",
-    "youtubei.js": "^15.1.1",
-    "ytdl-core": "^4.11.5"
+    "sequelize-cli": "^6.6.5"
   }
 }

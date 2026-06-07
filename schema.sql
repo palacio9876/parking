@@ -130,7 +130,7 @@ CREATE TABLE movements (
 
 -- Payments Table
 CREATE TABLE payments (
-    id_pago INT AUTO_INCREMENT PRIMARY KEY,
+    id_payment INT AUTO_INCREMENT PRIMARY KEY,
     id_company INT NOT NULL,
     id_movement INT NOT NULL,
     payment_method ENUM('cash', 'card', 'QR') NOT NULL, -- Modified: metodo_pago to payment_method and values to english

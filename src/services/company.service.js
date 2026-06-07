@@ -26,10 +26,11 @@ class CompanyService {
   }
 
   async updateCompany(id_company, updates) {
-    const affectedRows = await companyRepo.updateCompany(id_company, updates)
-    if (affectedRows === 0) {
+    const company = await companyRepo.findById(id_company)
+    if (!company) {
       throw new AppError(404, 'Company not found')
     }
+    await companyRepo.updateCompany(id_company, updates)
     return {
       success: true,
       message: 'Company updated successfully'
@@ -48,7 +49,7 @@ class CompanyService {
     }
 
     const affectedRows = await companyRepo.updateSettings(id_company, updates)
-    if (affectedRows === 0) {
+    if (affectedRows === 0 && !settings) {
       throw new AppError(404, 'Settings not found')
     }
     return {

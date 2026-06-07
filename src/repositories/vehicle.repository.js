@@ -76,6 +76,12 @@ class VehicleRepository {
     })
   }
 
+  countMovements(id_vehicle) {
+    return Movement.count({
+      where: { id_vehicle }
+    })
+  }
+
   async getVehicleWithStatus(id_vehicle, id_company) {
     const vehicle = await Vehicle.findOne({
       where: { id_vehicle, id_company }

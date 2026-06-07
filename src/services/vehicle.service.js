@@ -80,10 +80,10 @@ class VehicleService {
       throw new AppError(404, 'Vehicle not found')
     }
 
-    // Verificar que no tenga movimientos activos
-    const activeMovements = await vehicleRepo.countActiveMovements(id_vehicle)
-    if (activeMovements > 0) {
-      throw new AppError(400, 'Cannot delete vehicle with active movements')
+    // Verificar que no tenga movimientos asociados
+    const totalMovements = await vehicleRepo.countMovements(id_vehicle)
+    if (totalMovements > 0) {
+      throw new AppError(400, 'Cannot delete vehicle with existing movement history')
     }
 
     const deletedRows = await vehicleRepo.delete(id_vehicle, id_company)
