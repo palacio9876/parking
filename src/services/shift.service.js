@@ -3,10 +3,10 @@ const { AppError } = require('../utils/AppError')
 
 class ShiftService {
 
-  async openShift(id_company, id_user, { initial_base, opening_observation }) {
+  async openShift(t, id_company, id_user, { initial_base, opening_observation }) {
     const existing = await shiftRepo.getOpenShift(id_company)
     if (existing) {
-      throw new AppError(409, 'There is already an open shift')
+      throw new AppError(409, t('server.shift.alreadyOpen'))
     }
 
     const shift = await shiftRepo.createShift({
@@ -18,13 +18,13 @@ class ShiftService {
       status: 'open'
     })
 
-    return { success: true, message: 'Shift opened successfully', data: shift }
+    return { success: true, message: t('server.shift.opened'), data: shift }
   }
 
-  async closeShift(id_company, id_user, { total_cash, total_card, total_qr, closing_observation }) {
+  async closeShift(t, id_company, id_user, { total_cash, total_card, total_qr, closing_observation }) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {
-      throw new AppError(404, 'No open shift found')
+      throw new AppError(404, t('server.shift.noOpenShift'))
     }
 
     const cash    = Number(total_cash  || 0)
@@ -45,12 +45,12 @@ class ShiftService {
     })
 
     if (!affectedRows) {
-      throw new AppError(500, 'Error closing shift')
+      throw new AppError(500, t('server.shift.errorClosing'))
     }
 
     return {
       success: true,
-      message: 'Shift closed successfully',
+      message: t('server.shift.closed'),
       data: {
         shift:      { id_shift: shift.id_shift, user: id_user },
         base:       shift.initial_base,
@@ -62,10 +62,10 @@ class ShiftService {
     }
   }
 
-  async getCurrent(id_company) {
+  async getCurrent(t, id_company) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {
-      throw new AppError(404, 'No open shift found')
+      throw new AppError(404, t('server.shift.noOpenShift'))
     }
     return { success: true, data: shift }
   }

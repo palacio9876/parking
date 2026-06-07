@@ -7,7 +7,7 @@ class AuthController {
       const { tax_id, username, password } = req.body
       const ip_address = req.headers['x-forwarded-for'] || req.ip || '0.0.0.0'
 
-      const result = await authService.login({ tax_id, username, password, ip_address })
+      const result = await authService.login(req.t, { tax_id, username, password, ip_address })
       res.json(result)
     } catch (err) {
       next(err)

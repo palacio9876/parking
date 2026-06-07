@@ -12,10 +12,10 @@ class UserService {
     }
   }
 
-  async getById(id_user, id_company) {
+  async getById(t, id_user, id_company) {
     const user = await userRepo.findById(id_user, id_company)
     if (!user) {
-      throw new AppError(404, 'User not found')
+      throw new AppError(404, t('server.user.notFound'))
     }
     return {
       success: true,
@@ -30,11 +30,11 @@ class UserService {
     }
   }
 
-  async create(id_company, userData) {
+  async create(t, id_company, userData) {
     // Verificar si usuario ya existe
     const existing = await userRepo.findByUsername(userData.username, id_company)
     if (existing) {
-      throw new AppError(409, 'User already exists for this company')
+      throw new AppError(409, t('server.user.alreadyExists'))
     }
 
     // Hash password
@@ -51,18 +51,18 @@ class UserService {
 
     return {
       success: true,
-      message: 'User created successfully',
+      message: t('server.user.created'),
       data: {
         id_user: user.id_user
       }
     }
   }
 
-  async update(id_user, id_company, updates) {
+  async update(t, id_user, id_company, updates) {
     // Verificar que usuario existe
     const user = await userRepo.findById(id_user, id_company)
     if (!user) {
-      throw new AppError(404, 'User not found')
+      throw new AppError(404, t('server.user.notFound'))
     }
 
     // Si actualiza username, verificar que no exista otro con el mismo
@@ -73,7 +73,7 @@ class UserService {
         id_user
       )
       if (existing) {
-        throw new AppError(409, 'User already exists for this company')
+        throw new AppError(409, t('server.user.alreadyExists'))
       }
     }
 
@@ -85,35 +85,35 @@ class UserService {
 
     const affectedRows = await userRepo.update(id_user, id_company, updateData)
     if (affectedRows === 0) {
-      throw new AppError(404, 'User not found')
+      throw new AppError(404, t('server.user.notFound'))
     }
 
     return {
       success: true,
-      message: 'User updated successfully'
+      message: t('server.user.updated')
     }
   }
 
-  async deactivate(id_user, id_company, currentUserId) {
+  async deactivate(t, id_user, id_company, currentUserId) {
     // Verificar que usuario existe
     const user = await userRepo.findById(id_user, id_company)
     if (!user) {
-      throw new AppError(404, 'User not found')
+      throw new AppError(404, t('server.user.notFound'))
     }
 
     // No permitir desactivar tu propio usuario
     if (Number(id_user) === Number(currentUserId)) {
-      throw new AppError(400, 'Cannot deactivate your own user')
+      throw new AppError(400, t('server.user.cannotDeactivateSelf'))
     }
 
     const affectedRows = await userRepo.deactivate(id_user, id_company)
     if (affectedRows === 0) {
-      throw new AppError(404, 'User not found')
+      throw new AppError(404, t('server.user.notFound'))
     }
 
     return {
       success: true,
-      message: 'User deactivated successfully'
+      message: t('server.user.deactivated')
     }
   }
 }

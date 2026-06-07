@@ -3,10 +3,10 @@ const { AppError } = require('../utils/AppError')
 
 class PaymentService {
 
-  async recordPayments(id_company, id_user, { id_movement, payments }) {
+  async recordPayments(t, id_company, id_user, { id_movement, payments }) {
     // Validar que movimiento existe
     if (!payments || !Array.isArray(payments) || payments.length === 0) {
-      throw new AppError(400, 'Invalid payment data')
+      throw new AppError(400, t('server.payment.invalidData'))
     }
 
     // Crear registros de pago
@@ -23,7 +23,7 @@ class PaymentService {
 
     return {
       success: true,
-      message: 'Payments recorded successfully',
+      message: t('server.payment.recorded'),
       data: {
         payment_count: created.length
       }

@@ -6,6 +6,10 @@ const path    = require('path')
 const sequelize = require('./config/db')
 require('./models')
 const { errorHandler } = require('./middlewares/errorHandler')
+const { i18nMiddleware } = require('./middlewares/i18n')
+const { loadTranslations } = require('./utils/i18n')
+
+loadTranslations()
 
 const app = express()
 
@@ -16,6 +20,7 @@ const publicDir  = path.join(basePath, 'public')
 app.use(cors())
 app.use(express.json())
 app.use(express.static(publicDir))
+app.use(i18nMiddleware)
 
 app.use('/api/auth',      require('./routes/auth'))
 app.use('/api/vehicles',  require('./routes/vehicles'))

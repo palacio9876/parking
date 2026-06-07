@@ -4,7 +4,7 @@ class CompanyController {
 
   async getCompany(req, res, next) {
     try {
-      const result = await companyService.getCompany(req.user.id_company)
+      const result = await companyService.getCompany(req.t, req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)
@@ -13,7 +13,7 @@ class CompanyController {
 
   async getSettings(req, res, next) {
     try {
-      const result = await companyService.getSettings(req.user.id_company)
+      const result = await companyService.getSettings(req.t, req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)
@@ -22,7 +22,7 @@ class CompanyController {
 
   async updateCompany(req, res, next) {
     try {
-      const result = await companyService.updateCompany(req.user.id_company, req.body)
+      const result = await companyService.updateCompany(req.t, req.user.id_company, req.body)
       res.json(result)
     } catch (err) {
       next(err)
@@ -31,7 +31,7 @@ class CompanyController {
 
   async updateSettings(req, res, next) {
     try {
-      const result = await companyService.updateSettings(req.user.id_company, req.body)
+      const result = await companyService.updateSettings(req.t, req.user.id_company, req.body)
       res.json(result)
     } catch (err) {
       next(err)
@@ -45,7 +45,7 @@ class CompanyController {
         res.set('Content-Type', 'image/png')
         res.send(result.data.logo_url)
       } else {
-        res.status(404).json({ success: false, error: 'Logo not found' })
+        res.status(404).json({ success: false, error: req.t('server.company.logoNotFound') })
       }
     } catch (err) {
       next(err)
@@ -54,7 +54,7 @@ class CompanyController {
 
   async uploadLogo(req, res, next) {
     try {
-      const result = await companyService.uploadLogo(req.user.id_company, req.file?.buffer)
+      const result = await companyService.uploadLogo(req.t, req.user.id_company, req.file?.buffer)
       res.json(result)
     } catch (err) {
       next(err)

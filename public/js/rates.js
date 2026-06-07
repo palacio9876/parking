@@ -47,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const j = await res.json();
             if(!res.ok) throw new Error(j.message||'Could not save');
-            showToast('Success','Rate saved','success');
+            showToast(t('common.success'),t('rates.saved'),'success');
             loadRates();
         }catch(err){
-            showToast('Error', err.message, 'error');
+            showToast(t('common.error'), err.message, 'error');
         }
     });
 });
@@ -59,7 +59,7 @@ async function loadRates(){
     try{
         const res = await fetch('/api/rates/current', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error loading rates');
+        if(!res.ok) throw new Error(j.message||t('rates.loadError'));
         const ul = document.getElementById('ratesList');
         ul.innerHTML = j.data.map(t => `
             <li class="list-group-item d-flex flex-column">
@@ -67,12 +67,12 @@ async function loadRates(){
                     <strong class="text-capitalize">${t.vehicle_type}</strong>
                     <span class="badge bg-primary">${t.billing_mode}</span>
                 </div>
-                <small>Min: ${t.minute_rate} | Hour: ${t.hourly_rate} | Day: ${t.full_day_rate}</small>
-                <small>Scales → min→hr: ${t.minutes_to_hours_threshold} min, hr→day: ${t.hours_to_days_threshold} h</small>
+                <small>${t('rates.min')}: ${t.minute_rate} | ${t('rates.hour')}: ${t.hourly_rate} | ${t('rates.day')}: ${t.full_day_rate}</small>
+                <small>${t('rates.scales')} → min→hr: ${t.minutes_to_hours_threshold} min, hr→day: ${t.hours_to_days_threshold} h</small>
             </li>
         `).join('');
     }catch(err){
-        showToast('Error', err.message, 'error');
+        showToast(t('common.error'), err.message, 'error');
     }
 }
 

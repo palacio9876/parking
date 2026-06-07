@@ -11,21 +11,21 @@ class RateService {
     }
   }
 
-  async createOrUpdate(id_company, data) {
+  async createOrUpdate(t, id_company, data) {
     // Validar según modo de cobro
     const { billing_mode, hourly_rate, minute_rate, full_day_rate } = data
 
     if (billing_mode === 'minute' && !minute_rate) {
-      throw new AppError(400, 'minute_rate required for minute billing')
+      throw new AppError(400, t('server.rate.minuteRequired'))
     }
     if (billing_mode === 'hour' && !hourly_rate) {
-      throw new AppError(400, 'hourly_rate required for hour billing')
+      throw new AppError(400, t('server.rate.hourlyRequired'))
     }
     if (billing_mode === 'day' && !full_day_rate) {
-      throw new AppError(400, 'full_day_rate required for day billing')
+      throw new AppError(400, t('server.rate.dayRequired'))
     }
     if (billing_mode === 'mixed' && (!hourly_rate || !minute_rate || !full_day_rate)) {
-      throw new AppError(400, 'All rates required for mixed billing')
+      throw new AppError(400, t('server.rate.allRequired'))
     }
 
     // Desactivar tarifa anterior
@@ -39,7 +39,7 @@ class RateService {
 
     return {
       success: true,
-      message: 'Rate updated successfully',
+      message: t('server.rate.updated'),
       data: {
         id_rate: rate.id_rate
       }

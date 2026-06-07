@@ -89,14 +89,14 @@ async function loadDashboardData() {
         });
 
         if (response.status === 401) {
-            showToast('Sesión expirada', 'Por favor inicia sesión nuevamente', 'warning');
+            showToast(t('login.sessionExpired'), t('login.sessionExpiredMsg'), 'warning');
             localStorage.clear();
             setTimeout(()=> location.href='/', 1200);
             return;
         }
 
         if (!response.ok) {
-            throw new Error('Error al cargar los datos del dashboard');
+            throw new Error(t('dashboard.loadError'));
         }
 
         const data = await response.json();
@@ -108,14 +108,14 @@ async function loadDashboardData() {
         if (btnNext && btnPrev && pageInfo) {
             btnNext.disabled = !data.paging?.hasNext;
             btnPrev.disabled = (__page <= 0);
-            pageInfo.textContent = `Página ${__page + 1}`;
+            pageInfo.textContent = t('common.page') + ' ' + (__page + 1);
             btnNext.onclick = () => { __page += 1; loadDashboardData(); };
             btnPrev.onclick = () => { if (__page > 0) { __page -= 1; loadDashboardData(); } };
         }
 
     } catch (error) {
         console.error('Error:', error);
-        showError('Error al cargar los datos del dashboard');
+        showError(t('dashboard.loadError'));
         // Reseteo seguro de KPIs
         updateDashboardStats({ currentVehicles: 0, todayIncome: 0, averageTime: 0, totalUsers: 0 });
         updateRecentActivity([]);
@@ -143,7 +143,7 @@ async function setOcupacionKpi(){
         const hoy = `${yyyy}-${mm}-${dd}`;
         const res = await fetch(`/api/reports/kpis?from=${hoy}&to=${hoy}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.message||'Error KPI');
+        if (!res.ok) throw new Error(j.message||t('reports.kpiError'));
         const ocup = (j.data && j.data.occupancy!=null) ? j.data.occupancy : 0;
         const el = document.getElementById('kpiOcupacionDash');
         if (el) el.textContent = `${ocup}%`;
@@ -157,7 +157,7 @@ async function setOcupacionKpi(){
 function updateRecentActivity(activities) {
     const tableBody = document.getElementById('recentActivityTable');
     if (!activities || activities.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay actividad reciente</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">' + t('dashboard.noActivity') + '</td></tr>';
         return;
     }
 
@@ -182,7 +182,7 @@ window.viewDetails = async function(idMovement) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Error obtaining detail');
+        if (!res.ok) throw new Error(data.message || t('dashboard.detailError'));
 
         const m = data.data;
         const plate = m.vehicle?.license_plate || m.license_plate || '';
@@ -195,18 +195,18 @@ window.viewDetails = async function(idMovement) {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Detail Movement #${m.id_movement || idMovement}</h5>
+                    <h5 class="modal-title">${t('dashboard.detailTitle')} #${m.id_movement || idMovement}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                   </div>
                   <div class="modal-body">
-                    <div><strong>Plate:</strong> ${plate}</div>
-                    <div><strong>Type:</strong> ${vehType}</div>
-                    <div><strong>Entry:</strong> ${entryDate ? new Date(entryDate).toLocaleString('es-CO') : ''}</div>
-                    ${exitDate ? `<div><strong>Exit:</strong> ${new Date(exitDate).toLocaleString('es-CO')}</div>` : ''}
-                    ${total ? `<div><strong>Total:</strong> ${formatCurrency(total)}</div>` : ''}
+                    <div><strong>${t('dashboard.plate')}:</strong> ${plate}</div>
+                    <div><strong>${t('dashboard.type')}:</strong> ${vehType}</div>
+                    <div><strong>${t('dashboard.entry')}:</strong> ${fmtDate(entryDate)}</div>
+                    ${exitDate ? `<div><strong>${t('dashboard.exit')}:</strong> ${fmtDate(exitDate)}</div>` : ''}
+                    ${total ? `<div><strong>${t('dashboard.total')}:</strong> ${formatCurrency(total)}</div>` : ''}
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('common.close')}</button>
                   </div>
                 </div>
               </div>
@@ -220,7 +220,7 @@ window.viewDetails = async function(idMovement) {
         container.addEventListener('hidden.bs.modal', () => container.remove());
     } catch (e) {
         console.error(e);
-        showError('No fue posible obtener el detalle');
+        showError(t('dashboard.detailError'));
     }
 }
 
@@ -231,14 +231,14 @@ window.checkoutVehicle = async function(idMovement) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const det = await resDet.json();
-        if (!resDet.ok) throw new Error(det.message || 'Error');
+        if (!resDet.ok) throw new Error(det.message || t('common.error'));
         const m = det.data;
         const plate = m.vehicle?.license_plate || m.license_plate || '';
         const vehType = m.vehicle?.type || m.type || '';
         const entryDt = m.entry_date || '';
         const exitDt = m.exit_date || '';
         if (exitDt) {
-            showToast('Aviso', 'Este vehículo ya tuvo salida.', 'warning');
+            showToast(t('common.warning'), t('dashboard.alreadyExited'), 'warning');
             return;
         }
 
@@ -248,25 +248,25 @@ window.checkoutVehicle = async function(idMovement) {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Confirmar salida</h5>
+                    <h5 class="modal-title">${t('dashboard.confirmExit')}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                   </div>
                   <div class="modal-body">
-                    <div class="mb-2"><strong>Placa:</strong> ${plate}</div>
-                    <div class="mb-2"><strong>Tipo:</strong> ${vehType}</div>
-                    <div class="mb-2"><strong>Entrada:</strong> ${new Date(entryDt).toLocaleString('es-CO')}</div>
+                    <div class="mb-2"><strong>${t('dashboard.plate')}:</strong> ${plate}</div>
+                    <div class="mb-2"><strong>${t('dashboard.type')}:</strong> ${vehType}</div>
+                    <div class="mb-2"><strong>${t('dashboard.entry')}:</strong> ${fmtDate(entryDt)}</div>
                     <div class="mt-3">
-                      <label class="form-label">Método de pago</label>
+                      <label class="form-label">${t('dashboard.checkoutMethod')}</label>
                       <select class="form-select" id="checkoutMethod">
-                        <option value="cash">Efectivo</option>
-                        <option value="card">Tarjeta</option>
-                        <option value="QR">QR</option>
+                        <option value="cash">${t('payment.cash')}</option>
+                        <option value="card">${t('payment.card')}</option>
+                        <option value="QR">${t('payment.qr')}</option>
                       </select>
                     </div>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" id="btnConfirmCheckout">Confirmar salida</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('common.cancel')}</button>
+                    <button type="button" class="btn btn-success" id="btnConfirmCheckout">${t('dashboard.confirmCheckout')}</button>
                   </div>
                 </div>
               </div>
@@ -292,10 +292,10 @@ window.checkoutVehicle = async function(idMovement) {
                 const data = await res.json();
                 if (!res.ok) {
                     if (res.status === 404) {
-                        showToast('Aviso', data.message || 'El vehículo no tiene ingreso activo', 'warning');
+                        showToast(t('common.warning'), data.message || t('dashboard.vehicleNoActiveEntry'), 'warning');
                         return;
                     }
-                    throw new Error(data.message || 'No se pudo finalizar');
+                    throw new Error(data.message || t('dashboard.checkoutError'));
                 }
 
                 // Refrescar dashboard
@@ -304,7 +304,7 @@ window.checkoutVehicle = async function(idMovement) {
                 const company = await getCompanyInfo();
                 const f = data.data;
                 const ticketHtml = renderExitTicket(f, company);
-                printHTML(ticketHtml, 'Factura de Salida', 80, {
+                printHTML(ticketHtml, t('dashboard.printExit'), 80, {
                     t: 'exit', e: company?.tax_id, m: f.id_movement || f.movementId, p: f.license_plate, fs: f.exit_date || f.exitDate, total: f.total_to_pay || f.total
                 });
                 // Abrir modal de pago como en ingreso/salida
@@ -313,30 +313,30 @@ window.checkoutVehicle = async function(idMovement) {
                     if (window.abrirModalPago) {
                         window.abrirModalPago(f);
                     } else {
-                        showToast('Info', 'Para registrar pagos usa Ingreso/Salida.', 'info');
+                        showToast(t('common.info'), t('dashboard.infoPayments'), 'info');
                     }
                 } catch (_) {}
 
-                showToast('Éxito', 'Salida registrada: ' + formatCurrency(f.total), 'success');
+                showToast(t('common.success'), t('dashboard.checkoutSuccess') + ': ' + formatCurrency(f.total), 'success');
                 modal.hide();
                 container.remove();
             } catch (err) {
                 console.error(err);
-                showToast('Error', 'No fue posible finalizar el movimiento', 'error');
+                showToast(t('common.error'), t('dashboard.checkoutError'), 'error');
             }
         });
 
         container.addEventListener('hidden.bs.modal', () => container.remove());
     } catch (e) {
         console.error(e);
-        showError('No fue posible abrir la confirmación');
+        showError(t('dashboard.checkoutOpenError'));
     }
 }
 
 // Render del ticket de salida
 function renderExitTicket(exitData, company){
     const e = company || {};
-    const companyName = e.name || 'Empresa';
+    const companyName = e.name || t('company.name');
     const taxId = e.tax_id || '';
     const address = e.address || '';
     const phone = e.phone || '';
@@ -347,12 +347,12 @@ function renderExitTicket(exitData, company){
             <div>NIT: ${taxId}</div>
             <div>${address}${phone ? ' - '+phone : ''}</div>
             <hr/>
-            <div><strong>SALIDA</strong></div>
+            <div><strong>${t('dashboard.exitLabel')}</strong></div>
         </div>`;
     const ciscodeFooter = `
         <hr/>
         <div style="text-align:center;margin-top:6px">
-            <div>Desarrollado por <strong>Ciscode</strong></div>
+            <div>${t('footer.developedBy')} <strong>Ciscode</strong></div>
             <div>
                 <a href="https://ciscode.co" target="_blank" style="text-decoration:none;color:#000">ciscode.co</a>
                 &nbsp;|&nbsp;
@@ -374,15 +374,15 @@ function renderExitTicket(exitData, company){
     const exitD = exitData.exit_date || exitData.exitDate || '';
     const total = exitData.total_to_pay || exitData.total || 0;
     return `${header}
-        <div>Movimiento: <strong>#${movId}</strong></div>
-        <div>Placa: <strong>${plate}</strong></div>
-        <div>Tipo: <strong>${vtype}</strong></div>
-        <div>Entrada: <strong>${entryD ? new Date(entryD).toLocaleString('es-CO') : ''}</strong></div>
-        <div>Salida: <strong>${exitD ? new Date(exitD).toLocaleString('es-CO') : ''}</strong></div>
+        <div>${t('dashboard.movement')}: <strong>#${movId}</strong></div>
+        <div>${t('dashboard.plate')}: <strong>${plate}</strong></div>
+        <div>${t('dashboard.type')}: <strong>${vtype}</strong></div>
+        <div>${t('dashboard.entry')}: <strong>${fmtDate(entryD)}</strong></div>
+        <div>${t('dashboard.exit')}: <strong>${fmtDate(exitD)}</strong></div>
         <hr/>
-        <div>Total a pagar: <strong>${formatCurrency(total)}</strong></div>
-        <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
-        <div>Fecha impresión: ${new Date().toLocaleString('es-CO')}</div>
+        <div>${t('dashboard.totalToPay')}: <strong>${formatCurrency(total)}</strong></div>
+        <div>${t('dashboard.attendedBy')}: ${localStorage.getItem('userName')||''}</div>
+        <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>
         ${ciscodeFooter}`;
 }
 
@@ -428,11 +428,7 @@ function printHTML(html, titulo, anchoMM, qrPayload){
 
 // Funciones de utilidad
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0
-    }).format(amount);
+    return fmtCurrency(amount);
 }
 
 function formatTime(minutes) {
@@ -445,7 +441,7 @@ function formatTime(minutes) {
 }
 
 function formatDateTime(date) {
-    return new Date(date).toLocaleString('es-CO', {
+    return new Date(date).toLocaleString(locale(), {
         hour: '2-digit',
         minute: '2-digit'
     });
@@ -453,7 +449,7 @@ function formatDateTime(date) {
 
 // Función para mostrar errores
 function showError(message) {
-    showToast('Error', message, 'error');
+    showToast(t('common.error'), message, 'error');
 }
 
 // Notificaciones visuales (toasts)

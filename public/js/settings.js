@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!f) { preview.src=''; preview.classList.add('d-none'); return; }
             const max = 2 * 1024 * 1024;
             const okType = ['image/png','image/jpeg','image/jpg','image/gif'].includes(f.type);
-            if (!okType) { setAlert('alertCompany','danger','File type not allowed. Use PNG/JPG.'); fileInput.value=''; return; }
-            if (f.size > max) { setAlert('alertCompany','danger','File exceeds 2MB.'); fileInput.value=''; return; }
+            if (!okType) { setAlert('alertCompany','danger',t('settings.logoTypeError')); fileInput.value=''; return; }
+            if (f.size > max) { setAlert('alertCompany','danger',t('settings.logoSizeError')); fileInput.value=''; return; }
             const reader = new FileReader();
             reader.onload = e => { preview.src = e.target.result; preview.classList.remove('d-none'); };
             reader.readAsDataURL(f);
@@ -39,7 +39,7 @@ async function loadCompany(){
     try{
         const r = await fetch('/api/companies/me',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error loading company');
+        if(!r.ok) throw new Error(j.message||t('settings.loadCompanyError'));
         const e = j.data;
         document.getElementById('e_name').value = e.name || '';
         document.getElementById('e_tax_id').value = e.tax_id || '';
@@ -60,7 +60,7 @@ async function loadSettings(){
     try{
         const r = await fetch('/api/companies/config',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error loading settings');
+        if(!r.ok) throw new Error(j.message||t('settings.loadSettingsError'));
         const c = j.data;
         document.getElementById('c_cars').value = c.car_total_capacity || 0;
         document.getElementById('c_motos').value = c.motorcycle_total_capacity || 0;
@@ -87,14 +87,14 @@ async function saveCompany(){
         email: document.getElementById('e_email').value.trim()
     };
     const btn = document.getElementById('btnSaveCompany');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Saving...');
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.saving'));
     try{
         const r = await fetch('/api/companies',{
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
         if(!r.ok) throw new Error(j.message||'Error saving');
-        setAlert('alertCompany', 'success', 'Company data updated.');
+        setAlert('alertCompany', 'success', t('settings.saved'));
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
@@ -112,14 +112,14 @@ async function saveSettings(){
         operation_24h: document.getElementById('c_24h').checked
     };
     const btn = document.getElementById('btnSaveSettings');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Saving...');
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.saving'));
     try{
         const r = await fetch('/api/companies/config',{
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
         if(!r.ok) throw new Error(j.message||'Error saving');
-        setAlert('alertSettings', 'success', 'Settings updated.');
+        setAlert('alertSettings', 'success', t('settings.settingsSaved'));
     }catch(err){ setAlert('alertSettings','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
@@ -142,16 +142,16 @@ function spinner(text){
 
 async function uploadLogo(){
     const file = document.getElementById('e_logo_file') && document.getElementById('e_logo_file').files[0];
-    if (!file) { setAlert('alertCompany','warning','Select a logo file.'); return; }
+    if (!file) { setAlert('alertCompany','warning',t('settings.selectLogo')); return; }
     const btn = document.getElementById('btnUploadLogo');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Uploading...');
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.uploading'));
     try{
         const form = new FormData();
         form.append('logo', file);
         const r = await fetch('/api/companies/logo', { method:'POST', headers:{ 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: form });
         const j = await r.json();
-        if (!r.ok) throw new Error(j.message||'Error uploading logo');
-        setAlert('alertCompany','success','Logo uploaded and saved.');
+        if (!r.ok) throw new Error(j.message||t('settings.logoUploadError'));
+        setAlert('alertCompany','success',t('settings.logoUploaded'));
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }

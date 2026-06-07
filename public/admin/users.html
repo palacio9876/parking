@@ -3,43 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParkSystem - Usuarios</title>
+    <title data-i18n="users.title">ParkSystem - Usuarios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/dashboard.css" rel="stylesheet">
-    <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
     <script>
-        // Redirección por autenticación y rol admin (frontend guard)
-        if (!localStorage.getItem('token')) { window.location.href = '/'; }
-        if (localStorage.getItem('userRole') !== 'admin') { window.location.href = '/admin/dashboard'; }
+        if(!localStorage.getItem('token')){window.location.href='/';}
+        if(localStorage.getItem('userRole')!=='admin'){window.location.href='/admin/dashboard';}
     </script>
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .card { border: none; box-shadow: 0 0 15px rgba(0,0,0,.05); }
-    </style>
-    <script>
-        // Marcar elementos de menú admin-only si se necesitara condicional
-        document.addEventListener('DOMContentLoaded', ()=>{
-            const role = localStorage.getItem('userRole');
-            if (role !== 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el=> el.classList.add('d-none'));
-            }
-        });
-    </script>
-    <script>
-        // Si no existe ruta en server para esta vista, navegar manualmente
-    </script>
-    <script>
-        // Nada adicional aquí; la lógica se carga desde ../js/users.js
-    </script>
-    <script>
-        // Evitar FOUC de sidebar
-    </script>
-    <script>
-        // Fin de cabecera
-    </script>
+    <style>body{font-family:'Poppins',sans-serif}.card{border:none;box-shadow:0 0 15px rgba(0,0,0,.05)}</style>
+    <script>document.addEventListener('DOMContentLoaded',()=>{const r=localStorage.getItem('userRole');if(r!=='admin'){document.querySelectorAll('.admin-only').forEach(e=>e.classList.add('d-none'))}});</script>
 </head>
 <body>
     <div class="sidebar">
@@ -49,16 +24,16 @@
         </div>
         <nav class="sidebar-nav">
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="/admin/vehicles" class="nav-link"><i class="fas fa-car"></i><span>Vehículos</span></a></li>
-                <li class="nav-item"><a href="/admin/entry-exit" class="nav-link"><i class="fas fa-right-left"></i><span>Ingreso / Salida</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/settings" class="nav-link"><i class="fas fa-gear"></i><span>Configuración</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/rates" class="nav-link"><i class="fas fa-money-bill-wave"></i><span>Tarifas</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/users" class="nav-link active"><i class="fas fa-users"></i><span>Usuarios</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i><span>Reportes</span></a></li>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span data-i18n="sidebar.dashboard">Dashboard</span></a></li>
+                <li class="nav-item"><a href="/admin/vehicles" class="nav-link"><i class="fas fa-car"></i><span data-i18n="sidebar.vehicles">Vehículos</span></a></li>
+                <li class="nav-item"><a href="/admin/entry-exit" class="nav-link"><i class="fas fa-right-left"></i><span data-i18n="sidebar.entryExit">Ingreso / Salida</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/settings" class="nav-link"><i class="fas fa-gear"></i><span data-i18n="sidebar.settings">Configuración</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/rates" class="nav-link"><i class="fas fa-money-bill-wave"></i><span data-i18n="sidebar.rates">Tarifas</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/users" class="nav-link active"><i class="fas fa-users"></i><span data-i18n="sidebar.users">Usuarios</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i><span data-i18n="sidebar.reports">Reportes</span></a></li>
             </ul>
         </nav>
-        <div class="sidebar-footer"><a href="#" class="nav-link" id="btnLogout"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></div>
+        <div class="sidebar-footer"><a href="#" class="nav-link" id="btnLogout"><i class="fas fa-sign-out-alt"></i><span data-i18n="sidebar.logout">Cerrar Sesión</span></a></div>
     </div>
 
     <div class="main-content">
@@ -72,22 +47,22 @@
         <div class="container-fluid py-4">
             <div class="card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Gestión de Usuarios</h5>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">
-                            <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
-                        </button>
+                    <h5 class="mb-0" data-i18n="users.title">Gestión de Usuarios</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">
+                        <i class="fas fa-user-plus me-2"></i><span data-i18n="users.new">Nuevo Usuario</span>
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover" id="usersTable">
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Usuario</th>
-                                    <th>Rol</th>
-                                    <th>Activo</th>
-                                    <th>Último acceso</th>
-                                    <th>Acciones</th>
+                                    <th data-i18n="users.name">Nombre</th>
+                                    <th data-i18n="users.username">Usuario</th>
+                                    <th data-i18n="users.role">Rol</th>
+                                    <th data-i18n="users.active">Activo</th>
+                                    <th data-i18n="users.lastAccess">Último acceso</th>
+                                    <th data-i18n="common.actions">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -98,100 +73,92 @@
         </div>
     </div>
 
-    <!-- Modal Usuario -->
     <div class="modal fade" id="userModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="userModalTitle">Nuevo Usuario</h5>
+                    <h5 class="modal-title" id="userModalTitle" data-i18n="users.new">Nuevo Usuario</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="userForm">
                         <input type="hidden" id="userId">
                         <div class="mb-3">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label" data-i18n="users.name">Nombre</label>
                             <input type="text" id="name" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Usuario</label>
+                            <label class="form-label" data-i18n="users.username">Usuario</label>
                             <input type="text" id="username" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña</label>
+                            <label class="form-label" data-i18n="login.password">Contraseña</label>
                             <input type="password" id="password" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Rol</label>
+                            <label class="form-label" data-i18n="users.role">Rol</label>
                             <select id="role" class="form-select" required>
-                                <option value="admin">Administrador</option>
-                                <option value="operator">Operador</option>
+                                <option value="admin" data-i18n="users.admin">Administrador</option>
+                                <option value="operator" data-i18n="users.operator">Operador</option>
                             </select>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="active" checked>
-                            <label class="form-check-label" for="active">Activo</label>
+                            <label class="form-check-label" for="active" data-i18n="users.active">Activo</label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnSaveUser">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveUser" data-i18n="common.save">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Cambio de Clave (solo admin) -->
     <div class="modal fade" id="passwordModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Cambiar contraseña</h5>
+                    <h5 class="modal-title" data-i18n="users.passwordChange">Cambiar contraseña</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Form de cambio de clave. Relacionado con public/js/users.js (función cambiarClave) y endpoint PUT /api/users/:id -->
                     <form id="passwordForm">
                         <input type="hidden" id="pwd_user_id">
                         <div class="mb-3">
-                            <label class="form-label">Usuario</label>
+                            <label class="form-label" data-i18n="users.username">Usuario</label>
                             <input type="text" id="pwd_user_login" class="form-control" disabled>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Nueva contraseña</label>
+                            <label class="form-label" data-i18n="users.newPassword">Nueva contraseña</label>
                             <div class="input-group">
                                 <input type="password" id="pwd_new" class="form-control" required>
                                 <button class="btn btn-outline-secondary" type="button" id="pwd_toggle"><i class="fas fa-eye"></i></button>
                             </div>
-                            <div class="form-text">Mínimo 6 caracteres.</div>
+                            <div class="form-text" data-i18n="users.passwordMinInfo">Mínimo 6 caracteres.</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Confirmar contraseña</label>
+                            <label class="form-label" data-i18n="users.confirmPassword">Confirmar contraseña</label>
                             <input type="password" id="pwd_confirm" class="form-control" required>
                         </div>
                         <div class="alert d-none" id="pwd_alert"></div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnPwdSave">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnPwdSave" data-i18n="common.save">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="position-fixed top-0 end-0 p-3" style="z-index:1100">
-        <div id="toastContainer"></div>
-    </div>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:1100"><div id="toastContainer"></div></div>
 
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Footer global (reutilizable). Relacionado con public/js/footer.js -->
+    <script src="/js/i18n.js"></script>
     <script src="/js/footer.js"></script>
     <script src="/js/users.js"></script>
 </body>
 </html>
-
-

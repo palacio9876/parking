@@ -14,7 +14,7 @@ class VehicleController {
   async getById(req, res, next) {
     try {
       const { id } = req.params
-      const result = await vehicleService.getById(id, req.user.id_company)
+      const result = await vehicleService.getById(req.t, id, req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)
@@ -23,7 +23,7 @@ class VehicleController {
 
   async create(req, res, next) {
     try {
-      const result = await vehicleService.create(req.user.id_company, req.body)
+      const result = await vehicleService.create(req.t, req.user.id_company, req.body)
       res.status(201).json(result)
     } catch (err) {
       next(err)
@@ -33,7 +33,7 @@ class VehicleController {
   async update(req, res, next) {
     try {
       const { id } = req.params
-      const result = await vehicleService.update(id, req.user.id_company, req.body)
+      const result = await vehicleService.update(req.t, id, req.user.id_company, req.body)
       res.json(result)
     } catch (err) {
       next(err)
@@ -43,7 +43,7 @@ class VehicleController {
   async delete(req, res, next) {
     try {
       const { id } = req.params
-      const result = await vehicleService.delete(id, req.user.id_company)
+      const result = await vehicleService.delete(req.t, id, req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)
@@ -55,6 +55,7 @@ class VehicleController {
       const { id } = req.params
       const { limit = 50, offset = 0 } = req.query
       const result = await vehicleService.getHistory(
+        req.t,
         id,
         req.user.id_company,
         parseInt(limit),

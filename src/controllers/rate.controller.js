@@ -13,7 +13,7 @@ class RateController {
 
   async createOrUpdate(req, res, next) {
     try {
-      const result = await rateService.createOrUpdate(req.user.id_company, req.body)
+      const result = await rateService.createOrUpdate(req.t, req.user.id_company, req.body)
       res.status(201).json(result)
     } catch (err) {
       next(err)
