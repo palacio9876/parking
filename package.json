@@ -6,16 +6,18 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "dev:css": "tailwindcss --input public/css/source.css --output public/css/tailwind.css --minify --watch",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
     "migrate:status": "npx sequelize-cli db:migrate:status",
     "seed": "npx sequelize-cli db:seed:all",
     "seed:undo": "npx sequelize-cli db:seed:undo:all",
+    "build:css": "tailwindcss --input public/css/source.css --output public/css/tailwind.css --minify",
     "build:clean": "rimraf dist && mkdirp dist",
     "build:exe": "pkg src/server.js --targets node18-win-x64 --output dist/parqueadero.exe",
     "build:copy": "cpy \"public/**\" dist/public --cwd=. --parents && cpy schema.sql .env* dist/ --cwd=.",
-    "build": "npm run build:clean && npm run build:exe && npm run build:copy"
+    "build": "npm run build:css && npm run build:clean && npm run build:exe && npm run build:copy"
   },
   "keywords": [],
   "author": "Cristian Palacio",
@@ -34,11 +36,13 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
     "cpy-cli": "^5.0.0",
     "mkdirp": "^3.0.1",
     "nodemon": "^3.1.10",
     "pkg": "^5.8.1",
     "rimraf": "^5.0.7",
-    "sequelize-cli": "^6.6.5"
+    "sequelize-cli": "^6.6.5",
+    "tailwindcss": "^4.3.0"
   }
 }

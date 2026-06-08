@@ -33,9 +33,9 @@ async function loadUsers(){
                 <td>${u.active ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>'}</td>
                 <td>${fmtDate(u.last_access)}</td>
                 <td>
-                    <button class="btn btn-sm btn-info me-1" onclick='editUser(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-warning me-1" onclick='openPasswordChange(${JSON.stringify({id:u.id_user, login:u.username, name:u.name})})'><i class="fas fa-key"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick='deactivateUser(${u.id_user})'><i class="fas fa-user-slash"></i></button>
+                    <button class="btn btn-sm btn-edit" onclick='editUser(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-password" onclick='openPasswordChange(${JSON.stringify({id:u.id_user, login:u.username, name:u.name})})'><i class="fas fa-key"></i></button>
+                    <button class="btn btn-sm btn-delete" onclick='deactivateUser(${u.id_user})'><i class="fas fa-user-slash"></i></button>
                 </td>
             </tr>
         `).join('');

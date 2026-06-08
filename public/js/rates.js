@@ -61,14 +61,14 @@ async function loadRates(){
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||t('rates.loadError'));
         const ul = document.getElementById('ratesList');
-        ul.innerHTML = j.data.map(t => `
+        ul.innerHTML = j.data.map(r => `
             <li class="list-group-item d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-center">
-                    <strong class="text-capitalize">${t.vehicle_type}</strong>
-                    <span class="badge bg-primary">${t.billing_mode}</span>
+                    <strong class="text-capitalize">${r.vehicle_type}</strong>
+                    <span class="badge bg-primary">${r.billing_mode}</span>
                 </div>
-                <small>${t('rates.min')}: ${t.minute_rate} | ${t('rates.hour')}: ${t.hourly_rate} | ${t('rates.day')}: ${t.full_day_rate}</small>
-                <small>${t('rates.scales')} → min→hr: ${t.minutes_to_hours_threshold} min, hr→day: ${t.hours_to_days_threshold} h</small>
+                <small>${t('rates.min')}: ${r.minute_rate} | ${t('rates.hour')}: ${r.hourly_rate} | ${t('rates.day')}: ${r.full_day_rate}</small>
+                <small>${t('rates.scales')} → min→hr: ${r.minutes_to_hours_threshold} min, hr→day: ${r.hours_to_days_threshold} h</small>
             </li>
         `).join('');
     }catch(err){
@@ -76,25 +76,4 @@ async function loadRates(){
     }
 }
 
-function showToast(title, message, type) {
-    const container = document.getElementById('toastContainer');
-    const id = 't_' + Date.now();
-    const typeClass = type==='success' ? 'toast-success' : type==='warning' ? 'toast-warning' : type==='info' ? 'toast-info' : 'toast-error';
-    const el = document.createElement('div');
-    el.className = `toast align-items-center toast-custom ${typeClass}`;
-    el.id = id;
-    el.role = 'alert';
-    el.ariaLive = 'assertive';
-    el.ariaAtomic = 'true';
-    el.innerHTML = `
-      <div class="toast-header">
-        <strong class="me-auto">${title}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">${message}</div>
-    `;
-    container.appendChild(el);
-    const toast = new bootstrap.Toast(el, { delay: 3500 });
-    toast.show();
-    el.addEventListener('hidden.bs.toast', () => el.remove());
-}
+

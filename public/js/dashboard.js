@@ -168,7 +168,7 @@ function updateRecentActivity(activities) {
             <td>${formatDateTime(activity.entry_date || activity.entrada)}</td>
             <td><span class="badge bg-${(activity.status || activity.estado) === 'active' ? 'success' : 'secondary'}">${activity.status || activity.estado}</span></td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="viewDetails(${activity.id_movement || activity.id})">
+                <button class="btn btn-sm btn-view" onclick="viewDetails(${activity.id_movement || activity.id})">
                     <i class="fas fa-eye"></i>
                 </button>
             </td>
@@ -452,27 +452,4 @@ function showError(message) {
     showToast(t('common.error'), message, 'error');
 }
 
-// Notificaciones visuales (toasts)
-function showToast(title, message, type) {
-    const container = document.getElementById('toastContainer');
-    if (!container) { console[type==='error'?'error':'log'](message); return; }
-    const id = 't_' + Date.now();
-    const typeClass = type==='success' ? 'toast-success' : type==='warning' ? 'toast-warning' : type==='info' ? 'toast-info' : 'toast-error';
-    const el = document.createElement('div');
-    el.className = `toast align-items-center toast-custom ${typeClass}`;
-    el.id = id;
-    el.role = 'alert';
-    el.ariaLive = 'assertive';
-    el.ariaAtomic = 'true';
-    el.innerHTML = `
-      <div class="toast-header">
-        <strong class="me-auto">${title}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">${message}</div>
-    `;
-    container.appendChild(el);
-    const toast = new bootstrap.Toast(el, { delay: 3500 });
-    toast.show();
-    el.addEventListener('hidden.bs.toast', () => el.remove());
-}
+

@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@source "../*.html";
+@source "../admin/*.html";
+@source "../js/*.js";
+
+@theme {
+  --color-primary: #1a237e;
+  --color-primary-dark: #151b60;
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #ef4444;
+  --color-info: #38bdf8;
+  --font-poppins: 'Poppins', sans-serif;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@utility card-animate {
+  animation: fadeInUp 0.5s ease-out;
+}

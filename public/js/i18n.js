@@ -102,6 +102,20 @@
 
   function injectSwitcher() {
     if (document.getElementById('langSwitcher')) return;
+
+    // Check for .lang-switcher container in HTML
+    var container = document.querySelector('.lang-switcher');
+    if (container) {
+      var sel = document.createElement('select');
+      sel.id = 'langSwitcher';
+      sel.className = 'text-sm bg-transparent border border-gray-200 rounded-lg px-2 py-1.5 cursor-pointer outline-none focus:border-primary text-gray-700 hover:border-gray-300 transition-colors';
+      addOptions(sel);
+      sel.value = currentLang;
+      sel.addEventListener('change', function () { setLang(this.value); });
+      container.appendChild(sel);
+      return;
+    }
+
     var nav = document.querySelector('.navbar-nav.ms-auto');
     if (!nav) {
       var wrapper = document.createElement('div');

@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="rates.title">ParkSystem - Tarifas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/tailwind.css" rel="stylesheet">
     <link href="/css/dashboard.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script>if(!localStorage.getItem('token')){window.location.href='/';}</script>
 </head>
-<body>
+<body class="font-poppins bg-gray-100">
     <div class="sidebar">
         <div class="sidebar-header">
             <div class="logo-container"><div class="logo-circle"><span class="logo-text">PS</span></div></div>
-            <h5 class="mt-3 text-white">ParkSystem</h5>
+            <h5 class="mt-3 text-white text-lg font-semibold">ParkSystem</h5>
         </div>
         <nav class="sidebar-nav">
-            <ul class="nav flex-column">
+            <ul class="flex flex-col">
                 <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span data-i18n="sidebar.dashboard">Dashboard</span></a></li>
                 <li class="nav-item"><a href="/admin/vehicles" class="nav-link"><i class="fas fa-car"></i><span data-i18n="sidebar.vehicles">Vehículos</span></a></li>
                 <li class="nav-item"><a href="/admin/entry-exit" class="nav-link"><i class="fas fa-right-left"></i><span data-i18n="sidebar.entryExit">Ingreso / Salida</span></a></li>
@@ -31,90 +31,101 @@
     </div>
 
     <div class="main-content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-            <div class="container-fluid">
-                <button class="btn btn-link sidebar-toggle"><i class="fas fa-bars"></i></button>
-                <div class="navbar-collapse"><ul class="navbar-nav ms-auto"><li class="nav-item"><span class="nav-link"><i class="fas fa-user-circle me-2"></i><span id="userName">Usuario</span></span></li></ul></div>
+        <nav class="navbar-custom bg-white shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <button class="sidebar-toggle px-4 py-2 text-primary hover:text-primary-dark transition-colors" title="Toggle sidebar">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 px-4">
+                <div class="lang-switcher"></div>
+                <div class="h-5 w-px bg-gray-200"></div>
+                <span class="flex items-center gap-2 text-gray-700 text-sm font-medium">
+                    <i class="fas fa-user-circle text-lg text-primary"></i>
+                    <span id="userName">Usuario</span>
+                </span>
             </div>
         </nav>
 
-        <div class="container py-4">
-            <div class="row g-4">
-                <div class="col-12 col-xl-8">
-                    <div class="card">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0" data-i18n="rates.configure">Configurar Tarifas</h5>
-                            <button type="button" class="btn btn-outline-secondary btn-sm float-end" data-bs-toggle="modal" data-bs-target="#ayudaTarifasModal">
-                                <i class="fas fa-circle-question me-1"></i><span data-i18n="rates.help">Ayuda</span>
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div class="xl:col-span-2">
+                    <div class="bg-white rounded-xl shadow-sm">
+                        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <h5 class="text-lg font-semibold text-gray-900 mb-0" data-i18n="rates.configure">Configurar Tarifas</h5>
+                            <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors float-right" data-bs-toggle="modal" data-bs-target="#ayudaTarifasModal">
+                                <i class="fas fa-circle-question mr-1"></i><span data-i18n="rates.help">Ayuda</span>
                             </button>
                         </div>
-                        <div class="card-body">
-                            <form id="rateForm" class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label" data-i18n="rates.vehicleType">Tipo de vehículo</label>
-                                    <select id="vehicle_type" class="form-select" required>
+                        <div class="p-6">
+                            <form id="rateForm" class="grid grid-cols-12 gap-4">
+                                <div class="col-span-12 md:col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.vehicleType">Tipo de vehículo</label>
+                                    <select id="vehicle_type" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" required>
                                         <option value="car" data-i18n="rates.car">Carro</option>
                                         <option value="motorcycle" data-i18n="rates.motorcycle">Moto</option>
                                         <option value="bicycle" data-i18n="rates.bicycle">Bicicleta</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" data-i18n="rates.billingMode">Modo de cobro</label>
-                                    <select id="billing_mode" class="form-select">
+                                <div class="col-span-12 md:col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.billingMode">Modo de cobro</label>
+                                    <select id="billing_mode" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                                         <option value="mixed" data-i18n="rates.mixed">Mixto</option>
                                         <option value="minute" data-i18n="rates.perMinute">Por minuto</option>
                                         <option value="hour" data-i18n="rates.perHour">Por hora</option>
                                         <option value="day" data-i18n="rates.perDay">Por día</option>
                                     </select>
                                 </div>
-                                <div class="col-12"><hr></div>
-                                <div class="col-md-4">
-                                    <label class="form-label" data-i18n="rates.minuteRate">Valor minuto</label>
-                                    <input type="number" min="0" step="0.01" id="minute_rate" class="form-control" required>
+                                <div class="col-span-12"><hr class="border-gray-200"></div>
+                                <div class="col-span-12 md:col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.minuteRate">Valor minuto</label>
+                                    <input type="number" min="0" step="0.01" id="minute_rate" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" required>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" data-i18n="rates.hourlyRate">Valor hora</label>
-                                    <input type="number" min="0" step="0.01" id="hourly_rate" class="form-control" required>
+                                <div class="col-span-12 md:col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.hourlyRate">Valor hora</label>
+                                    <input type="number" min="0" step="0.01" id="hourly_rate" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" required>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" data-i18n="rates.fullDayRate">Valor día</label>
-                                    <input type="number" min="0" step="0.01" id="full_day_rate" class="form-control" required>
+                                <div class="col-span-12 md:col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.fullDayRate">Valor día</label>
+                                    <input type="number" min="0" step="0.01" id="full_day_rate" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" required>
                                 </div>
-                                <div class="col-12"><hr></div>
-                                <div class="col-md-6">
-                                    <label class="form-label" data-i18n="rates.minToHourThreshold">Hasta (min) cobrar por minuto</label>
-                                    <input type="number" min="0" step="1" id="minute_to_hour_threshold" class="form-control" value="0">
+                                <div class="col-span-12"><hr class="border-gray-200"></div>
+                                <div class="col-span-12 md:col-span-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.minToHourThreshold">Hasta (min) cobrar por minuto</label>
+                                    <input type="number" min="0" step="1" id="minute_to_hour_threshold" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" value="0">
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" data-i18n="rates.hourToDayThreshold">Luego (horas) cobrar por hora antes de día</label>
-                                    <input type="number" min="0" step="1" id="hour_to_day_threshold" class="form-control" value="0">
+                                <div class="col-span-12 md:col-span-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.hourToDayThreshold">Luego (horas) cobrar por hora antes de día</label>
+                                    <input type="number" min="0" step="1" id="hour_to_day_threshold" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" value="0">
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" data-i18n="rates.hourRounding">Redondeo de horas</label>
-                                    <select id="hour_rounding" class="form-select">
+                                <div class="col-span-12 md:col-span-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.hourRounding">Redondeo de horas</label>
+                                    <select id="hour_rounding" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                                         <option value="up" data-i18n="rates.roundingUp">Arriba (ceil)</option>
                                         <option value="exact" data-i18n="rates.roundingExact">Exacto</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" data-i18n="rates.dayRounding">Redondeo de días</label>
-                                    <select id="day_rounding" class="form-select">
+                                <div class="col-span-12 md:col-span-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.dayRounding">Redondeo de días</label>
+                                    <select id="day_rounding" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                                         <option value="up" data-i18n="rates.roundingUp">Arriba (ceil)</option>
                                         <option value="exact" data-i18n="rates.roundingExact">Exacto</option>
                                     </select>
                                 </div>
-                                <div class="col-12 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i><span data-i18n="rates.save">Guardar</span></button>
+                                <div class="col-span-12 flex justify-end">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors"><i class="fas fa-save mr-2"></i><span data-i18n="rates.save">Guardar</span></button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-xl-4">
-                    <div class="card">
-                        <div class="card-header bg-white"><h5 class="mb-0" data-i18n="rates.active">Tarifas activas</h5></div>
-                        <div class="card-body">
-                            <ul class="list-group" id="ratesList"></ul>
+                <div class="xl:col-span-1">
+                    <div class="bg-white rounded-xl shadow-sm">
+                        <div class="px-6 py-4 border-b border-gray-100">
+                            <h5 class="text-lg font-semibold text-gray-900 mb-0" data-i18n="rates.active">Tarifas activas</h5>
+                        </div>
+                        <div class="p-6">
+                            <ul class="divide-y divide-gray-100" id="ratesList"></ul>
                         </div>
                     </div>
                 </div>
@@ -122,40 +133,38 @@
         </div>
     </div>
 
-    <div class="position-fixed top-0 end-0 p-3" style="z-index:1100"><div id="toastContainer"></div></div>
-
     <div class="modal fade" id="ayudaTarifasModal" tabindex="-1" aria-labelledby="ayudaTarifasLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ayudaTarifasLabel"><i class="fas fa-circle-question me-2"></i><span data-i18n="rates.helpTitle">Ayuda para configurar Tarifas</span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content bg-white rounded-xl shadow-2xl border-0">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-xl">
+                    <h5 class="text-lg font-semibold" id="ayudaTarifasLabel"><i class="fas fa-circle-question mr-2"></i><span data-i18n="rates.helpTitle">Ayuda para configurar Tarifas</span></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="modal-body">
-                    <h6 class="mb-2" data-i18n="rates.billingMode">Modos de cobro</h6>
-                    <ul class="mb-3">
+                <div class="p-6">
+                    <h6 class="text-sm font-semibold mb-2" data-i18n="rates.billingMode">Modos de cobro</h6>
+                    <ul class="list-disc pl-5 text-sm text-gray-600 mb-4 space-y-1">
                         <li><strong data-i18n="rates.perMinute">Por minuto</strong><span data-i18n="rates.helpMinute">: se cobra valor minuto por cada minuto estacionado.</span></li>
                         <li><strong data-i18n="rates.perHour">Por hora</strong><span data-i18n="rates.helpHour">: se cobra valor hora por el total de horas (ver redondeo).</span></li>
                         <li><strong data-i18n="rates.perDay">Por día</strong><span data-i18n="rates.helpDay">: se cobra valor día por cada día completo (ver redondeo).</span></li>
                         <li><strong data-i18n="rates.mixed">Mixto</strong><span data-i18n="rates.helpMixed">: combina por minuto, por hora y por día según umbrales definidos abajo.</span></li>
                     </ul>
 
-                    <h6 class="mb-2" data-i18n="rates.helpMixedTitle">Modo Mixto</h6>
-                    <p class="mb-1" data-i18n="rates.helpMixedDesc">El modo mixto utiliza los siguientes pasos:</p>
-                    <ol class="mb-3">
+                    <h6 class="text-sm font-semibold mb-2" data-i18n="rates.helpMixedTitle">Modo Mixto</h6>
+                    <p class="text-sm text-gray-600 mb-2" data-i18n="rates.helpMixedDesc">El modo mixto utiliza los siguientes pasos:</p>
+                    <ol class="list-decimal pl-5 text-sm text-gray-600 mb-4 space-y-1">
                         <li data-i18n="rates.helpMixedStep1"><strong>Hasta (min) cobrar por minuto</strong>: si el tiempo total es menor o igual a este valor, todo se cobra por minuto.</li>
                         <li data-i18n="rates.helpMixedStep2"><strong>Luego (horas) cobrar por hora antes de día</strong>: si supera los minutos anteriores, hasta este número de horas se cobra por hora.</li>
                         <li data-i18n="rates.helpMixedStep3">Si el tiempo excede esas horas, el resto pasa a cobrarse por día.</li>
                     </ol>
 
-                    <h6 class="mb-2" data-i18n="rates.rounding">Redondeo</h6>
-                    <ul class="mb-3">
+                    <h6 class="text-sm font-semibold mb-2" data-i18n="rates.rounding">Redondeo</h6>
+                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
                         <li data-i18n="rates.helpRoundingHour"><strong>Redondeo de horas</strong>: Arriba (ceil) o Exacto.</li>
                         <li data-i18n="rates.helpRoundingDay"><strong>Redondeo de días</strong>: Arriba (ceil) o Exacto.</li>
                     </ul>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.close">Cerrar</button>
+                <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 rounded-b-xl">
+                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors" data-bs-dismiss="modal" data-i18n="common.close">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -163,7 +172,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="/js/i18n.js"></script>
+    <script src="/js/toast.js"></script>
     <script src="/js/footer.js"></script>
     <script src="/js/rates.js"></script>
 </body>

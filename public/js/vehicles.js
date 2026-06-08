@@ -11,7 +11,7 @@ function initDataTable() {
     columns: [
       { data: 'license_plate',
         render: function(data, type, row) {
-          return '<button class="btn btn-link p-0" onclick="viewHistory(' + row.id + ", '" + data + "')" + '">' + data + '</button>';
+          return '<button class="btn-link font-medium hover:underline cursor-pointer" onclick="viewHistory(' + row.id + ", '" + data + "')" + '">' + data + '</button>';
         }
       },
       { data: 'type' },
@@ -31,7 +31,7 @@ function initDataTable() {
       },
       { data: null,
         render: function(data, type, row) {
-          return '<button class="btn btn-sm btn-info me-1" onclick="editVehicle(' + row.id + ')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deleteVehicle(' + row.id + ')"><i class="fas fa-trash"></i></button>';
+          return '<button class="btn btn-sm btn-edit" onclick="editVehicle(' + row.id + ')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-delete" onclick="deleteVehicle(' + row.id + ')"><i class="fas fa-trash"></i></button>';
         }
       }
     ]
@@ -185,8 +185,10 @@ async function viewHistory(idVehicle, plate) {
     });
     const j = await res.json();
     if (!res.ok) throw new Error(j.message || t('vehicles.historyError'));
+    const histEl = document.getElementById('histPlate');
     const tb = document.getElementById('historyBody');
-    document.getElementById('histPlate').textContent = plate;
+    if (!histEl || !tb) { showToast(t('common.error'), t('common.error'), 'error'); return; }
+    histEl.textContent = plate;
     if (!j.data || j.data.length === 0) {
       tb.innerHTML = '<tr><td colspan="6" class="text-center">' + t('common.noRecords') + '</td></tr>';
     } else {
@@ -204,19 +206,19 @@ async function viewHistory(idVehicle, plate) {
         return '<tr><td>' + (r.id_movement || r.id) + '</td><td>' + fmtDate(r.entry_date) + '</td><td>' + (r.exit_date ? fmtDate(r.exit_date) : '-') + '</td><td><span class="badge bg-' + badgeStatus + '">' + r.status + '</span></td><td>' + (total ? fmtCurrency(total) : '-') + '</td><td>' + paymentSummary + '</td></tr>';
       }).join('');
     }
-    const modal = new bootstrap.Modal(document.getElementById('historyModal'));
-    modal.show();
+    const modalEl = document.getElementById('historyModal');
+    if (modalEl) { const modal = new bootstrap.Modal(modalEl); modal.show(); }
   } catch (err) {
-    alert(t('common.error') + ': ' + err.message);
+    showToast(t('common.error'), err.message, 'error');
   }
 }
 
 function showSuccess(message) {
-  alert(message);
+  showToast(t('common.success'), message, 'success');
 }
 
 function showError(message) {
-  alert(t('common.error') + ': ' + message);
+  showToast(t('common.error'), message, 'error');
 }
 
 function closeSession() {

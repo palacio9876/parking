@@ -12,7 +12,7 @@
 			'<div class="modal-dialog">',
 				'<div class="modal-content">',
 					'<div class="modal-header">',
-						'<h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i>' + t('shifts.title') + '</h5>',
+						'<h5 class="modal-title"><i class="fas fa-cash-register me-2"></i>' + t('shifts.title') + '</h5>',
 						'<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
 					'</div>',
 					'<div class="modal-body">',
@@ -141,7 +141,7 @@
 				quick.id = 'shiftQuickBtn';
 				quick.type = 'button';
 				quick.className = 'btn btn-outline-danger btn-sm ms-2';
-				quick.innerHTML = '<i class="bi bi-door-closed me-1"></i>' + t('shifts.closeQuick');
+				quick.innerHTML = '<i class="fas fa-door-closed me-1"></i>' + t('shifts.closeQuick');
 				nav.appendChild(quick);
 				quick.addEventListener('click', function(){ if (shiftOpen) { openClosingModal(); } else { requireShift(); } });
 			}
