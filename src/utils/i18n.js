@@ -1,9 +1,13 @@
+// Módulo de internacionalización (i18n) para cargar y resolver traducciones
 const fs = require('fs')
 const path = require('path')
 
 const translations = {}
 let loaded = false
 
+/**
+ * Carga los archivos de traducción desde public/lang/ (es.json, en.json)
+ */
 function loadTranslations() {
   if (loaded) return
   const langDir = path.join(__dirname, '..', '..', 'public', 'lang')
@@ -16,6 +20,11 @@ function loadTranslations() {
   }
 }
 
+/**
+ * Determina el idioma desde query string (lang) o header Accept-Language
+ * @param {object} req - Objeto de solicitud Express
+ * @returns {string} Código de idioma ('es' | 'en')
+ */
 function getLang(req) {
   const query = (req.query && req.query.lang) || ''
   const header = (req.headers && req.headers['accept-language']) || ''
@@ -24,6 +33,12 @@ function getLang(req) {
   return 'es'
 }
 
+/**
+ * Obtiene el valor traducido para una clave dada en el idioma especificado
+ * @param {string} lang - Código de idioma
+ * @param {string} key - Clave de traducción (ej. "server.auth.loginSuccess")
+ * @returns {string} Texto traducido o la clave si no se encuentra
+ */
 function t(lang, key) {
   if (!loaded) loadTranslations()
   const dict = translations[lang] || translations.es

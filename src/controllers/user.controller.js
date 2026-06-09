@@ -1,7 +1,12 @@
+// Controlador de usuarios: CRUD de usuarios del sistema
 const userService = require('../services/user.service')
 
 class UserController {
 
+  /**
+   * GET /api/users
+   * Lista todos los usuarios activos de la empresa
+   */
   async getAll(req, res, next) {
     try {
       const result = await userService.getAll(req.user.id_company)
@@ -11,6 +16,10 @@ class UserController {
     }
   }
 
+  /**
+   * GET /api/users/:id
+   * Obtiene un usuario por ID
+   */
   async getById(req, res, next) {
     try {
       const { id } = req.params
@@ -21,6 +30,10 @@ class UserController {
     }
   }
 
+  /**
+   * POST /api/users
+   * Crea un nuevo usuario
+   */
   async create(req, res, next) {
     try {
       const result = await userService.create(req.t, req.user.id_company, req.body)
@@ -30,6 +43,10 @@ class UserController {
     }
   }
 
+  /**
+   * PUT /api/users/:id
+   * Actualiza un usuario existente
+   */
   async update(req, res, next) {
     try {
       const { id } = req.params
@@ -40,6 +57,10 @@ class UserController {
     }
   }
 
+  /**
+   * DELETE /api/users/:id
+   * Desactiva un usuario (borrado lógico)
+   */
   async deactivate(req, res, next) {
     try {
       const { id } = req.params

@@ -1,3 +1,4 @@
+// Migración: crea la tabla de vehículos (vehicles)
 'use strict'
 
 module.exports = {
@@ -7,6 +8,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+        comment: 'Identificador único del vehículo',
       },
       id_company: {
         type: Sequelize.INTEGER,
@@ -14,23 +16,28 @@ module.exports = {
         references: { model: 'companies', key: 'id_company' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
+        comment: 'Empresa propietaria del registro',
       },
       license_plate: {
         type: Sequelize.STRING(10),
         allowNull: false,
+        comment: 'Placa del vehículo',
       },
       type: {
         type: Sequelize.ENUM('car', 'motorcycle', 'bicycle'),
         allowNull: false,
+        comment: 'Tipo: car (carro), motorcycle (moto), bicycle (bicicleta)',
       },
       color: {
         type: Sequelize.STRING(30),
         allowNull: false,
+        comment: 'Color del vehículo',
       },
       model: Sequelize.STRING(50),
       registration_date: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        comment: 'Fecha de registro',
       },
     })
 

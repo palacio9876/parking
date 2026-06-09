@@ -1,3 +1,4 @@
+// Rutas de reportes: KPIs, ingresos, movimientos, turnos y exportación
 const { Router } = require('express')
 const reportController = require('../controllers/report.controller')
 const { auth }   = require('../middlewares/auth')

@@ -1,3 +1,4 @@
+// DTO de tarifa: esquema de validación para crear o actualizar tarifas
 const { z } = require('zod')
 
 const createRateDto = z.object({

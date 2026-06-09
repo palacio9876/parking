@@ -1,3 +1,4 @@
+// Rutas de vehículos: CRUD e historial de vehículos
 const { Router } = require('express')
 const vehicleController = require('../controllers/vehicle.controller')
 const { auth } = require('../middlewares/auth')
@@ -10,27 +11,27 @@ const router = Router()
 // Todas las rutas requieren autenticación
 router.use(auth)
 
-// Obtener todos los vehículos de la empresa
+// GET /api/vehicles - Obtener todos los vehículos de la empresa
 router.get(
   '/',
   (req, res, next) => vehicleController.getAll(req, res, next)
 )
 
-// Crear nuevo vehículo
+// POST /api/vehicles - Crear nuevo vehículo
 router.post(
   '/',
   validate(createVehicleDto),
   (req, res, next) => vehicleController.create(req, res, next)
 )
 
-// Obtener un vehículo específico
+// GET /api/vehicles/:id - Obtener un vehículo específico
 router.get(
   '/:id',
   sanitizeIdParam('id'),
   (req, res, next) => vehicleController.getById(req, res, next)
 )
 
-// Actualizar vehículo
+// PUT /api/vehicles/:id - Actualizar vehículo
 router.put(
   '/:id',
   sanitizeIdParam('id'),
@@ -38,14 +39,14 @@ router.put(
   (req, res, next) => vehicleController.update(req, res, next)
 )
 
-// Eliminar vehículo
+// DELETE /api/vehicles/:id - Eliminar vehículo (solo sin movimientos)
 router.delete(
   '/:id',
   sanitizeIdParam('id'),
   (req, res, next) => vehicleController.delete(req, res, next)
 )
 
-// Obtener historial de movimientos de un vehículo
+// GET /api/vehicles/:id/history - Obtener historial de movimientos
 router.get(
   '/:id/history',
   sanitizeIdParam('id'),

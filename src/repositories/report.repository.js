@@ -1,8 +1,16 @@
+// Repositorio de reportes: consultas analíticas para el módulo de informes
 const { Movement, Payment, CompanySetting, Vehicle, Shift, User } = require('../models')
 const { Op, fn, col, literal } = require('sequelize')
 
 class ReportRepository {
 
+  /**
+   * Obtiene KPIs básicos (ingresos y cantidad de tickets) en un rango de fechas
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio (YYYY-MM-DD)
+   * @param {string} to - Fecha fin (YYYY-MM-DD)
+   * @returns {Promise<object>} { income, tickets }
+   */
   async getKPIs(id_company, from, to) {
     const result = await Payment.findOne({
       where: {
@@ -18,10 +26,20 @@ class ReportRepository {
     return result
   }
 
+  /**
+   * Cuenta los vehículos actualmente dentro del parqueadero
+   * @param {number} id_company - ID de la empresa
+   * @returns {Promise<number>}
+   */
   async getActiveCount(id_company) {
     return Movement.count({ where: { id_company, exit_date: null } })
   }
 
+  /**
+   * Obtiene las capacidades del parqueadero
+   * @param {number} id_company - ID de la empresa
+   * @returns {Promise<object>} { car_total_capacity, motorcycle_total_capacity, bicycle_total_capacity }
+   */
   async getCapacity(id_company) {
     return CompanySetting.findOne({
       where: { id_company },
@@ -30,6 +48,14 @@ class ReportRepository {
     })
   }
 
+  /**
+   * Obtiene ingresos agrupados por día en un rango de fechas
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {string} [paymentMethod] - Filtrar por método de pago
+   * @returns {Promise<Array>}
+   */
   async getIncomeByDay(id_company, from, to, paymentMethod) {
     const where = {
       id_company,
@@ -49,6 +75,13 @@ class ReportRepository {
     })
   }
 
+  /**
+   * Obtiene ingresos agrupados por método de pago
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @returns {Promise<Array>}
+   */
   async getIncomeByMethod(id_company, from, to) {
     return Payment.findAll({
       where: {
@@ -65,6 +98,16 @@ class ReportRepository {
     })
   }
 
+  /**
+   * Obtiene movimientos con paginación y filtros (tipo, estado, placa)
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {number} limit - Límite por página
+   * @param {number} offset - Desplazamiento
+   * @param {object} filters - { type, status, plate }
+   * @returns {Promise<object>} { data: Array, total: number }
+   */
   async getMovements(id_company, from, to, limit, offset, filters = {}) {
     const where = {
       id_company,
@@ -103,6 +146,14 @@ class ReportRepository {
     }
   }
 
+  /**
+   * Obtiene las placas más frecuentes en un rango de fechas
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {number} limit - Top N (default 10)
+   * @returns {Promise<Array>}
+   */
   async getTopPlates(id_company, from, to, limit = 10) {
     return Movement.findAll({
       where: {
@@ -125,6 +176,14 @@ class ReportRepository {
     })
   }
 
+  /**
+   * Obtiene los turnos (shifts) en un rango de fechas, opcionalmente filtrados por usuario
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {string} [username] - Nombre de usuario para filtrar
+   * @returns {Promise<Array>}
+   */
   async getShifts(id_company, from, to, username) {
     const where = {
       id_company,

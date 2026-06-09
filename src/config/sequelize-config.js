@@ -1,3 +1,4 @@
+// Configuración de entornos para Sequelize CLI (migraciones y seeders)
 require('dotenv').config()
 
 module.exports = {

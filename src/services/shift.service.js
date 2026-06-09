@@ -1,8 +1,17 @@
+// Servicio de turnos: lógica de negocio para apertura y cierre de caja
 const shiftRepo = require('../repositories/shift.repository')
 const { AppError } = require('../utils/AppError')
 
 class ShiftService {
 
+  /**
+   * Abre un nuevo turno de caja para un operador
+   * @param {function} t - Función de traducción
+   * @param {number} id_company - ID de la empresa
+   * @param {number} id_user - ID del usuario que abre el turno
+   * @param {object} data - { initial_base, opening_observation }
+   * @returns {object} { success, message, data }
+   */
   async openShift(t, id_company, id_user, { initial_base, opening_observation }) {
     const existing = await shiftRepo.getOpenShift(id_company)
     if (existing) {
@@ -21,6 +30,14 @@ class ShiftService {
     return { success: true, message: t('server.shift.opened'), data: shift }
   }
 
+  /**
+   * Cierra el turno actual registrando totales por método de pago y calculando diferencia
+   * @param {function} t - Función de traducción
+   * @param {number} id_company - ID de la empresa
+   * @param {number} id_user - ID del usuario que cierra
+   * @param {object} data - { total_cash, total_card, total_qr, closing_observation }
+   * @returns {object} { success, message, data: { shift, base, userTotals, expected, difference, stats } }
+   */
   async closeShift(t, id_company, id_user, { total_cash, total_card, total_qr, closing_observation }) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {
@@ -62,6 +79,12 @@ class ShiftService {
     }
   }
 
+  /**
+   * Obtiene el turno actualmente abierto
+   * @param {function} t - Función de traducción
+   * @param {number} id_company - ID de la empresa
+   * @returns {object} { success, data }
+   */
   async getCurrent(t, id_company) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {
@@ -70,6 +93,11 @@ class ShiftService {
     return { success: true, data: shift }
   }
 
+  /**
+   * Obtiene un resumen del turno actual (o valores por defecto si no hay turno abierto)
+   * @param {number} id_company - ID de la empresa
+   * @returns {object} { success, data: { totals, shift? } }
+   */
   async getSummary(id_company) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {

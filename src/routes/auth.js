@@ -1,4 +1,4 @@
-// src/routes/auth.js
+// Rutas de autenticación: login y consulta de sesión
 const { Router }         = require('express')
 const authController     = require('../controllers/auth.controller')
 const { auth }           = require('../middlewares/auth')

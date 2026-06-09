@@ -1,7 +1,15 @@
+// Servicio de reportes: lógica de negocio para generar informes y análisis
 const reportRepo = require('../repositories/report.repository')
 
 class ReportService {
 
+  /**
+   * Obtiene KPIs: ingresos, tickets, ticket promedio, ocupación actual
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio (YYYY-MM-DD)
+   * @param {string} to - Fecha fin (YYYY-MM-DD)
+   * @returns {object} { success, data: { income, tickets, averageTicket, activeCount, occupancy } }
+   */
   async getKPIs(id_company, from, to) {
     const [kpis, activeCount, capacity] = await Promise.all([
       reportRepo.getKPIs(id_company, from, to),
@@ -23,16 +31,41 @@ class ReportService {
     }
   }
 
+  /**
+   * Obtiene ingresos agrupados por día
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {string} [paymentMethod] - Filtrar por método de pago
+   * @returns {object} { success, data }
+   */
   async getIncomeByDay(id_company, from, to, paymentMethod) {
     const data = await reportRepo.getIncomeByDay(id_company, from, to, paymentMethod)
     return { success: true, data }
   }
 
+  /**
+   * Obtiene ingresos agrupados por método de pago
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @returns {object} { success, data }
+   */
   async getIncomeByMethod(id_company, from, to) {
     const data = await reportRepo.getIncomeByMethod(id_company, from, to)
     return { success: true, data }
   }
 
+  /**
+   * Obtiene movimientos con paginación y filtros
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {number} pageSize - Tamaño de página
+   * @param {number} page - Número de página
+   * @param {object} filters - { type, status, plate }
+   * @returns {object} { success, data, paging }
+   */
   async getMovements(id_company, from, to, pageSize = 20, page = 0, filters = {}) {
     const limit  = pageSize
     const offset = page * pageSize
@@ -44,11 +77,27 @@ class ReportService {
     }
   }
 
+  /**
+   * Obtiene el top de placas más frecuentes
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {number} limit - Cantidad máxima de resultados
+   * @returns {object} { success, data }
+   */
   async getTopPlates(id_company, from, to, limit = 10) {
     const data = await reportRepo.getTopPlates(id_company, from, to, limit)
     return { success: true, data }
   }
 
+  /**
+   * Obtiene los turnos (shifts) en un rango de fechas
+   * @param {number} id_company - ID de la empresa
+   * @param {string} from - Fecha inicio
+   * @param {string} to - Fecha fin
+   * @param {string} [username] - Filtro por nombre de usuario
+   * @returns {object} { success, data }
+   */
   async getShifts(id_company, from, to, username) {
     const data = await reportRepo.getShifts(id_company, from, to, username)
     return { success: true, data }

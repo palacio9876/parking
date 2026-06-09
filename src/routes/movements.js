@@ -1,3 +1,4 @@
+// Rutas de movimientos: entrada, salida, detalle e historial
 const { Router }  = require('express')
 const movementController = require('../controllers/movement.controller')
 const { auth }    = require('../middlewares/auth')

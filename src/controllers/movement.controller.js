@@ -1,7 +1,12 @@
+// Controlador de movimientos: entrada, salida, detalle e historial
 const movementService = require('../services/movement.service')
 
 class MovementController {
 
+  /**
+   * POST /api/movements/entry
+   * Registra la entrada de un vehículo
+   */
   async recordEntry(req, res, next) {
     try {
       const result = await movementService.recordEntry(
@@ -16,6 +21,10 @@ class MovementController {
     }
   }
 
+  /**
+   * POST /api/movements/exit
+   * Registra la salida de un vehículo y calcula el total
+   */
   async recordExit(req, res, next) {
     try {
       const result = await movementService.recordExit(
@@ -30,6 +39,10 @@ class MovementController {
     }
   }
 
+  /**
+   * GET /api/movements/:id
+   * Obtiene el detalle de un movimiento
+   */
   async getDetail(req, res, next) {
     try {
       const { id } = req.params
@@ -40,6 +53,10 @@ class MovementController {
     }
   }
 
+  /**
+   * GET /api/movements/:id/history
+   * Obtiene el historial de movimientos de un vehículo
+   */
   async getHistory(req, res, next) {
     try {
       const { id } = req.params

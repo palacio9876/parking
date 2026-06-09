@@ -1,3 +1,4 @@
+// DTO de pago: esquema de validación para registrar pagos de un movimiento
 const { z } = require('zod')
 
 const createPaymentDto = z.object({

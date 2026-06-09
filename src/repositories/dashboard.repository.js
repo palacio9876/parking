@@ -1,9 +1,15 @@
+// Repositorio del dashboard: consultas para la vista principal de estadísticas
 const { Movement, Vehicle, User, Rate, Payment } = require('../models')
 const { Op, fn, col } = require('sequelize')
 const sequelize = require('../config/db')
 
 class DashboardRepository {
 
+  /**
+   * Obtiene la cantidad de vehículos activos (dentro) agrupados por tipo
+   * @param {number} id_company - ID de la empresa
+   * @returns {Promise<Array>} Lista de { type, count }
+   */
   async getActiveVehiclesByType(id_company) {
     return Movement.findAll({
       where: { id_company, exit_date: null },
@@ -21,6 +27,11 @@ class DashboardRepository {
     })
   }
 
+  /**
+   * Obtiene el ingreso total del día de hoy (movimientos completados)
+   * @param {number} id_company - ID de la empresa
+   * @returns {Promise<object>} Objeto con { total } o null
+   */
   async getTodayIncome(id_company) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -43,12 +54,24 @@ class DashboardRepository {
     })
   }
 
+  /**
+   * Cuenta los usuarios activos de una empresa
+   * @param {number} id_company - ID de la empresa
+   * @returns {Promise<number>}
+   */
   async getTotalActiveUsers(id_company) {
     return User.count({
       where: { id_company, active: true }
     })
   }
 
+  /**
+   * Obtiene la actividad reciente de movimientos (activos primero, luego por fecha descendente)
+   * @param {number} id_company - ID de la empresa
+   * @param {number} limit - Límite de resultados
+   * @param {number} offset - Desplazamiento para paginación
+   * @returns {Promise<Array>}
+   */
   async getRecentActivity(id_company, limit, offset) {
     return Movement.findAll({
       where: { id_company },
@@ -68,6 +91,11 @@ class DashboardRepository {
     })
   }
 
+  /**
+   * Cuenta el total de movimientos de una empresa
+   * @param {number} id_company - ID de la empresa
+   * @returns {Promise<number>}
+   */
   async getMovementCount(id_company) {
     return Movement.count({
       where: { id_company }

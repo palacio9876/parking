@@ -1,7 +1,12 @@
+// Controlador de vehículos: CRUD e historial de vehículos
 const vehicleService = require('../services/vehicle.service')
 
 class VehicleController {
 
+  /**
+   * GET /api/vehicles
+   * Lista todos los vehículos de la empresa
+   */
   async getAll(req, res, next) {
     try {
       const result = await vehicleService.getAll(req.user.id_company)
@@ -11,6 +16,10 @@ class VehicleController {
     }
   }
 
+  /**
+   * GET /api/vehicles/:id
+   * Obtiene un vehículo por ID
+   */
   async getById(req, res, next) {
     try {
       const { id } = req.params
@@ -21,6 +30,10 @@ class VehicleController {
     }
   }
 
+  /**
+   * POST /api/vehicles
+   * Crea un nuevo vehículo
+   */
   async create(req, res, next) {
     try {
       const result = await vehicleService.create(req.t, req.user.id_company, req.body)
@@ -30,6 +43,10 @@ class VehicleController {
     }
   }
 
+  /**
+   * PUT /api/vehicles/:id
+   * Actualiza un vehículo existente
+   */
   async update(req, res, next) {
     try {
       const { id } = req.params
@@ -40,6 +57,10 @@ class VehicleController {
     }
   }
 
+  /**
+   * DELETE /api/vehicles/:id
+   * Elimina un vehículo (solo si no tiene movimientos)
+   */
   async delete(req, res, next) {
     try {
       const { id } = req.params
@@ -50,6 +71,10 @@ class VehicleController {
     }
   }
 
+  /**
+   * GET /api/vehicles/:id/history
+   * Obtiene el historial de movimientos de un vehículo
+   */
   async getHistory(req, res, next) {
     try {
       const { id } = req.params

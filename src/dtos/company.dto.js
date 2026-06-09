@@ -1,3 +1,4 @@
+// DTOs de empresa: esquemas de validación para actualizar datos y configuraciones
 const { z } = require('zod')
 
 const updateCompanyDto = z.object({

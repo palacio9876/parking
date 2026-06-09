@@ -1,3 +1,4 @@
+// DTOs de vehículo: esquemas de validación para crear y actualizar vehículos
 const { z } = require('zod')
 
 const createVehicleDto = z.object({

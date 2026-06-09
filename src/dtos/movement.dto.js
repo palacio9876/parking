@@ -1,3 +1,4 @@
+// DTOs de movimiento: esquemas de validación para registrar entrada y salida de vehículos
 const { z } = require('zod')
 
 const createMovementDto = z.object({

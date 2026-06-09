@@ -1,15 +1,22 @@
+// Servicio de pagos: lógica de negocio para registrar y consultar pagos
 const paymentRepo = require('../repositories/payment.repository')
 const { AppError } = require('../utils/AppError')
 
 class PaymentService {
 
+  /**
+   * Registra uno o varios pagos para un movimiento (soporta split de pago)
+   * @param {function} t - Función de traducción
+   * @param {number} id_company - ID de la empresa
+   * @param {number} id_user - ID del usuario que registra
+   * @param {object} data - { id_movement, payments: Array<{ payment_method, amount }> }
+   * @returns {object} { success, message, data: { payment_count } }
+   */
   async recordPayments(t, id_company, id_user, { id_movement, payments }) {
-    // Validar que movimiento existe
     if (!payments || !Array.isArray(payments) || payments.length === 0) {
       throw new AppError(400, t('server.payment.invalidData'))
     }
 
-    // Crear registros de pago
     const paymentRecords = payments.map(p => ({
       id_company,
       id_movement,
@@ -30,6 +37,12 @@ class PaymentService {
     }
   }
 
+  /**
+   * Obtiene los pagos de un movimiento
+   * @param {number} id_movement - ID del movimiento
+   * @param {number} id_company - ID de la empresa
+   * @returns {object} { success, data }
+   */
   async getPayments(id_movement, id_company) {
     const payments = await paymentRepo.getPaymentsByMovement(id_movement)
     return {

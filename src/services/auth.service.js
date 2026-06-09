@@ -1,3 +1,4 @@
+// Servicio de autenticación: lógica de negocio para inicio de sesión
 const bcrypt   = require('bcryptjs')
 const jwt      = require('jsonwebtoken')
 const authRepo = require('../repositories/auth.repository')
@@ -5,6 +6,13 @@ const { AppError } = require('../utils/AppError')
 
 class AuthService {
 
+  /**
+   * Procesa el inicio de sesión de un usuario
+   * @param {function} t - Función de traducción
+   * @param {object} params - { tax_id, username, password, ip_address }
+   * @returns {object} { success, message, data: { token, user } }
+   * @throws {AppError} 401 si credenciales inválidas, 429 si demasiados intentos
+   */
   async login(t, { tax_id, username, password, ip_address }) {
 
     // 1. Verificar empresa
@@ -60,7 +68,7 @@ class AuthService {
       ip_address
     })
 
-    // 6. Generar token
+    // 6. Generar token JWT con expiración de 8 horas
     const token = jwt.sign(
       {
         id_user:    user.id_user,
