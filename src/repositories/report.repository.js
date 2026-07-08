@@ -147,6 +147,75 @@ class ReportRepository {
   }
 
   /**
+   * Obtiene todos los movimientos (sin paginación) para exportación
+   * @param {number} id_company
+   * @param {string} from
+   * @param {string} to
+   * @param {object} filters - { type, status, plate }
+   * @returns {Promise<Array>}
+   */
+  async getAllMovements(id_company, from, to, filters = {}) {
+    const where = {
+      id_company,
+      entry_date: { [Op.between]: [`${from} 00:00:00`, `${to} 23:59:59`] }
+    }
+    if (filters.status) where.status = filters.status
+
+    const vehicleWhere = {}
+    if (filters.type)  vehicleWhere.type = filters.type
+    if (filters.plate) vehicleWhere.license_plate = { [Op.like]: `%${filters.plate}%` }
+
+    const rows = await Movement.findAll({
+      where,
+      order: [['entry_date', 'DESC']],
+      include: [{
+        association: 'vehicle',
+        attributes: ['license_plate', 'type'],
+        where: Object.keys(vehicleWhere).length ? vehicleWhere : undefined,
+        required: !!Object.keys(vehicleWhere).length
+      }]
+    })
+
+    return rows.map(r => ({
+      id: r.id_movement,
+      license_plate: r.vehicle?.license_plate,
+      type:          r.vehicle?.type,
+      entry_date:    r.entry_date,
+      exit_date:     r.exit_date,
+      status:        r.status,
+      total_to_pay:  r.total_to_pay
+    }))
+  }
+
+  /**
+   * Obtiene todas las placas más frecuentes (sin límite) para exportación
+   * @param {number} id_company
+   * @param {string} from
+   * @param {string} to
+   * @returns {Promise<Array>}
+   */
+  async getAllTopPlates(id_company, from, to) {
+    return Movement.findAll({
+      where: {
+        id_company,
+        entry_date: { [Op.between]: [`${from} 00:00:00`, `${to} 23:59:59`] }
+      },
+      attributes: [
+        [fn('COUNT', col('Movement.id_movement')), 'visits'],
+        [fn('SUM', col('total_to_pay')), 'total']
+      ],
+      include: [{
+        association: 'vehicle',
+        attributes: ['license_plate', 'type'],
+        required: true
+      }],
+      group: ['vehicle.id_vehicle'],
+      order: [[fn('COUNT', col('Movement.id_movement')), 'DESC']],
+      raw: true
+    })
+  }
+
+  /**
    * Obtiene las placas más frecuentes en un rango de fechas
    * @param {number} id_company - ID de la empresa
    * @param {string} from - Fecha inicio

@@ -1,5 +1,6 @@
 // Servicio de movimientos: lógica de negocio para entradas y salidas de vehículos
 const movementRepo = require('../repositories/movement.repository')
+const vehicleRepo = require('../repositories/vehicle.repository')
 const { AppError } = require('../utils/AppError')
 
 class MovementService {
@@ -13,9 +14,14 @@ class MovementService {
    * @returns {object} { success, message, data: { id_movement, license_plate, entry_date } }
    */
   async recordEntry(t, id_company, id_user, { license_plate, type }) {
-    const vehicle = await movementRepo.findByLicensePlate(license_plate, id_company)
+    let vehicle = await movementRepo.findByLicensePlate(license_plate, id_company)
     if (!vehicle) {
-      throw new AppError(404, t('server.movement.vehicleNotFound'))
+      vehicle = await vehicleRepo.create({
+        id_company,
+        license_plate,
+        type,
+        color: ''
+      })
     }
 
     const activeMovement = await movementRepo.findActiveMovement(vehicle.id_vehicle)

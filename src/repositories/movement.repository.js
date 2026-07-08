@@ -36,7 +36,8 @@ class MovementRepository {
    */
   findById(id_movement, id_company) {
     return Movement.findOne({
-      where: { id_movement, id_company }
+      where: { id_movement, id_company },
+      include: [{ model: Vehicle, as: 'vehicle' }]
     })
   }
 

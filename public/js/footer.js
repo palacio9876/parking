@@ -79,15 +79,15 @@
 		footer.style.position = 'sticky';
 		footer.style.top = '100vh';
 		footer.style.width = '100%';
-		var ciscodeUrl = 'https://ciscodedev.netlify.app/';
-		var paypalUrl = 'https://www.paypal.com/donate/?hosted_button_id=8HMKJZY4E29RY';
-		var githubUrl = 'https://github.com/Cristiancano1236/sistema-parqueadero';
+		var developerEmail = 'mailto:cristiancamilopala@gmail.com';
+		var paypalUrl = 'https://www.paypal.com/donate/?hosted_button_id=QR7A3ZJYBK9EL';
+		var githubUrl = 'https://github.com/palacio9876/parking';
 		footer.innerHTML = [
 			'<div class="container-fluid px-3 text-center">',
 				'<div class="mx-auto" style="max-width: 980px">',
 					'<p class="mb-2 small lh-base">',
 						t('footer.text') + ' ',
-						'<a class="'+linkClass+'" href="'+ciscodeUrl+'" target="_blank" rel="noopener">' + t('footer.developer') + '</a>. ',
+						'<a class="'+linkClass+'" href="'+developerEmail+'" target="_blank" rel="noopener">' + t('footer.developer') + '</a>. ',
 						t('footer.donation') + ' ',
 						'<a class="'+linkClass+'" href="'+paypalUrl+'" target="_blank" rel="noopener">' + t('footer.thisLink') + '</a>. ',
 						t('footer.helpText') + ' ',
@@ -95,7 +95,7 @@
 						'<a class="'+linkClass+'" href="'+githubUrl+'" target="_blank" rel="noopener">' + t('footer.github') + '</a>.',
 					'</p>',
 					'<div class="d-grid gap-2 d-sm-flex justify-content-center flex-wrap">',
-						'<a class="btn btn-sm '+outlineBtn+'" href="'+ciscodeUrl+'" target="_blank" rel="noopener" aria-label="Developer site">',
+						'<a class="btn btn-sm '+outlineBtn+'" href="'+developerEmail+'" target="_blank" rel="noopener" aria-label="Developer site">',
 							'<i class="bi bi-globe2 me-1"></i> ' + t('footer.support')
 						,'</a>',
 						'<a class="btn btn-sm '+solidBtn+'" href="'+paypalUrl+'" target="_blank" rel="noopener" aria-label="Donate on PayPal">',

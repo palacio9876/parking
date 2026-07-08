@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnLogout').addEventListener('click', () => { localStorage.clear(); location.href = '/'; });
 
     loadEmpresaInfo();
+    cargarPlacasActivas();
 
     document.getElementById('formIngreso').addEventListener('submit', handleEntry);
     document.getElementById('formSalida').addEventListener('submit', handleExit);
@@ -90,6 +91,19 @@ function fmtTime(t) {
     return s.length >= 5 ? s.substring(0, 5) : s;
 }
 
+async function cargarPlacasActivas() {
+    try {
+        const r = await fetch('/api/vehicles', { headers: { 'Authorization': `Bearer ${token}` } });
+        const j = await r.json();
+        if (!r.ok || !j.data) return;
+        const datalist = document.getElementById('salPlacaList');
+        datalist.innerHTML = j.data
+            .filter(v => v.status === 'active')
+            .map(v => `<option value="${v.license_plate}">${v.type} - ${v.color}</option>`)
+            .join('');
+    } catch (_) {}
+}
+
 async function handleEntry(e) {
     e.preventDefault();
     await ensureEmpresaConfig();
@@ -107,6 +121,7 @@ async function handleEntry(e) {
     document.getElementById('compIngresoBody').innerHTML = renderComprobante('INGRESO', b, null, empresaInfo);
     document.getElementById('compIngreso').classList.remove('d-none');
     document.getElementById('formIngreso').reset();
+    cargarPlacasActivas();
 }
 
 async function handleExit(e) {
@@ -127,11 +142,11 @@ async function handleExit(e) {
     document.getElementById('compSalida').classList.remove('d-none');
     document.getElementById('formSalida').reset();
     abrirModalPago(f, metodoPref);
+    cargarPlacasActivas();
 }
 
 function renderComprobante(tipo, ingreso, salida, empresa) {
     const e = empresa || {};
-    const ciscodeUrl = 'https://ciscode.co';
     const header = `
         <div style="text-align:center">
             ${e.logo_url ? `<img src="${e.logo_url}" alt="logo" style="max-height:60px">` : ''}
@@ -141,25 +156,6 @@ function renderComprobante(tipo, ingreso, salida, empresa) {
             <div>${t('company.schedule')}: <strong>${(empresa?.operation_24h) ? t('time.h24') : ((fmtTime(empresa?.opening_time) || '') + ' - ' + (fmtTime(empresa?.closing_time) || ''))}</strong></div>
             <hr/>
             <div><strong>${tipo === 'INGRESO' ? t('entryExit.entryReceiptTitle') : t('entryExit.exitReceiptTitle')}</strong></div>
-        </div>`;
-
-    const ciscodeFooter = `
-        <hr/>
-        <div style="text-align:center;margin-top:6px">
-            <div>${t('footer.developedBy')} <strong>Ciscode</strong></div>
-            <div>
-                <a href="${ciscodeUrl}" target="_blank" style="text-decoration:none;color:#000">ciscode.co</a>
-                &nbsp;|&nbsp;
-                <a href="https://www.youtube.com/@Ciscode" target="_blank" aria-label="YouTube Ciscode" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:#000">
-                    <span>
-                        <svg width="18" height="12" viewBox="0 0 24 17" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M23.5 2.6a3 3 0 0 0-2.1-2.1C19.5 0 12 0 12 0s-7.5 0-9.4.5A3 3 0 0 0 .5 2.6 31 31 0 0 0 0 8.5a31 31 0 0 0 .5 5.9 3 3 0 0 0 2.1 2.1C4.5 17 12 17 12 17s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-5.9 31 31 0 0 0-.5-5.9z" fill="#FF0000"/>
-                            <path d="M9.75 12.25V4.75L15.5 8.5l-5.75 3.75z" fill="#fff"/>
-                        </svg>
-                    </span>
-                    <span style="font-size:10px">YouTube</span>
-                </a>
-            </div>
         </div>`;
 
     if (tipo === 'INGRESO') {
@@ -175,8 +171,7 @@ function renderComprobante(tipo, ingreso, salida, empresa) {
             <div>${t('entryExit.day')}: <strong>${ingreso.full_day_rate || ''}</strong></div>
             <hr/>
             <div>${t('entryExit.attendedBy')}: ${localStorage.getItem('userName') || ''}</div>
-            <div>${t('entryExit.printDate')}: ${fmtDate(new Date())}</div>
-            ${ciscodeFooter}`;
+            <div>${t('entryExit.printDate')}: ${fmtDate(new Date())}</div>`;
     }
 
     const pagosHtml = (salida.paymentsList && salida.paymentsList.length)
@@ -197,8 +192,7 @@ function renderComprobante(tipo, ingreso, salida, empresa) {
         <div>${t('entryExit.totalToPay')}: <strong>${fmtCurrency(salida.total_to_pay)}</strong></div>
         ${pagosHtml}
         <div>${t('entryExit.attendedBy')}: ${localStorage.getItem('userName') || ''}</div>
-        <div>${t('entryExit.printDate')}: ${fmtDate(new Date())}</div>
-        ${ciscodeFooter}`;
+        <div>${t('entryExit.printDate')}: ${fmtDate(new Date())}</div>`;
 }
 
 function formatCurrencyEE(amount) {

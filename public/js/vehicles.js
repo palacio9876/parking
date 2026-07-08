@@ -5,16 +5,32 @@ function initDataTable() {
     vehiclesTable.destroy();
     vehiclesTable = null;
   }
-  var langUrl = i18n.datatablesLangUrl();
+  var lang = i18n.getLang();
   var opts = {
+    pageLength: 10,
+    dom: 'lrtip',
+    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, t('common.total')]],
     order: [[4, 'desc']],
+    language: lang === 'es' ? {
+      lengthMenu: "Mostrar _MENU_ registros",
+      zeroRecords: "No se encontraron registros",
+      info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+      infoEmpty: "Mostrando 0 a 0 de 0 registros",
+      infoFiltered: "(filtrado de _MAX_ registros totales)",
+      search: "Buscar:",
+      paginate: { first: "Primero", previous: "Anterior", next: "Siguiente", last: "Último" }
+    } : {},
     columns: [
       { data: 'license_plate',
         render: function(data, type, row) {
-          return '<button class="btn-link font-medium hover:underline cursor-pointer" onclick="viewHistory(' + row.id + ", '" + data + "')" + '">' + data + '</button>';
+          return '<button class="btn-link font-medium hover:underline cursor-pointer transition-colors" onclick="viewHistory(' + row.id + ", '" + data + "')" + '">' + data + '</button>';
         }
       },
-      { data: 'type' },
+      { data: 'type',
+        render: function(data) {
+          return t('vehicleType.' + data);
+        }
+      },
       { data: 'color' },
       { data: 'model' },
       { data: 'created_at',
@@ -36,9 +52,6 @@ function initDataTable() {
       }
     ]
   };
-  if (langUrl) {
-    opts.language = { url: langUrl };
-  }
   vehiclesTable = $('#vehiclesTable').DataTable(opts);
 }
 
@@ -169,8 +182,9 @@ async function deleteVehicle(id) {
 function applyFilters() {
   const type = document.getElementById('filterType').value;
   const plate = document.getElementById('filterPlate').value.toLowerCase();
+  const typeLabel = type ? t('vehicleType.' + type) : '';
   $.fn.dataTable.ext.search.push(function(settings, data) {
-    const typeMatch = !type || data[1] === type;
+    const typeMatch = !type || data[1] === typeLabel;
     const plateMatch = !plate || data[0].toLowerCase().includes(plate);
     return typeMatch && plateMatch;
   });
@@ -203,7 +217,7 @@ async function viewHistory(idVehicle, plate) {
         } else {
           paymentSummary = paid > 0 ? fmtCurrency(paid) + (r.payments ? ' (' + r.payments + ')' : '') : '-';
         }
-        return '<tr><td>' + (r.id_movement || r.id) + '</td><td>' + fmtDate(r.entry_date) + '</td><td>' + (r.exit_date ? fmtDate(r.exit_date) : '-') + '</td><td><span class="badge bg-' + badgeStatus + '">' + r.status + '</span></td><td>' + (total ? fmtCurrency(total) : '-') + '</td><td>' + paymentSummary + '</td></tr>';
+        return '<tr><td>' + (r.id_movement || r.id) + '</td><td>' + fmtDate(r.entry_date) + '</td><td>' + (r.exit_date ? fmtDate(r.exit_date) : '-') + '</td><td><span class="badge bg-' + badgeStatus + '">' + t('status.' + r.status) + '</span></td><td>' + (total ? fmtCurrency(total) : '-') + '</td><td>' + paymentSummary + '</td></tr>';
       }).join('');
     }
     const modalEl = document.getElementById('historyModal');
@@ -219,6 +233,12 @@ function showSuccess(message) {
 
 function showError(message) {
   showToast(t('common.error'), message, 'error');
+}
+
+function clearVFilters() {
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterPlate').value = '';
+  applyFilters();
 }
 
 function closeSession() {

@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnLast7').addEventListener('click', setLast7);
     document.getElementById('btnMonth').addEventListener('click', setMonth);
     document.getElementById('btnApply').addEventListener('click', ()=>{ __pageRep = 0; loadAll(); });
+    document.getElementById('btnClearFilters').addEventListener('click', clearFilters);
     document.getElementById('btnPrev').addEventListener('click', ()=>{ if(__pageRep>0){ __pageRep--; loadMovements(); } });
     document.getElementById('btnNext').addEventListener('click', ()=>{ __pageRep++; loadMovements(); });
     document.getElementById('btnExport').addEventListener('click', exportToPDF);
@@ -65,6 +66,22 @@ async function ensureXLSX(){
         }catch(e){ lastErr = e; }
     }
     throw lastErr || new Error('Could not load SheetJS');
+}
+
+function clearFilters(){
+    const hoy = new Date();
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth()+1).padStart(2,'0');
+    const dd = String(hoy.getDate()).padStart(2,'0');
+    const today = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('fFrom').value = today;
+    document.getElementById('fTo').value = today;
+    document.getElementById('fType').value = '';
+    document.getElementById('fStatus').value = '';
+    document.getElementById('fPlate').value = '';
+    document.getElementById('fPaymentMethod').value = '';
+    __pageRep = 0;
+    loadAll();
 }
 
 function baseParams(){
@@ -118,6 +135,7 @@ function initShiftsView(){
       '          <input type="date" id="tTo" class="form-control form-control-sm" />',
 '          <input type="text" id="tUser" class="form-control form-control-sm" placeholder="' + t('reports.searchUser') + '" />',
 '          <button class="btn btn-sm btn-primary" id="tSearch"><i class="fas fa-filter me-1"></i>' + t('common.filter') + '</button>',
+'          <button class="btn btn-sm btn-outline-secondary" id="tClearFilters"><i class="fas fa-times me-1"></i> Limpiar</button>',
 '          <button class="btn btn-sm btn-outline-success" id="tExportXlsx"><i class="fas fa-file-excel me-1"></i>' + t('reports.exportExcel') + '</button>',
       '        </div>',
       '        <div class="table-responsive">',
@@ -146,6 +164,14 @@ function initShiftsView(){
     document.getElementById('tTo').value = today;
 
     document.getElementById('tSearch').addEventListener('click', loadShifts);
+    document.getElementById('tClearFilters').addEventListener('click', ()=>{
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      document.getElementById('tFrom').value = today;
+      document.getElementById('tTo').value = today;
+      document.getElementById('tUser').value = '';
+      loadShifts();
+    });
 
     async function loadShifts(){
       const params = new URLSearchParams({
@@ -188,10 +214,12 @@ function initShiftsView(){
 
     // Excel export
     document.getElementById('tExportXlsx').addEventListener('click', async ()=>{
+      const lang = (window.i18n && window.i18n.getLang()) || 'es';
       const params = new URLSearchParams({
         from: document.getElementById('tFrom').value,
         to: document.getElementById('tTo').value,
-        user: document.getElementById('tUser').value.trim()
+        user: document.getElementById('tUser').value.trim(),
+        lang
       });
       const res = await fetch('/api/reports/shifts/export/xlsx?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
       if (!res.ok) { const j = await res.json().catch(()=>({message:t('reports.exportError')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
@@ -324,7 +352,7 @@ async function loadChartPaymentMethod(){
         const res = await fetch(`/api/reports/income-by-payment-method?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||t('reports.incomeMethodError'));
-        const labels = j.data.map(r=>r.payment_method);
+        const labels = j.data.map(r=>t('payment.' + r.payment_method));
         const data = j.data.map(r=>Number(r.total||0));
         renderDoughnut('chartPaymentMethod', labels, data);
     }catch(e){ toast(t('common.error'), e.message, 'error'); }
@@ -351,10 +379,10 @@ async function loadMovements(){
                 <tr>
                     <td>${r.id}</td>
                     <td>${r.license_plate}</td>
-                    <td>${r.type}</td>
+                    <td>${t('vehicleType.' + r.type)}</td>
                     <td>${formatDateTime(r.entry_date)}</td>
                     <td>${r.exit_date? formatDateTime(r.exit_date): '-'}</td>
-                    <td><span class="badge bg-${r.status==='active'?'success':'secondary'}">${r.status}</span></td>
+                    <td><span class="badge bg-${r.status==='active'?'success':'secondary'}">${t('status.' + r.status)}</span></td>
                     <td>${r.total_to_pay!=null? formatCurrency(r.total_to_pay) : '-'}</td>
                     <td>
                         ${r.status==='completed' ? `<button class="btn btn-sm btn-outline-primary" onclick="reprintExit(${r.id})"><i class='fas fa-print'></i></button>` : ''}
@@ -454,7 +482,7 @@ async function loadTopPlates(){
             tb.innerHTML = j.data.map(r=>`
                 <tr>
                     <td>${r.license_plate}</td>
-                    <td>${r.type}</td>
+                    <td>${t('vehicleType.' + r.type)}</td>
                     <td>${r.visits}</td>
                     <td>${formatCurrency(r.total||0)}</td>
                 </tr>
@@ -486,18 +514,26 @@ function renderDoughnut(id, labels, data){
     });
 }
 
-// PDF export with design
+// PDF export from backend
 async function exportToPDF(){
     try{
         const { from, to } = baseParams();
         const type = document.getElementById('fType').value;
         const status = document.getElementById('fStatus').value;
         const plate = document.getElementById('fPlate').value.trim();
-        const q = new URLSearchParams({ from, to, limit:'1000' });
+        const lang = (window.i18n && window.i18n.getLang()) || 'es';
+        const q = new URLSearchParams({ from, to, lang });
         if (type) q.append('type', type);
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);
         toast(t('common.info'), t('reports.generatingPdf'), 'info');
+        const res = await fetch(`/api/reports/export/pdf?${q.toString()}`, { headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` } });
+        if (!res.ok) { const j = await res.json().catch(()=>({message:t('common.error')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `reporte_${from}_${to}.pdf`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        toast(t('common.success'), t('reports.fileDownloaded'), 'success');
     }catch(err){
         toast(t('common.error'), err.message, 'error');
     }
@@ -509,7 +545,8 @@ async function exportToExcelBackend(){
         const type = document.getElementById('fType').value;
         const status = document.getElementById('fStatus').value;
         const plate = document.getElementById('fPlate').value.trim();
-        const q = new URLSearchParams({ from, to });
+        const lang = (window.i18n && window.i18n.getLang()) || 'es';
+        const q = new URLSearchParams({ from, to, lang });
         if (type) q.append('type', type);
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);

@@ -61,19 +61,20 @@
                     <div class="flex flex-wrap gap-2">
                         <input type="date" id="fFrom" class="w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" data-i18n="reports.from" data-i18n-attr="aria-label">
                         <input type="date" id="fTo" class="w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" data-i18n="reports.to" data-i18n-attr="aria-label">
-                        <select id="fType" class="w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                        <select id="fType" class="w-auto px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                             <option value="" data-i18n="reports.allTypes">Todos los tipos</option>
                             <option value="car" data-i18n="vehicleType.car">Carro</option>
                             <option value="motorcycle" data-i18n="vehicleType.motorcycle">Moto</option>
                             <option value="bicycle" data-i18n="vehicleType.bicycle">Bicicleta</option>
                         </select>
-                        <select id="fStatus" class="w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                        <select id="fStatus" class="w-auto px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                             <option value="" data-i18n="reports.allStatus">Todos los estados</option>
                             <option value="active" data-i18n="reports.active">Activos</option>
                             <option value="completed" data-i18n="reports.completed">Finalizados</option>
                         </select>
                         <input type="text" id="fPlate" class="w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" data-i18n="reports.plate" data-i18n-attr="placeholder" placeholder="Placa">
                         <button class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors" id="btnApply"><i class="fas fa-filter mr-2"></i><span data-i18n="reports.apply">Aplicar</span></button>
+                        <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors" id="btnClearFilters"><i class="fas fa-times mr-1"></i> Limpiar</button>
                         <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors" id="btnToday"><i class="fas fa-calendar-day mr-2"></i><span data-i18n="reports.today">Hoy</span></button>
                         <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors" id="btnLast7"><i class="fas fa-calendar-week mr-2"></i><span data-i18n="reports.last7">Últimos 7</span></button>
                         <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors" id="btnMonth"><i class="fas fa-calendar mr-2"></i><span data-i18n="reports.thisMonth">Este mes</span></button>
@@ -95,7 +96,7 @@
                     <div class="bg-white rounded-xl shadow-sm">
                         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                             <h5 class="text-lg font-semibold text-gray-900 mb-0" data-i18n="reports.incomeByDay">Ingresos por día</h5>
-                            <select id="fPaymentMethod" class="w-auto px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" style="max-width:200px">
+                            <select id="fPaymentMethod" class="w-auto px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary" style="max-width:200px">
                                 <option value="" data-i18n="reports.allMethods">Todos los métodos</option>
                                 <option value="cash" data-i18n="payment.cash">Efectivo</option>
                                 <option value="card" data-i18n="payment.card">Tarjeta</option>

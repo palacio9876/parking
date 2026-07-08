@@ -86,8 +86,7 @@ class DashboardRepository {
         association: 'vehicle',
         attributes: ['license_plate', 'type'],
         required: true
-      }],
-      raw: true
+      }]
     })
   }
 

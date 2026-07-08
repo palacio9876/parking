@@ -175,8 +175,16 @@
 }
 
 /* Link button (for clickable table cells) */
-.btn-link { background: none; border: none; padding: 0; font: inherit; color: #1a237e; cursor: pointer; text-decoration: none; }
+.btn-link { background: none; border: none; padding: 0; font: inherit; color: #1a237e; cursor: pointer; text-decoration: none; transition: color 0.15s ease; }
 .btn-link:hover { text-decoration: underline; color: #151b60; }
+
+/* Solid button variants used by JS-generated modals */
+.btn-secondary { background-color: #6b7280; color: #fff; border-color: #6b7280; }
+.btn-secondary:hover { background-color: #4b5563; }
+.btn-success { background-color: #22c55e; color: #fff; border-color: #22c55e; }
+.btn-success:hover { background-color: #16a34a; }
+.btn-light { background-color: #f9fafb; color: #1f2937; border-color: #e5e7eb; }
+.btn-light:hover { background-color: #f3f4f6; }
 
 /* Colored action button variants */
 .btn-edit { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
@@ -208,7 +216,8 @@
 .form-control { display: block; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: #fff; transition: border-color 0.15s ease; }
 .form-control:focus { outline: none; border-color: #1a237e; box-shadow: 0 0 0 2px rgba(26,35,126,.15); }
 .form-control-sm { padding: 0.375rem 0.5rem; font-size: 0.75rem; }
-.form-select { display: block; width: 100%; padding: 0.5rem 2rem 0.5rem 0.75rem; font-size: 0.875rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.75rem center/12px; appearance: none; }
+.form-select { display: block; width: 100%; padding: 0.5rem 2rem 0.5rem 0.75rem; font-size: 0.875rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.75rem center/12px; appearance: none; cursor: pointer; transition: border-color 0.15s ease; }
+.form-select:hover { border-color: #1a237e; }
 .form-select:focus { outline: none; border-color: #1a237e; box-shadow: 0 0 0 2px rgba(26,35,126,.15); }
 .form-select-sm { padding: 0.375rem 1.75rem 0.375rem 0.5rem; font-size: 0.75rem; }
 .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }

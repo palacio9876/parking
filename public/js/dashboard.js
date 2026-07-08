@@ -99,7 +99,8 @@ async function loadDashboardData() {
             throw new Error(t('dashboard.loadError'));
         }
 
-        const data = await response.json();
+        const resData = await response.json();
+        const data = resData.data;
         updateDashboardStats(data);
         updateRecentActivity(data.recentActivity);
         const btnNext = document.getElementById('btnNext');
@@ -129,7 +130,7 @@ function updateDashboardStats(data) {
     document.getElementById('currCarros').textContent = Number(map.car || map.carro || 0);
     document.getElementById('currMotos').textContent = Number(map.motorcycle || map.moto || 0);
     document.getElementById('currBicis').textContent = Number(map.bicycle || map.bici || 0);
-    document.getElementById('todayIncome').textContent = formatCurrency(data.todayIncome || 0);
+    document.getElementById('todayIncome').textContent = formatCurrency(data.todayIncome?.total ?? 0);
     // Ocupación: consultar KPI de reportes para hoy
     setOcupacionKpi();
 }
@@ -190,23 +191,56 @@ window.viewDetails = async function(idMovement) {
         const entryDate = m.entry_date || m.entryDate || '';
         const exitDate = m.exit_date || m.exitDate || '';
         const total = m.total_to_pay || m.total || 0;
+        const status = m.status || 'active';
+        const typeIcon = vehType === 'car' ? 'fa-car' : vehType === 'motorcycle' ? 'fa-motorcycle' : 'fa-bicycle';
+        const typeLabel = vehType === 'car' ? t('vehicleType.car') : vehType === 'motorcycle' ? t('vehicleType.motorcycle') : vehType === 'bicycle' ? t('vehicleType.bicycle') : vehType;
         const modalHtml = `
             <div class="modal fade" id="detailModal" tabindex="-1">
               <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">${t('dashboard.detailTitle')} #${m.id_movement || idMovement}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-content bg-white rounded-xl shadow-2xl border-0">
+                  <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-xl">
+                    <h5 class="text-lg font-semibold text-gray-900">
+                      <i class="fas fa-info-circle text-primary mr-2"></i>${t('dashboard.detailTitle')} #${m.id_movement || idMovement}
+                    </h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-bs-dismiss="modal">
+                      <i class="fas fa-times"></i>
+                    </button>
                   </div>
-                  <div class="modal-body">
-                    <div><strong>${t('dashboard.plate')}:</strong> ${plate}</div>
-                    <div><strong>${t('dashboard.type')}:</strong> ${vehType}</div>
-                    <div><strong>${t('dashboard.entry')}:</strong> ${fmtDate(entryDate)}</div>
-                    ${exitDate ? `<div><strong>${t('dashboard.exit')}:</strong> ${fmtDate(exitDate)}</div>` : ''}
-                    ${total ? `<div><strong>${t('dashboard.total')}:</strong> ${formatCurrency(total)}</div>` : ''}
+                  <div class="p-6">
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4">
+                      <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl">
+                        <i class="fas ${typeIcon}"></i>
+                      </div>
+                      <div>
+                        <div class="text-lg font-bold text-gray-900">${plate}</div>
+                        <div class="text-sm text-gray-500">${typeLabel}</div>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                      <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-500"><i class="fas fa-sign-in-alt mr-2 text-green-500"></i>${t('dashboard.entry')}</span>
+                        <span class="text-sm font-semibold text-gray-900">${fmtDate(entryDate)}</span>
+                      </div>
+                      ${exitDate ? `
+                      <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-500"><i class="fas fa-sign-out-alt mr-2 text-red-500"></i>${t('dashboard.exit')}</span>
+                        <span class="text-sm font-semibold text-gray-900">${fmtDate(exitDate)}</span>
+                      </div>` : ''}
+                      ${total ? `
+                      <div class="flex items-center justify-between px-4 py-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <span class="text-sm font-medium text-blue-700"><i class="fas fa-dollar-sign mr-2"></i>${t('dashboard.total')}</span>
+                        <span class="text-sm font-bold text-blue-700">${formatCurrency(total)}</span>
+                      </div>` : ''}
+                      <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-500"><i class="fas fa-circle mr-2 ${status === 'active' ? 'text-green-500' : 'text-gray-400'}"></i>${t('dashboard.status')}</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">${status === 'active' ? t('dashboard.active') : t('dashboard.completed')}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('common.close')}</button>
+                  <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 rounded-b-xl">
+                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors" data-bs-dismiss="modal">
+                      <i class="fas fa-times mr-1"></i>${t('common.close')}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -349,24 +383,6 @@ function renderExitTicket(exitData, company){
             <hr/>
             <div><strong>${t('dashboard.exitLabel')}</strong></div>
         </div>`;
-    const ciscodeFooter = `
-        <hr/>
-        <div style="text-align:center;margin-top:6px">
-            <div>${t('footer.developedBy')} <strong>Ciscode</strong></div>
-            <div>
-                <a href="https://ciscode.co" target="_blank" style="text-decoration:none;color:#000">ciscode.co</a>
-                &nbsp;|&nbsp;
-                <a href="https://www.youtube.com/@Ciscode" target="_blank" aria-label="YouTube Ciscode" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:#000">
-                    <span>
-                        <svg width="18" height="12" viewBox="0 0 24 17" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M23.5 2.6a3 3 0 0 0-2.1-2.1C19.5 0 12 0 12 0s-7.5 0-9.4.5A3 3 0 0 0 .5 2.6 31 31 0 0 0 0 8.5a31 31 0 0 0 .5 5.9 3 3 0 0 0 2.1 2.1C4.5 17 12 17 12 17s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-5.9 31 31 0 0 0-.5-5.9z" fill="#FF0000"/>
-                            <path d="M9.75 12.25V4.75L15.5 8.5l-5.75 3.75z" fill="#fff"/>
-                        </svg>
-                    </span>
-                    <span style="font-size:10px">YouTube</span>
-                </a>
-            </div>
-        </div>`;
     const movId = exitData.id_movement || exitData.movementId || '';
     const plate = exitData.license_plate || '';
     const vtype = exitData.type || '';
@@ -382,8 +398,7 @@ function renderExitTicket(exitData, company){
         <hr/>
         <div>${t('dashboard.totalToPay')}: <strong>${formatCurrency(total)}</strong></div>
         <div>${t('dashboard.attendedBy')}: ${localStorage.getItem('userName')||''}</div>
-        <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>
-        ${ciscodeFooter}`;
+        <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>`;
 }
 
 // Ventana de impresión tipo ticket con QR opcional

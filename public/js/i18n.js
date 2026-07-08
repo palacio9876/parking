@@ -124,7 +124,7 @@
       var select = document.createElement('select');
       select.id = 'langSwitcher';
       select.className = 'form-select form-select-sm';
-      select.style.cssText = 'width:auto;min-width:110px;padding:2px 28px 2px 8px;font-size:13px;border-radius:6px;border:1px solid #dee2e6;background:#fff;cursor:pointer;';
+      select.style.cssText = 'width:auto;min-width:110px;padding:2px 28px 2px 8px;font-size:13px;border-radius:6px;border:1px solid #dee2e6;background:#fff;cursor:pointer;transition:border-color 0.15s ease;';
       addOptions(select);
       select.value = currentLang;
       select.addEventListener('change', function () { setLang(this.value); });

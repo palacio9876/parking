@@ -61,7 +61,7 @@
                             <form id="rateForm" class="grid grid-cols-12 gap-4">
                                 <div class="col-span-12 md:col-span-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.vehicleType">Tipo de vehículo</label>
-                                    <select id="vehicle_type" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" required>
+                                    <select id="vehicle_type" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" required>
                                         <option value="car" data-i18n="rates.car">Carro</option>
                                         <option value="motorcycle" data-i18n="rates.motorcycle">Moto</option>
                                         <option value="bicycle" data-i18n="rates.bicycle">Bicicleta</option>
@@ -69,7 +69,7 @@
                                 </div>
                                 <div class="col-span-12 md:col-span-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.billingMode">Modo de cobro</label>
-                                    <select id="billing_mode" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                                    <select id="billing_mode" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                                         <option value="mixed" data-i18n="rates.mixed">Mixto</option>
                                         <option value="minute" data-i18n="rates.perMinute">Por minuto</option>
                                         <option value="hour" data-i18n="rates.perHour">Por hora</option>
@@ -100,14 +100,14 @@
                                 </div>
                                 <div class="col-span-12 md:col-span-6">
                                     <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.hourRounding">Redondeo de horas</label>
-                                    <select id="hour_rounding" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                                    <select id="hour_rounding" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                                         <option value="up" data-i18n="rates.roundingUp">Arriba (ceil)</option>
                                         <option value="exact" data-i18n="rates.roundingExact">Exacto</option>
                                     </select>
                                 </div>
                                 <div class="col-span-12 md:col-span-6">
                                     <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="rates.dayRounding">Redondeo de días</label>
-                                    <select id="day_rounding" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                                    <select id="day_rounding" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
                                         <option value="up" data-i18n="rates.roundingUp">Arriba (ceil)</option>
                                         <option value="exact" data-i18n="rates.roundingExact">Exacto</option>
                                     </select>
@@ -138,7 +138,7 @@
             <div class="modal-content bg-white rounded-xl shadow-2xl border-0">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-xl">
                     <h5 class="text-lg font-semibold" id="ayudaTarifasLabel"><i class="fas fa-circle-question mr-2"></i><span data-i18n="rates.helpTitle">Ayuda para configurar Tarifas</span></h5>
-                    <button type="button" class="text-gray-400 hover:text-gray-600" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="p-6">
                     <h6 class="text-sm font-semibold mb-2" data-i18n="rates.billingMode">Modos de cobro</h6>

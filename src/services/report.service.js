@@ -91,6 +91,27 @@ class ReportService {
   }
 
   /**
+   * Obtiene todos los movimientos sin paginación para exportación
+   */
+  async getAllMovements(id_company, from, to, filters = {}) {
+    return reportRepo.getAllMovements(id_company, from, to, filters)
+  }
+
+  /**
+   * Obtiene todos los datos consolidados para el reporte PDF
+   */
+  async getReportData(id_company, from, to, filters = {}) {
+    const [kpis, incomeByDay, incomeByMethod, movements, topPlates] = await Promise.all([
+      this.getKPIs(id_company, from, to),
+      reportRepo.getIncomeByDay(id_company, from, to),
+      reportRepo.getIncomeByMethod(id_company, from, to),
+      reportRepo.getAllMovements(id_company, from, to, filters),
+      reportRepo.getAllTopPlates(id_company, from, to)
+    ])
+    return { kpis: kpis.data, incomeByDay, incomeByMethod, movements, topPlates }
+  }
+
+  /**
    * Obtiene los turnos (shifts) en un rango de fechas
    * @param {number} id_company - ID de la empresa
    * @param {string} from - Fecha inicio
