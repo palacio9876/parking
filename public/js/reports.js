@@ -1,6 +1,10 @@
 // Frontend Reports
 // Related to: public/admin/reportes.html and routes /api/reports/*
 
+const vehicleTypeRep = { carro: 'Carro', moto: 'Moto', bicicleta: 'Bicicleta' };
+const paymentMethodRep = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', QR: 'QR' };
+const statusLabelsRep = { activo: 'Activo', completado: 'Finalizado', inactive: 'Inactivo' };
+
 let __pageRep = 0;
 let __pageSizeRep = 20;
 let chartIncome = null;
@@ -11,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) { window.location.href = '/'; return; }
 
-    document.getElementById('userName').textContent = localStorage.getItem('userName') || t('reports.user');
+    document.getElementById('userName').textContent = localStorage.getItem('userName') || 'Usuario';
     document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
     document.getElementById('btnLogout').addEventListener('click',()=>{localStorage.clear(); location.href='/';});
     const role = localStorage.getItem('userRole');
@@ -114,7 +118,7 @@ function initShiftsView(){
         const btn = document.createElement('button');
         btn.id = 'btnShiftsModal';
         btn.className = 'btn btn-outline-dark btn-sm ms-2';
-        btn.innerHTML = '<i class="fas fa-cash-register me-1"></i>' + t('reports.shiftClosures');
+        btn.innerHTML = '<i class="fas fa-cash-register me-1"></i>Cierres de Turno';
         filtrosHeader.appendChild(btn);
         btn.addEventListener('click', ()=>{ loadShifts(); new bootstrap.Modal(document.getElementById('shiftsModal')).show(); });
     }
@@ -126,30 +130,30 @@ function initShiftsView(){
       '  <div class="modal-dialog modal-xl">',
       '    <div class="modal-content">',
       '      <div class="modal-header">',
-      '        <h5 class="modal-title"><i class="fas fa-cash-register me-2"></i>' + t('reports.shiftClosures') + '</h5>',
+      '        <h5 class="modal-title"><i class="fas fa-cash-register me-2"></i>Cierres de Turno</h5>',
       '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
       '      </div>',
       '      <div class="modal-body">',
       '        <div class="d-flex flex-wrap gap-2 mb-3">',
       '          <input type="date" id="tFrom" class="form-control form-control-sm" />',
       '          <input type="date" id="tTo" class="form-control form-control-sm" />',
-'          <input type="text" id="tUser" class="form-control form-control-sm" placeholder="' + t('reports.searchUser') + '" />',
-'          <button class="btn btn-sm btn-primary" id="tSearch"><i class="fas fa-filter me-1"></i>' + t('common.filter') + '</button>',
+'          <input type="text" id="tUser" class="form-control form-control-sm" placeholder="Usuario" />',
+'          <button class="btn btn-sm btn-primary" id="tSearch"><i class="fas fa-filter me-1"></i>Filtrar</button>',
 '          <button class="btn btn-sm btn-outline-secondary" id="tClearFilters"><i class="fas fa-times me-1"></i> Limpiar</button>',
-'          <button class="btn btn-sm btn-outline-success" id="tExportXlsx"><i class="fas fa-file-excel me-1"></i>' + t('reports.exportExcel') + '</button>',
+'          <button class="btn btn-sm btn-outline-success" id="tExportXlsx"><i class="fas fa-file-excel me-1"></i>Exportar Excel</button>',
       '        </div>',
       '        <div class="table-responsive">',
       '          <table class="table table-sm" id="tbShifts">',
       '            <thead><tr>',
-'              <th>#</th><th>' + t('reports.opening') + '</th><th>' + t('reports.closing') + '</th><th>' + t('reports.user') + '</th>',
-'              <th>' + t('reports.base') + '</th><th>' + t('payment.cash') + '</th><th>' + t('payment.card') + '</th><th>' + t('payment.qr') + '</th><th>' + t('common.total') + '</th><th>' + t('reports.difference') + '</th><th></th>',
+'              <th>#</th><th>Apertura</th><th>Cierre</th><th>Usuario</th>',
+'              <th>Base</th><th>Efectivo</th><th>Tarjeta</th><th>QR</th><th>Total</th><th>Diferencia</th><th></th>',
       '            </tr></thead>',
       '            <tbody></tbody>',
       '          </table>',
       '        </div>',
       '      </div>',
       '      <div class="modal-footer">',
-      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">' + t('common.close') + '</button>',
+      '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>',
       '      </div>',
       '    </div>',
       '  </div>',
@@ -181,7 +185,7 @@ function initShiftsView(){
       });
       const r = await fetch('/api/reports/shifts?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
       const j = await r.json();
-      if (!r.ok) { toast(t('common.error'), j.message||t('reports.shiftsError'), 'error'); return; }
+      if (!r.ok) { toast('Error', j.message||'Error listando turnos', 'error'); return; }
       const tb = document.querySelector('#tbShifts tbody');
       tb.innerHTML = '';
       j.data.forEach((t, idx)=>{
@@ -214,7 +218,7 @@ function initShiftsView(){
 
     // Excel export
     document.getElementById('tExportXlsx').addEventListener('click', async ()=>{
-      const lang = (window.i18n && window.i18n.getLang()) || 'es';
+      const lang = 'es';
       const params = new URLSearchParams({
         from: document.getElementById('tFrom').value,
         to: document.getElementById('tTo').value,
@@ -222,7 +226,7 @@ function initShiftsView(){
         lang
       });
       const res = await fetch('/api/reports/shifts/export/xlsx?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
-      if (!res.ok) { const j = await res.json().catch(()=>({message:t('reports.exportError')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
+      if (!res.ok) { const j = await res.json().catch(()=>({message:'Error exportando'})); toast('Error', j.message||'Error exportando', 'error'); return; }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -239,30 +243,30 @@ function initShiftsView(){
         if (window.printSummary){ window.printSummary(res); return; }
         const html = `
           <div style="font-family:Arial,sans-serif;font-size:12px">
-            <h3 style="margin:0 0 8px">${t('reports.shiftClosure')}</h3>
-            <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>
-            <div>${t('reports.shiftClosure')} #${res.shift.id_shift} | ${t('reports.user')}: ${escHtml(res.shift.user)}</div>
-            <div>${t('reports.initialBase')}: <strong>${fmt(res.base_initial)}</strong></div>
-            <div>${t('reports.totalTickets')}: <strong>${res.stats.total}</strong> (${t('reports.cars')}: ${res.stats.byType.car} | ${t('reports.motorcycles')}: ${res.stats.byType.motorcycle} | ${t('reports.bicycles')}: ${res.stats.byType.bicycle})</div>
+            <h3 style="margin:0 0 8px">Cierre de Turno</h3>
+            <div>Fecha impresión: ${fmtDate(new Date())}</div>
+            <div>Cierre de Turno #${res.shift.id_shift} | Usuario: ${escHtml(res.shift.user)}</div>
+            <div>Base inicial: <strong>${fmt(res.base_initial)}</strong></div>
+            <div>Total tickets: <strong>${res.stats.total}</strong> (Carros: ${res.stats.byType.car} | Motos: ${res.stats.byType.motorcycle} | Bicicletas: ${res.stats.byType.bicycle})</div>
             <hr/>
             <div style="display:flex;gap:16px">
               <div>
-                <div style="font-weight:bold">${t('reports.userCount')}</div>
-                <div>${t('payment.cash')}: ${fmt(res.user.cash)}</div>
-                <div>${t('payment.card')}: ${fmt(res.user.card)}</div>
-                <div>${t('payment.qr')}: ${fmt(res.user.qr)}</div>
-                <div><strong>${t('common.total')}: ${fmt(res.user.total)}</strong></div>
+                <div style="font-weight:bold">Conteo Usuario</div>
+                <div>Efectivo: ${fmt(res.user.cash)}</div>
+                <div>Tarjeta: ${fmt(res.user.card)}</div>
+                <div>QR: ${fmt(res.user.qr)}</div>
+                <div><strong>Total: ${fmt(res.user.total)}</strong></div>
               </div>
               <div>
-                <div style="font-weight:bold">${t('reports.system')}</div>
-                <div>${t('payment.cash')}: ${fmt(res.expected.cash)}</div>
-                <div>${t('payment.card')}: ${fmt(res.expected.card)}</div>
-                <div>${t('payment.qr')}: ${fmt(res.expected.qr)}</div>
-                <div><strong>${t('common.total')}: ${fmt(res.expected.total)}</strong></div>
+                <div style="font-weight:bold">Sistema</div>
+                <div>Efectivo: ${fmt(res.expected.cash)}</div>
+                <div>Tarjeta: ${fmt(res.expected.card)}</div>
+                <div>QR: ${fmt(res.expected.qr)}</div>
+                <div><strong>Total: ${fmt(res.expected.total)}</strong></div>
               </div>
             </div>
             <hr/>
-            <div><strong>${t('reports.difference')}: ${fmt(res.diff)}</strong></div>
+            <div><strong>Diferencia: ${fmt(res.diff)}</strong></div>
             ${res.obs?('<div>Obs.: '+escHtml(res.obs)+'</div>'):''}
           </div>`;
 
@@ -276,7 +280,7 @@ function initShiftsView(){
         b58.addEventListener('click', on58);
         b80.addEventListener('click', on80);
         m.show();
-      }catch(e){ toast(t('common.error'), e.message, 'error'); }
+      }catch(e){ toast('Error', e.message, 'error'); }
     }
 
     function printHtmlAtWidth(html, mm){
@@ -294,18 +298,18 @@ function initShiftsView(){
         '  <div class="modal-dialog">',
         '    <div class="modal-content">',
         '      <div class="modal-header">',
-        '        <h5 class="modal-title">' + t('reports.selectPrintSize') + '</h5>',
+        '        <h5 class="modal-title">Seleccionar tamaño de impresión</h5>',
         '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
         '      </div>',
         '      <div class="modal-body">',
-        '        <p class="mb-2">' + t('reports.printSizeHelp') + '</p>',
+        '        <p class="mb-2">Elige el ancho del papel térmico para imprimir el cierre.</p>',
         '        <div class="d-flex gap-2">',
         '          <button type="button" id="btnShiftsPrint58" class="btn btn-primary">58 mm</button>',
         '          <button type="button" id="btnShiftsPrint80" class="btn btn-outline-primary">80 mm</button>',
         '        </div>',
         '      </div>',
         '      <div class="modal-footer">',
-        '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">' + t('common.cancel') + '</button>',
+        '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>',
         '      </div>',
         '    </div>',
         '  </div>',
@@ -322,13 +326,13 @@ async function loadKPIs(){
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('reports.kpiError'));
+        if(!res.ok) throw new Error(j.message||'Error KPIs');
         const d = j.data || {};
         document.getElementById('kpiIncome').textContent = formatCurrency(d.income||0);
         document.getElementById('kpiTickets').textContent = String(d.tickets||0);
         document.getElementById('kpiAverage').textContent = formatCurrency(d.averageTicket||0);
         document.getElementById('kpiOccupancy').textContent = (d.occupancy!=null? d.occupancy:0) + '%';
-    }catch(e){ toast(t('common.error'), e.message, 'error'); }
+    }catch(e){ toast('Error', e.message, 'error'); }
 }
 
 async function loadChartIncome(){
@@ -339,11 +343,11 @@ async function loadChartIncome(){
         if (paymentMethod) q.append('paymentMethod', paymentMethod);
         const res = await fetch(`/api/reports/income-by-day?${q.toString()}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('reports.incomeDayError'));
+        if(!res.ok) throw new Error(j.message||'Error ingresos por día');
         const labels = j.data.map(r=>r.date);
         const data = j.data.map(r=>Number(r.total||0));
-        renderLineChart('chartIncome', labels, data, t('reports.income'));
-    }catch(e){ toast(t('common.error'), e.message, 'error'); }
+        renderLineChart('chartIncome', labels, data, 'Ingresos');
+    }catch(e){ toast('Error', e.message, 'error'); }
 }
 
 async function loadChartPaymentMethod(){
@@ -351,11 +355,11 @@ async function loadChartPaymentMethod(){
         const { from, to } = baseParams();
         const res = await fetch(`/api/reports/income-by-payment-method?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('reports.incomeMethodError'));
-        const labels = j.data.map(r=>t('payment.' + r.payment_method));
+        if(!res.ok) throw new Error(j.message||'Error ingresos por método');
+        const labels = j.data.map(r=>paymentMethodRep[r.payment_method] || r.payment_method);
         const data = j.data.map(r=>Number(r.total||0));
         renderDoughnut('chartPaymentMethod', labels, data);
-    }catch(e){ toast(t('common.error'), e.message, 'error'); }
+    }catch(e){ toast('Error', e.message, 'error'); }
 }
 
 async function loadMovements(){
@@ -370,22 +374,22 @@ async function loadMovements(){
         if (plate) q.append('plate', plate);
         const res = await fetch(`/api/reports/movements?${q.toString()}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('reports.movementsError'));
+        if(!res.ok) throw new Error(j.message||'Error movimientos');
         const tb = document.getElementById('tbMov');
         if (!j.data || j.data.length === 0){
-            tb.innerHTML = '<tr><td colspan="7" class="text-center">' + t('common.noRecords') + '</td></tr>';
+            tb.innerHTML = '<tr><td colspan="7" class="text-center">Sin registros</td></tr>';
         } else {
             tb.innerHTML = j.data.map(r=>`
                 <tr>
                     <td>${r.id}</td>
                     <td>${r.license_plate}</td>
-                    <td>${t('vehicleType.' + r.type)}</td>
+                    <td>${vehicleTypeRep[r.type] || r.type}</td>
                     <td>${formatDateTime(r.entry_date)}</td>
                     <td>${r.exit_date? formatDateTime(r.exit_date): '-'}</td>
-                    <td><span class="badge bg-${r.status==='active'?'success':'secondary'}">${t('status.' + r.status)}</span></td>
+                    <td><span class="badge bg-${r.status==='activo'?'success':'secondary'}">${statusLabelsRep[r.status] || r.status}</span></td>
                     <td>${r.total_to_pay!=null? formatCurrency(r.total_to_pay) : '-'}</td>
                     <td>
-                        ${r.status==='completed' ? `<button class="btn btn-sm btn-outline-primary" onclick="reprintExit(${r.id})"><i class='fas fa-print'></i></button>` : ''}
+                        ${r.status==='completado' ? `<button class="btn btn-sm btn-outline-primary" onclick="reprintExit(${r.id})"><i class='fas fa-print'></i></button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -394,9 +398,9 @@ async function loadMovements(){
         const maxPage = Math.max(0, Math.ceil(total / __pageSizeRep) - 1);
         document.getElementById('btnPrev').disabled = __pageRep <= 0;
         document.getElementById('btnNext').disabled = __pageRep >= maxPage;
-        document.getElementById('pageInfo').textContent = t('common.page') + ' ' + (__pageRep+1) + ' ' + t('common.of') + ' ' + (maxPage+1);
-        document.getElementById('movPaging').textContent = t('common.total') + ': ' + total;
-    }catch(e){ toast(t('common.error'), e.message, 'error'); }
+        document.getElementById('pageInfo').textContent = 'Página ' + (__pageRep+1) + ' de ' + (maxPage+1);
+        document.getElementById('movPaging').textContent = 'Total: ' + total;
+    }catch(e){ toast('Error', e.message, 'error'); }
 }
 
 // Reprint exit ticket from reports
@@ -405,7 +409,7 @@ window.reprintExit = async function(idMovement){
         // Get invoice with entry-exit structure
         const res = await fetch(`/api/movements/invoice/${idMovement}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.message||t('reports.reprintExit'));
+        if (!res.ok) throw new Error(j.message||'Reimpresión de Salida');
         const f = j.data;
         // Company, logo (DataURL) and settings
         const company = await fetch('/api/companies/me',{ headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} }).then(r=>r.json()).then(x=>x.data).catch(()=>null);
@@ -421,39 +425,39 @@ window.reprintExit = async function(idMovement){
         // Reuse same entry-exit render if available
         if (window.renderReceipt && window.printHTML){
             const htmlTicket = renderReceipt('EXIT', null, f, companyInfo);
-            printHTML(htmlTicket, t('reprints.exitInvoice'), 80, { t:'exit', e:companyInfo?.tax_id, m:f.movementId, p:f.license_plate, fs:f.exitDate, total: f.total });
+            printHTML(htmlTicket, 'Factura de Salida', 80, { t:'exit', e:companyInfo?.tax_id, m:f.movementId, p:f.license_plate, fs:f.exitDate, total: f.total });
             return;
         }
         // Simple fallback (if reports is opened in isolation)
         const header = `
             <div style="text-align:center">
                 ${companyInfo.logo_url ? `<img src="${companyInfo.logo_url}" alt="logo" style="max-height:60px">` : ''}
-                <div><strong>${companyInfo.name||t('company.name')}</strong></div>
+                <div><strong>${companyInfo.name||'Empresa'}</strong></div>
                 <div>TAX ID: ${companyInfo.tax_id||''}</div>
                 <div>${companyInfo.address||''} ${companyInfo.phone? ' - '+companyInfo.phone:''}</div>
-                <div>${t('company.schedule')}: <strong>${(companyInfo?.operation_24h)?t('time.h24'):((fmtTimeRS(companyInfo?.opening_time)||'')+' - '+(fmtTimeRS(companyInfo?.closing_time)||''))}</strong></div>
+                <div>Horario: <strong>${(companyInfo?.operation_24h)?'24 horas':((fmtTimeRS(companyInfo?.opening_time)||'')+' - '+(fmtTimeRS(companyInfo?.closing_time)||''))}</strong></div>
                 <hr/>
-                <div><strong>${t('dashboard.exitLabel')}</strong></div>
+                <div><strong>SALIDA</strong></div>
             </div>`;
         const paymentsHtml = (f.paymentsList && f.paymentsList.length)
-            ? `<div><strong>${t('vehicles.historyPayments')}</strong></div>` + f.paymentsList.map(p=>`<div>${p.payment_method}: <strong>${formatCurrency(Number(p.amount||0))}</strong></div>`).join('')
+            ? `<div><strong>Pagos</strong></div>` + f.paymentsList.map(p=>`<div>${p.payment_method}: <strong>${formatCurrency(Number(p.amount||0))}</strong></div>`).join('')
             : '';
         const body = `
-            <div>${t('dashboard.movement')}: <strong>#${f.movementId}</strong></div>
-            <div>${t('dashboard.plate')}: <strong>${f.license_plate}</strong></div>
-            <div>${t('dashboard.type')}: <strong>${f.type}</strong></div>
-            <div>${t('dashboard.entry')}: <strong>${fmtDate(f.entryDate)}</strong></div>
-            <div>${t('dashboard.exit')}: <strong>${fmtDate(f.exitDate)}</strong></div>
+            <div>Movimiento: <strong>#${f.movementId}</strong></div>
+            <div>Placa: <strong>${f.license_plate}</strong></div>
+            <div>Tipo: <strong>${f.type}</strong></div>
+            <div>Entrada: <strong>${fmtDate(f.entryDate)}</strong></div>
+            <div>Salida: <strong>${fmtDate(f.exitDate)}</strong></div>
             <hr/>
             <div>Rates</div>
             <div>Minute: <strong>${f.rate.minute_rate}</strong></div>
             <div>Hour: <strong>${f.rate.hourly_rate}</strong></div>
             <div>Day: <strong>${f.rate.full_day_rate}</strong></div>
             <hr/>
-            <div>${t('dashboard.totalToPay')}: <strong>${formatCurrency(f.total)}</strong></div>
+            <div>Total a pagar: <strong>${formatCurrency(f.total)}</strong></div>
             ${paymentsHtml}
-            <div>${t('dashboard.attendedBy')}: ${localStorage.getItem('userName')||''}</div>
-            <div>${t('dashboard.printDate')}: ${fmtDate(new Date())}</div>`;
+            <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
+            <div>Fecha impresión: ${fmtDate(new Date())}</div>`;
         const printWin = window.open('','_blank','width=420,height=700');
         const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Reprint</title>
             <style>@page{ size:80mm auto; margin: 3mm } body{ width:80mm; font-family: Arial, sans-serif; font-size:11px; margin:0 } .wrap{ padding:4mm } hr{ border:none; border-top:1px dashed #999; margin:6px 0 } img{ display:block; margin:0 auto 6px; max-width:100% } .qr{ display:flex; justify-content:center; margin-top:6px }</style>
@@ -464,7 +468,7 @@ window.reprintExit = async function(idMovement){
         printWin.document.write(doc);
         printWin.document.close();
         printWin.focus();
-    }catch(e){ toast(t('common.error'), e.message, 'error'); }
+    }catch(e){ toast('Error', e.message, 'error'); }
 }
 
 function fmtTimeRS(t){ if(!t) return ''; const s=String(t); return s.length>=5? s.substring(0,5): s; }
@@ -474,21 +478,21 @@ async function loadTopPlates(){
         const { from, to } = baseParams();
         const res = await fetch(`/api/reports/top-plates?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&limit=10`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('reports.topPlatesError'));
+        if(!res.ok) throw new Error(j.message||'Error top placas');
         const tb = document.getElementById('tbTop');
         if (!j.data || j.data.length === 0){
-            tb.innerHTML = '<tr><td colspan="4" class="text-center">' + t('common.noRecords') + '</td></tr>';
+            tb.innerHTML = '<tr><td colspan="4" class="text-center">Sin registros</td></tr>';
         } else {
             tb.innerHTML = j.data.map(r=>`
                 <tr>
                     <td>${r.license_plate}</td>
-                    <td>${t('vehicleType.' + r.type)}</td>
+                    <td>${vehicleTypeRep[r.type] || r.type}</td>
                     <td>${r.visits}</td>
                     <td>${formatCurrency(r.total||0)}</td>
                 </tr>
             `).join('');
         }
-    }catch(e){ toast(t('common.error'), e.message, 'error'); }
+    }catch(e){ toast('Error', e.message, 'error'); }
 }
 
 // Render charts
@@ -521,21 +525,21 @@ async function exportToPDF(){
         const type = document.getElementById('fType').value;
         const status = document.getElementById('fStatus').value;
         const plate = document.getElementById('fPlate').value.trim();
-        const lang = (window.i18n && window.i18n.getLang()) || 'es';
+        const lang = 'es';
         const q = new URLSearchParams({ from, to, lang });
         if (type) q.append('type', type);
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);
-        toast(t('common.info'), t('reports.generatingPdf'), 'info');
+        toast('Información', 'Generando PDF...', 'info');
         const res = await fetch(`/api/reports/export/pdf?${q.toString()}`, { headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` } });
-        if (!res.ok) { const j = await res.json().catch(()=>({message:t('common.error')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
+        if (!res.ok) { const j = await res.json().catch(()=>({message:'Error'})); toast('Error', j.message||'Error exportando', 'error'); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `reporte_${from}_${to}.pdf`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        toast(t('common.success'), t('reports.fileDownloaded'), 'success');
+        toast('Éxito', 'Archivo descargado', 'success');
     }catch(err){
-        toast(t('common.error'), err.message, 'error');
+        toast('Error', err.message, 'error');
     }
 }
 
@@ -545,19 +549,19 @@ async function exportToExcelBackend(){
         const type = document.getElementById('fType').value;
         const status = document.getElementById('fStatus').value;
         const plate = document.getElementById('fPlate').value.trim();
-        const lang = (window.i18n && window.i18n.getLang()) || 'es';
+        const lang = 'es';
         const q = new URLSearchParams({ from, to, lang });
         if (type) q.append('type', type);
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);
         const res = await fetch(`/api/reports/export/xlsx?${q.toString()}`, { headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` } });
-        if (!res.ok) { const j = await res.json().catch(()=>({message:t('common.error')})); toast(t('common.error'), j.message||t('reports.exportError'), 'error'); return; }
+        if (!res.ok) { const j = await res.json().catch(()=>({message:'Error'})); toast('Error', j.message||'Error exportando', 'error'); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `reports_${Date.now()}.xlsx`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        toast(t('common.success'), t('reports.fileDownloaded'), 'success');
-    }catch(err){ toast(t('common.error'), err.message, 'error'); }
+        toast('Éxito', 'Archivo descargado', 'success');
+    }catch(err){ toast('Error', err.message, 'error'); }
 }
 
 function setToday(){ const d = new Date(); const s = d.toISOString().split('T')[0]; document.getElementById('fFrom').value = s; document.getElementById('fTo').value = s; }

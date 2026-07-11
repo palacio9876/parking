@@ -86,23 +86,23 @@
 			'<div class="container-fluid px-3 text-center">',
 				'<div class="mx-auto" style="max-width: 980px">',
 					'<p class="mb-2 small lh-base">',
-						t('footer.text') + ' ',
-						'<a class="'+linkClass+'" href="'+developerEmail+'" target="_blank" rel="noopener">' + t('footer.developer') + '</a>. ',
-						t('footer.donation') + ' ',
-						'<a class="'+linkClass+'" href="'+paypalUrl+'" target="_blank" rel="noopener">' + t('footer.thisLink') + '</a>. ',
-						t('footer.helpText') + ' ',
-						t('footer.openSource') + ' ',
-						'<a class="'+linkClass+'" href="'+githubUrl+'" target="_blank" rel="noopener">' + t('footer.github') + '</a>.',
+						'Este software es completamente gratuito. Si necesitas consultoría, capacitación o deseas realizar cambios, contacta al desarrollador ',
+						'<a class="'+linkClass+'" href="'+developerEmail+'" target="_blank" rel="noopener">Cristian C. Palacio N</a>. ',
+						'Además, si te gustó y quieres apoyar, puedes hacer una donación a través de ',
+						'<a class="'+linkClass+'" href="'+paypalUrl+'" target="_blank" rel="noopener">este enlace</a>. ',
+						'Esto me ayudará a seguir creando software de calidad sin costo. ',
+						'Y recuerda que el código de este sistema está completamente abierto en ',
+						'<a class="'+linkClass+'" href="'+githubUrl+'" target="_blank" rel="noopener">GitHub</a>.',
 					'</p>',
 					'<div class="d-grid gap-2 d-sm-flex justify-content-center flex-wrap">',
 						'<a class="btn btn-sm '+outlineBtn+'" href="'+developerEmail+'" target="_blank" rel="noopener" aria-label="Developer site">',
-							'<i class="bi bi-globe2 me-1"></i> ' + t('footer.support')
+							'<i class="bi bi-globe2 me-1"></i> Soporte'
 						,'</a>',
 						'<a class="btn btn-sm '+solidBtn+'" href="'+paypalUrl+'" target="_blank" rel="noopener" aria-label="Donate on PayPal">',
-							'<i class="bi bi-heart-fill me-1"></i> ' + t('footer.donate')
+							'<i class="bi bi-heart-fill me-1"></i> Donar'
 						,'</a>',
 						'<a class="btn btn-sm '+outlineBtn+'" href="'+githubUrl+'" target="_blank" rel="noopener" aria-label="Repository on GitHub">',
-							'<i class="bi bi-github me-1"></i> ' + t('footer.code')
+							'<i class="bi bi-github me-1"></i> Código'
 						,'</a>',
 					'</div>',
 					'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
@@ -120,9 +120,7 @@
 		}catch(_e){}
 	}
 
-	i18n.onReady(function(){
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', mount);
-		} else { mount(); }
-	});
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', mount);
+	} else { mount(); }
 })();

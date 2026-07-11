@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="vehicles.title">ParkSystem - Gestión de Vehículos</title>
+    <title>ParkSystem - Gestión de Vehículos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -19,16 +19,16 @@
         </div>
         <nav class="sidebar-nav">
             <ul class="flex flex-col">
-                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span data-i18n="sidebar.dashboard">Dashboard</span></a></li>
-                <li class="nav-item"><a href="/admin/vehicles" class="nav-link active"><i class="fas fa-car"></i><span data-i18n="sidebar.vehicles">Vehículos</span></a></li>
-                <li class="nav-item"><a href="/admin/entry-exit" class="nav-link"><i class="fas fa-right-left"></i><span data-i18n="sidebar.entryExit">Ingreso / Salida</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/settings" class="nav-link"><i class="fas fa-gear"></i><span data-i18n="sidebar.settings">Configuración</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/rates" class="nav-link"><i class="fas fa-money-bill-wave"></i><span data-i18n="sidebar.rates">Tarifas</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/users" class="nav-link"><i class="fas fa-users"></i><span data-i18n="sidebar.users">Usuarios</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i><span data-i18n="sidebar.reports">Reportes</span></a></li>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="/admin/vehicles" class="nav-link active"><i class="fas fa-car"></i><span>Vehículos</span></a></li>
+                <li class="nav-item"><a href="/admin/entry-exit" class="nav-link"><i class="fas fa-right-left"></i><span>Ingreso / Salida</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/settings" class="nav-link"><i class="fas fa-gear"></i><span>Configuración</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/rates" class="nav-link"><i class="fas fa-money-bill-wave"></i><span>Tarifas</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/users" class="nav-link"><i class="fas fa-users"></i><span>Usuarios</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i><span>Reportes</span></a></li>
             </ul>
         </nav>
-        <div class="sidebar-footer"><a href="#" class="nav-link" id="btnLogout"><i class="fas fa-sign-out-alt"></i><span data-i18n="sidebar.logout">Cerrar Sesión</span></a></div>
+        <div class="sidebar-footer"><a href="#" class="nav-link" id="btnLogout"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></div>
     </div>
 
     <div class="main-content">
@@ -39,7 +39,6 @@
                 </button>
             </div>
             <div class="flex items-center gap-3 px-4">
-                <div class="lang-switcher"></div>
                 <div class="h-5 w-px bg-gray-200"></div>
                 <div class="relative">
                     <a class="flex items-center gap-2 text-gray-700 text-sm font-medium cursor-pointer hover:text-gray-900 transition-colors" href="#" id="userDropdown" data-bs-toggle="dropdown">
@@ -48,10 +47,10 @@
                         <i class="fas fa-chevron-down text-xs text-gray-400"></i>
                     </a>
                     <ul class="dropdown-menu absolute right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-100 py-1 min-w-[180px] hidden" id="userDropdownMenu">
-                        <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="#"><i class="fas fa-user mr-2 text-gray-400"></i><span data-i18n="profile.title">Perfil</span></a></li>
-                        <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="/admin/settings"><i class="fas fa-cog mr-2 text-gray-400"></i><span data-i18n="profile.settings">Configuración</span></a></li>
+                        <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="#"><i class="fas fa-user mr-2 text-gray-400"></i><span>Perfil</span></a></li>
+                        <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="/admin/settings"><i class="fas fa-cog mr-2 text-gray-400"></i><span>Configuración</span></a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" href="#" id="logoutDropdown"><i class="fas fa-sign-out-alt mr-2"></i><span data-i18n="sidebar.logout">Cerrar Sesión</span></a></li>
+                        <li><a class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" href="#" id="logoutDropdown"><i class="fas fa-sign-out-alt mr-2"></i><span>Cerrar Sesión</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -61,9 +60,9 @@
             <div class="mb-6">
                 <div class="bg-white rounded-xl shadow-sm">
                     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h5 class="text-lg font-semibold text-gray-900 mb-0" data-i18n="vehicles.title">Gestión de Vehículos</h5>
+                        <h5 class="text-lg font-semibold text-gray-900 mb-0">Gestión de Vehículos</h5>
                         <button class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors" data-bs-toggle="modal" data-bs-target="#vehicleModal">
-                            <i class="fas fa-plus mr-2"></i><span data-i18n="vehicles.new">Nuevo Vehículo</span>
+                            <i class="fas fa-plus mr-2"></i><span>Nuevo Vehículo</span>
                         </button>
                     </div>
                     <div class="p-6">
@@ -78,14 +77,14 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <select class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="filterType">
-                                        <option value="" data-i18n="vehicles.filterType">Todos los tipos</option>
-                                        <option value="car" data-i18n="vehicles.filterCar">Carros</option>
-                                        <option value="motorcycle" data-i18n="vehicles.filterMotorcycle">Motos</option>
-                                        <option value="bicycle" data-i18n="vehicles.filterBicycle">Bicicletas</option>
+                                        <option value="">Todos los tipos</option>
+                                        <option value="carro">Carros</option>
+                                        <option value="moto">Motos</option>
+                                        <option value="bicicleta">Bicicletas</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="filterPlate" data-i18n="vehicles.filterPlate" data-i18n-attr="placeholder" placeholder="Buscar por placa">
+                                    <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="filterPlate" placeholder="Buscar por placa">
                                 </div>
                                 <div class="flex items-end">
                                     <button onclick="clearVFilters()" class="px-4 py-2.5 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors" type="button">
@@ -99,13 +98,13 @@
                             <table class="w-full text-left" id="vehiclesTable">
                                 <thead>
                                     <tr>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="vehicles.plate">Placa</th>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="vehicles.type">Tipo</th>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="vehicles.color">Color</th>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="vehicles.model">Modelo</th>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="vehicles.regDate">Fecha Registro</th>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="vehicles.status">Estado</th>
-                                        <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="common.actions">Acciones</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Placa</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Tipo</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Color</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Modelo</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Fecha Registro</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Estado</th>
+                                        <th class="text-sm font-semibold text-gray-500 pb-3">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -121,7 +120,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content bg-white rounded-xl shadow-2xl border-0">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-xl">
-                    <h5 class="text-lg font-semibold"><span data-i18n="vehicles.historyTitle">Historial del Vehículo</span> <span id="histPlate"></span></h5>
+                    <h5 class="text-lg font-semibold"><span>Historial del Vehículo</span> <span id="histPlate"></span></h5>
                     <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="p-6">
@@ -129,12 +128,12 @@
                         <table class="w-full text-left text-sm">
                             <thead>
                                 <tr>
-                                    <th class="font-semibold text-gray-500 pb-3" data-i18n="vehicles.historyMov">#Mov</th>
-                                    <th class="font-semibold text-gray-500 pb-3" data-i18n="vehicles.historyEntry">Entrada</th>
-                                    <th class="font-semibold text-gray-500 pb-3" data-i18n="vehicles.historyExit">Salida</th>
-                                    <th class="font-semibold text-gray-500 pb-3" data-i18n="vehicles.historyStatus">Estado</th>
-                                    <th class="font-semibold text-gray-500 pb-3" data-i18n="vehicles.historyTotal">Total</th>
-                                    <th class="font-semibold text-gray-500 pb-3" data-i18n="vehicles.historyPayments">Pagos</th>
+                                    <th class="font-semibold text-gray-500 pb-3">#Mov</th>
+                                    <th class="font-semibold text-gray-500 pb-3">Entrada</th>
+                                    <th class="font-semibold text-gray-500 pb-3">Salida</th>
+                                    <th class="font-semibold text-gray-500 pb-3">Estado</th>
+                                    <th class="font-semibold text-gray-500 pb-3">Total</th>
+                                    <th class="font-semibold text-gray-500 pb-3">Pagos</th>
                                 </tr>
                             </thead>
                             <tbody id="historyBody"></tbody>
@@ -142,7 +141,7 @@
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 rounded-b-xl">
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors" data-bs-dismiss="modal" data-i18n="common.close">Cerrar</button>
+                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -152,38 +151,38 @@
         <div class="modal-dialog">
             <div class="modal-content bg-white rounded-xl shadow-2xl border-0">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-xl">
-                    <h5 class="text-lg font-semibold" id="modalTitle" data-i18n="vehicles.new">Nuevo Vehículo</h5>
+                    <h5 class="text-lg font-semibold" id="modalTitle">Nuevo Vehículo</h5>
                     <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="p-6">
                     <form id="vehicleForm">
                         <input type="hidden" id="vehicleId">
                         <div class="mb-4">
-                            <label for="placa" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="vehicles.formPlate">Placa</label>
+                            <label for="placa" class="block text-sm font-medium text-gray-700 mb-1">Placa</label>
                             <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="license_plate" required>
                         </div>
                         <div class="mb-4">
-                            <label for="tipo" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="vehicles.formType">Tipo</label>
+                            <label for="tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                             <select class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="type" required>
-                                <option value="" data-i18n="vehicles.formSelectType">Seleccione un tipo</option>
-                                <option value="car" data-i18n="vehicles.formCar">Carro</option>
-                                <option value="motorcycle" data-i18n="vehicles.formMotorcycle">Moto</option>
-                                <option value="bicycle" data-i18n="vehicles.formBicycle">Bicicleta</option>
+                                <option value="">Seleccione un tipo</option>
+                                <option value="carro">Carro</option>
+                                <option value="moto">Moto</option>
+                                <option value="bicicleta">Bicicleta</option>
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label for="color" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="vehicles.formColor">Color</label>
+                            <label for="color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
                             <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="color" required>
                         </div>
                         <div class="mb-4">
-                            <label for="modelo" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="vehicles.formModel">Modelo</label>
+                            <label for="modelo" class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
                             <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" id="model">
                         </div>
                     </form>
                 </div>
                 <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 rounded-b-xl">
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors" data-bs-dismiss="modal" data-i18n="common.cancel">Cancelar</button>
-                    <button type="button" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors" id="btnSave" data-i18n="common.save">Guardar</button>
+                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors" id="btnSave">Guardar</button>
                 </div>
             </div>
         </div>

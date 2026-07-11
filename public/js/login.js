@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || t('login.error'));
+                    throw new Error(data.message || 'Error en el inicio de sesión');
                 }
 
                 // Guardar token y datos del usuario
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const boton = loginForm.querySelector('button[type="submit"]');
         boton.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            ${t('login.loading')}
+            Iniciando sesión...
         `;
         boton.disabled = true;
     }
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para restaurar el botón
     function restaurarBoton() {
         const boton = loginForm.querySelector('button[type="submit"]');
-        boton.innerHTML = t('login.button');
+        boton.innerHTML = 'Iniciar Sesión';
         boton.disabled = false;
     }
 

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) { window.location.href = '/'; return; }
     if (role !== 'admin') { window.location.href = '/admin/dashboard'; return; }
 
-    document.getElementById('userName').textContent = localStorage.getItem('userName') || t('users.name');
+    document.getElementById('userName').textContent = localStorage.getItem('userName') || 'Nombre';
     document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
     document.getElementById('btnLogout').addEventListener('click',()=>{ localStorage.clear(); location.href='/'; });
 
@@ -23,7 +23,7 @@ async function loadUsers(){
     try{
         const res = await fetch('/api/users', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('users.loadError'));
+        if(!res.ok) throw new Error(j.message||'Error listando usuarios');
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = j.data.map(u => `
             <tr>
@@ -39,12 +39,12 @@ async function loadUsers(){
                 </td>
             </tr>
         `).join('');
-    }catch(err){ toast(t('common.error'), err.message, 'error'); }
+    }catch(err){ toast('Error', err.message, 'error'); }
 }
 
 function editUser(u){
     document.getElementById('userId').value = u.id_user;
-    document.getElementById('userModalTitle').textContent = t('users.edit');
+    document.getElementById('userModalTitle').textContent = 'Editar Usuario';
     document.getElementById('name').value = u.name;
     document.getElementById('username').value = u.username;
     document.getElementById('password').value = '';
@@ -55,14 +55,14 @@ function editUser(u){
 }
 
 async function deactivateUser(id){
-    if(!confirm(t('users.deactivateConfirm'))) return;
+    if(!confirm('¿Desactivar este usuario?')) return;
     try{
         const res = await fetch(`/api/users/${id}`, { method:'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||'Error');
-        toast(t('common.success'),t('users.deactivated'),'success');
+        toast('Éxito','Usuario desactivado','success');
         loadUsers();
-    }catch(err){ toast(t('common.error'), err.message, 'error'); }
+    }catch(err){ toast('Error', err.message, 'error'); }
 }
 
 async function saveUser(){
@@ -77,12 +77,12 @@ async function saveUser(){
     // Frontend validations
     const errors = [];
     const usernameRegex = /^[A-Za-z0-9]+$/; // no spaces, dashes or special chars
-    if (!body.name) errors.push(t('users.nameRequired'));
-    if (!body.username) errors.push(t('users.usernameRequired'));
-    if (body.username && !usernameRegex.test(body.username)) errors.push(t('users.usernameRegex'));
-    if (!id && !body.password) errors.push(t('users.passwordRequired'));
-    if (body.password && body.password.length < 6) errors.push(t('users.passwordMinLength'));
-    if (!['admin','operator'].includes(body.role)) errors.push(t('users.roleRequired'));
+    if (!body.name) errors.push('El nombre es requerido.');
+    if (!body.username) errors.push('El usuario es requerido.');
+    if (body.username && !usernameRegex.test(body.username)) errors.push('El usuario solo puede tener letras y números (sin espacios ni guiones).');
+    if (!id && !body.password) errors.push('La contraseña es requerida.');
+    if (body.password && body.password.length < 6) errors.push('La contraseña debe tener al menos 6 caracteres.');
+    if (!['admin','operator'].includes(body.role)) errors.push('Selecciona un rol válido.');
     if (errors.length) { showFormErrors(errors); return; }
     clearFormErrors();
     
@@ -90,7 +90,7 @@ async function saveUser(){
     const btn = document.getElementById('btnSaveUser');
     const prevHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + t('common.saving');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     if (id) { if (!body.password) { delete body.password; } }
     try{
         const res = await fetch(id ? `/api/users/${id}` : '/api/users', {
@@ -100,10 +100,10 @@ async function saveUser(){
         });
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||'Error saving user');
-        toast(t('common.success'), id ? t('users.updated') : t('users.created'), 'success');
+        toast('Éxito', id ? 'Usuario actualizado' : 'Usuario creado', 'success');
         document.getElementById('userForm').reset();
         document.getElementById('userId').value='';
-        document.getElementById('userModalTitle').textContent = t('users.new');
+        document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
         loadUsers();
     }catch(err){ showFormErrors([err.message]); }
@@ -194,9 +194,9 @@ async function changePassword(){
     const alert = document.getElementById('pwd_alert');
     // Validations
     const msgs = [];
-    if (!pass1) msgs.push(t('users.passwordRequiredMsg'));
-    if (pass1 && pass1.length < 6) msgs.push(t('users.passwordMinMsg'));
-    if (pass1 !== pass2) msgs.push(t('users.passwordMismatch'));
+    if (!pass1) msgs.push('La nueva contraseña es requerida.');
+    if (pass1 && pass1.length < 6) msgs.push('La contraseña debe tener al menos 6 caracteres.');
+    if (pass1 !== pass2) msgs.push('Las contraseñas no coinciden.');
     if (msgs.length){
         alert.className = 'alert alert-danger';
         alert.innerHTML = msgs.map(m=>`<div>${m}</div>`).join('');
@@ -206,7 +206,7 @@ async function changePassword(){
     const btn = document.getElementById('btnPwdSave');
     const prev = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + t('common.saving');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     try{
         const res = await fetch(`/api/users/${id}`,{
             method:'PUT',
@@ -214,9 +214,9 @@ async function changePassword(){
             body: JSON.stringify({ password: pass1 })
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('users.updatePasswordError'));
+        if(!res.ok) throw new Error(j.message||'No se pudo actualizar la contraseña');
         alert.className = 'alert alert-success';
-        alert.textContent = t('users.passwordUpdated');
+        alert.textContent = 'Contraseña actualizada exitosamente.';
         setTimeout(()=>{
             bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
         }, 600);

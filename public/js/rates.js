@@ -11,13 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const mode = document.getElementById('billing_mode');
     const fToggle = () => {
         const m = mode.value;
-        const inMin = m === 'minute' || m === 'mixed';
-        const inHour = m === 'hour' || m === 'mixed';
-        const inDay = m === 'day' || m === 'mixed';
+        const inMin = m === 'minuto' || m === 'mixto';
+        const inHour = m === 'hora' || m === 'mixto';
+        const inDay = m === 'dia' || m === 'mixto';
         document.getElementById('minute_rate').disabled = !inMin;
         document.getElementById('hourly_rate').disabled = !inHour;
         document.getElementById('full_day_rate').disabled = !inDay;
-        const scales = m === 'mixed';
+        const scales = m === 'mixto';
         document.getElementById('minute_to_hour_threshold').disabled = !scales;
         document.getElementById('hour_to_day_threshold').disabled = !scales;
         document.getElementById('hour_rounding').disabled = !scales;
@@ -47,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const j = await res.json();
             if(!res.ok) throw new Error(j.message||'Could not save');
-            showToast(t('common.success'),t('rates.saved'),'success');
+            showToast('Éxito','Tarifa guardada','success');
             loadRates();
         }catch(err){
-            showToast(t('common.error'), err.message, 'error');
+            showToast('Error', err.message, 'error');
         }
     });
 });
@@ -59,7 +59,7 @@ async function loadRates(){
     try{
         const res = await fetch('/api/rates/current', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('rates.loadError'));
+        if(!res.ok) throw new Error(j.message||'Error cargando tarifas');
         const ul = document.getElementById('ratesList');
         ul.innerHTML = j.data.map(r => `
             <li class="list-group-item d-flex flex-column">
@@ -67,12 +67,12 @@ async function loadRates(){
                     <strong class="text-capitalize">${r.vehicle_type}</strong>
                     <span class="badge bg-primary">${r.billing_mode}</span>
                 </div>
-                <small>${t('rates.min')}: ${r.minute_rate} | ${t('rates.hour')}: ${r.hourly_rate} | ${t('rates.day')}: ${r.full_day_rate}</small>
-                <small>${t('rates.scales')} → min→hr: ${r.minutes_to_hours_threshold} min, hr→day: ${r.hours_to_days_threshold} h</small>
+                <small>Min: ${r.minute_rate} | Hora: ${r.hourly_rate} | Día: ${r.full_day_rate}</small>
+                <small>Escalas → min→hr: ${r.minutes_to_hours_threshold} min, hr→day: ${r.hours_to_days_threshold} h</small>
             </li>
         `).join('');
     }catch(err){
-        showToast(t('common.error'), err.message, 'error');
+        showToast('Error', err.message, 'error');
     }
 }
 

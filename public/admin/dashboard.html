@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="dashboard.title">ParkSystem - Dashboard</title>
+    <title>ParkSystem - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/tailwind.css" rel="stylesheet">
@@ -23,43 +23,43 @@
                 <li class="nav-item">
                     <a href="/admin/dashboard" class="nav-link active">
                         <i class="fas fa-tachometer-alt"></i>
-                        <span data-i18n="sidebar.dashboard">Dashboard</span>
+                        <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="/admin/vehicles" class="nav-link">
                         <i class="fas fa-car"></i>
-                        <span data-i18n="sidebar.vehicles">Vehículos</span>
+                        <span>Vehículos</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="/admin/entry-exit" class="nav-link">
                         <i class="fas fa-right-left"></i>
-                        <span data-i18n="sidebar.entryExit">Ingreso / Salida</span>
+                        <span>Ingreso / Salida</span>
                     </a>
                 </li>
                 <li class="nav-item admin-only">
                     <a href="/admin/settings" class="nav-link">
                         <i class="fas fa-gear"></i>
-                        <span data-i18n="sidebar.settings">Configuración</span>
+                        <span>Configuración</span>
                     </a>
                 </li>
                 <li class="nav-item admin-only">
                     <a href="/admin/rates" class="nav-link">
                         <i class="fas fa-money-bill-wave"></i>
-                        <span data-i18n="sidebar.rates">Tarifas</span>
+                        <span>Tarifas</span>
                     </a>
                 </li>
                 <li class="nav-item admin-only">
                     <a href="/admin/users" class="nav-link">
                         <i class="fas fa-users"></i>
-                        <span data-i18n="sidebar.users">Usuarios</span>
+                        <span>Usuarios</span>
                     </a>
                 </li>
                 <li class="nav-item admin-only">
                     <a href="/admin/reports" class="nav-link">
                         <i class="fas fa-chart-bar"></i>
-                        <span data-i18n="sidebar.reports">Reportes</span>
+                        <span>Reportes</span>
                     </a>
                 </li>
             </ul>
@@ -67,7 +67,7 @@
         <div class="sidebar-footer">
             <a href="#" class="nav-link" id="btnLogout">
                 <i class="fas fa-sign-out-alt"></i>
-                <span data-i18n="sidebar.logout">Cerrar Sesión</span>
+                <span>Cerrar Sesión</span>
             </a>
         </div>
     </div>
@@ -80,7 +80,6 @@
                 </button>
             </div>
             <div class="flex items-center gap-3 px-4">
-                <div class="lang-switcher"></div>
                 <div class="h-5 w-px bg-gray-200"></div>
                 <span class="flex items-center gap-2 text-gray-700 text-sm font-medium">
                     <i class="fas fa-user-circle text-lg text-primary"></i>
@@ -96,11 +95,11 @@
                         <div class="flex items-center">
                             <div class="stat-icon bg-primary"><i class="fas fa-car"></i></div>
                             <div class="ml-3">
-                                <h6 class="text-sm font-semibold text-gray-500 mb-1" data-i18n="dashboard.currentVehicles">Vehículos Actuales (por tipo)</h6>
+                                <h6 class="text-sm font-semibold text-gray-500 mb-1">Vehículos Actuales (por tipo)</h6>
                                 <div class="flex gap-3 flex-wrap">
-                                    <div><span class="text-xs text-gray-500" data-i18n="dashboard.cars">Carros</span><div id="currCarros" class="font-bold text-2xl text-gray-900">0</div></div>
-                                    <div><span class="text-xs text-gray-500" data-i18n="dashboard.motorcycles">Motos</span><div id="currMotos" class="font-bold text-2xl text-gray-900">0</div></div>
-                                    <div><span class="text-xs text-gray-500" data-i18n="dashboard.bicycles">Bicicletas</span><div id="currBicis" class="font-bold text-2xl text-gray-900">0</div></div>
+                                    <div><span class="text-xs text-gray-500">Carros</span><div id="currCarros" class="font-bold text-2xl text-gray-900">0</div></div>
+                                    <div><span class="text-xs text-gray-500">Motos</span><div id="currMotos" class="font-bold text-2xl text-gray-900">0</div></div>
+                                    <div><span class="text-xs text-gray-500">Bicicletas</span><div id="currBicis" class="font-bold text-2xl text-gray-900">0</div></div>
                                 </div>
                             </div>
                         </div>
@@ -111,7 +110,7 @@
                         <div class="flex items-center">
                             <div class="stat-icon bg-success"><i class="fas fa-money-bill-wave"></i></div>
                             <div class="ml-3">
-                                <h6 class="text-sm font-semibold text-gray-500 mb-1" data-i18n="dashboard.todayIncome">Ingresos Hoy</h6>
+                                <h6 class="text-sm font-semibold text-gray-500 mb-1">Ingresos Hoy</h6>
                                 <h3 class="text-3xl font-bold text-gray-900 mb-0" id="todayIncome">$0</h3>
                             </div>
                         </div>
@@ -122,7 +121,7 @@
                         <div class="flex items-center">
                             <div class="stat-icon bg-warning"><i class="fas fa-parking"></i></div>
                             <div class="ml-3">
-                                <h6 class="text-sm font-semibold text-gray-500 mb-1" data-i18n="dashboard.occupancy">Ocupación</h6>
+                                <h6 class="text-sm font-semibold text-gray-500 mb-1">Ocupación</h6>
                                 <h3 class="text-3xl font-bold text-gray-900 mb-0" id="kpiOcupacionDash">0%</h3>
                             </div>
                         </div>
@@ -134,26 +133,26 @@
                 <div class="xl:col-span-2">
                     <div class="bg-white rounded-xl shadow-sm card-animate">
                         <div class="px-6 py-4 border-b border-gray-100">
-                            <h5 class="text-lg font-semibold text-gray-900 mb-0" data-i18n="dashboard.recentActivity">Actividad Reciente</h5>
+                            <h5 class="text-lg font-semibold text-gray-900 mb-0">Actividad Reciente</h5>
                         </div>
                         <div class="p-6">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left">
                                     <thead>
                                         <tr>
-                                            <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="dashboard.plate">Placa</th>
-                                            <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="dashboard.type">Tipo</th>
-                                            <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="dashboard.entry">Entrada</th>
-                                            <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="dashboard.status">Estado</th>
-                                            <th class="text-sm font-semibold text-gray-500 pb-3" data-i18n="common.actions">Acciones</th>
+                                            <th class="text-sm font-semibold text-gray-500 pb-3">Placa</th>
+                                            <th class="text-sm font-semibold text-gray-500 pb-3">Tipo</th>
+                                            <th class="text-sm font-semibold text-gray-500 pb-3">Entrada</th>
+                                            <th class="text-sm font-semibold text-gray-500 pb-3">Estado</th>
+                                            <th class="text-sm font-semibold text-gray-500 pb-3">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody id="recentActivityTable"></tbody>
                                 </table>
                                 <div class="flex justify-between items-center mt-2">
-                                    <button class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" id="btnPrev" data-i18n="common.prev">Anterior</button>
-                                    <span class="text-sm text-gray-500" id="pageInfo" data-i18n="common.page">Página 1</span>
-                                    <button class="px-3 py-1.5 text-sm border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" id="btnNext" data-i18n="common.next">Siguiente</button>
+                                    <button class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" id="btnPrev">Anterior</button>
+                                    <span class="text-sm text-gray-500" id="pageInfo">Página 1</span>
+                                    <button class="px-3 py-1.5 text-sm border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" id="btnNext">Siguiente</button>
                                 </div>
                             </div>
                         </div>
@@ -163,14 +162,14 @@
                 <div>
                     <div class="bg-white rounded-xl shadow-sm card-animate">
                         <div class="px-6 py-4 border-b border-gray-100">
-                            <h5 class="text-lg font-semibold text-gray-900 mb-0" data-i18n="dashboard.quickActions">Acciones Rápidas</h5>
+                            <h5 class="text-lg font-semibold text-gray-900 mb-0">Acciones Rápidas</h5>
                         </div>
                         <div class="p-6 space-y-3">
                             <a class="flex items-center justify-center w-full px-6 py-4 bg-primary text-white font-medium rounded-xl hover:bg-primary-dark transition-colors" href="/admin/entry-exit">
-                                <i class="fas fa-plus-circle mr-2"></i><span data-i18n="dashboard.registerEntryExit">Registrar Ingreso / Salida</span>
+                                <i class="fas fa-plus-circle mr-2"></i><span>Registrar Ingreso / Salida</span>
                             </a>
                             <button class="flex items-center justify-center w-full px-6 py-4 bg-blue-400 text-white font-medium rounded-xl hover:bg-blue-500 transition-colors">
-                                <i class="fas fa-print mr-2"></i><span data-i18n="dashboard.generateReport">Generar Reporte</span>
+                                <i class="fas fa-print mr-2"></i><span>Generar Reporte</span>
                             </button>
                         </div>
                     </div>

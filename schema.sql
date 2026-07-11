@@ -18,8 +18,8 @@ CREATE TABLE companies (
     active BOOLEAN DEFAULT TRUE,
     registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     expiration_date DATETIME,
-    plan ENUM('basic', 'premium', 'enterprise') NOT NULL, -- Modified: plan values to english
-    CONSTRAINT chk_plan CHECK (plan IN ('basic', 'premium', 'enterprise'))
+    plan ENUM('basico', 'premium', 'empresarial') NOT NULL,
+    CONSTRAINT chk_plan CHECK (plan IN ('basico', 'premium', 'empresarial'))
 ) ENGINE=InnoDB;
 
 -- System Users Table
@@ -29,7 +29,7 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL, -- Modified: usuario_login to username
     password VARCHAR(255) NOT NULL, -- Modified: contraseña to password
-    role ENUM('admin', 'operator') NOT NULL, -- Modified: rol to role and values to english
+    role ENUM('admin', 'operator') NOT NULL, -- Modified: rol to role
     active BOOLEAN DEFAULT TRUE,
     creation_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_access DATETIME,
@@ -73,12 +73,12 @@ CREATE TABLE vehicles (
     id_vehicle INT AUTO_INCREMENT PRIMARY KEY,
     id_company INT NOT NULL,
     license_plate VARCHAR(10) NOT NULL, -- Modified: placa to license_plate
-    type ENUM('car', 'motorcycle', 'bicycle') NOT NULL, -- Modified: tipo to type and values to english
+    type ENUM('carro', 'moto', 'bicicleta') NOT NULL, -- Modified: tipo to type
     color VARCHAR(30) NOT NULL,
     model VARCHAR(50),
     registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_company) REFERENCES companies(id_company),
-    CONSTRAINT chk_vehicle_type CHECK (type IN ('car', 'motorcycle', 'bicycle')),
+    CONSTRAINT chk_vehicle_type CHECK (type IN ('carro', 'moto', 'bicicleta')),
     CONSTRAINT uq_plate_company UNIQUE (license_plate, id_company)
 ) ENGINE=InnoDB;
 
@@ -86,7 +86,7 @@ CREATE TABLE vehicles (
 CREATE TABLE rates (
     id_rate INT AUTO_INCREMENT PRIMARY KEY,
     id_company INT NOT NULL,
-    vehicle_type ENUM('car', 'motorcycle', 'bicycle') NOT NULL, -- Modified: tipo_vehiculo to vehicle_type
+    vehicle_type ENUM('carro', 'moto', 'bicicleta') NOT NULL, -- Modified: tipo_vehiculo to vehicle_type
     hourly_rate DECIMAL(10,2) NOT NULL, -- Modified: valor_hora to hourly_rate
     minute_rate DECIMAL(10,2) NOT NULL, -- Modified: valor_minuto to minute_rate
     full_day_rate DECIMAL(10,2) NOT NULL, -- Modified: valor_dia_completo to full_day_rate
@@ -94,13 +94,13 @@ CREATE TABLE rates (
     effective_until DATETIME, -- Modified: fecha_vigencia_hasta to effective_until
     active BOOLEAN DEFAULT TRUE,
     -- Billing configuration
-    billing_mode ENUM('minute','hour','day','mixed') NOT NULL DEFAULT 'mixed', -- Modified: modo_cobro to billing_mode
+    billing_mode ENUM('minuto','hora','dia','mixto') NOT NULL DEFAULT 'mixto', -- Modified: modo_cobro to billing_mode
     minutes_to_hours_threshold INT NOT NULL DEFAULT 0, -- 0 = no threshold. Modified: paso_minutos_a_horas to minutes_to_hours_threshold
     hours_to_days_threshold INT NOT NULL DEFAULT 0,   -- 0 = no threshold. Modified: paso_horas_a_dias to hours_to_days_threshold
-    hourly_rounding ENUM('up','exact') NOT NULL DEFAULT 'up', -- Modified: redondeo_horas to hourly_rounding
-    daily_rounding ENUM('up','exact') NOT NULL DEFAULT 'up', -- Modified: redondeo_dias to daily_rounding
+    hourly_rounding ENUM('arriba','exacto') NOT NULL DEFAULT 'arriba', -- Modified: redondeo_horas to hourly_rounding
+    daily_rounding ENUM('arriba','exacto') NOT NULL DEFAULT 'arriba', -- Modified: redondeo_dias to daily_rounding
     FOREIGN KEY (id_company) REFERENCES companies(id_company),
-    CONSTRAINT chk_rate_vehicle_type CHECK (vehicle_type IN ('car', 'motorcycle', 'bicycle')),
+    CONSTRAINT chk_rate_vehicle_type CHECK (vehicle_type IN ('carro', 'moto', 'bicicleta')),
     CONSTRAINT chk_non_negative_values CHECK (
         hourly_rate >= 0 AND 
         minute_rate >= 0 AND 
@@ -119,7 +119,7 @@ CREATE TABLE movements (
     total_to_pay DECIMAL(10,2), -- Modified: total_a_pagar to total_to_pay
     id_user_entry INT NOT NULL, -- Modified: id_usuario_entrada to id_user_entry
     id_user_exit INT, -- Modified: id_usuario_salida to id_user_exit
-    status ENUM('active', 'completed') DEFAULT 'active', -- Modified: estado to status and values to english
+    status ENUM('activo', 'completado') DEFAULT 'activo', -- Modified: estado to status
     FOREIGN KEY (id_company) REFERENCES companies(id_company),
     FOREIGN KEY (id_vehicle) REFERENCES vehicles(id_vehicle),
     FOREIGN KEY (id_rate) REFERENCES rates(id_rate),
@@ -133,7 +133,7 @@ CREATE TABLE payments (
     id_payment INT AUTO_INCREMENT PRIMARY KEY,
     id_company INT NOT NULL,
     id_movement INT NOT NULL,
-    payment_method ENUM('cash', 'card', 'QR') NOT NULL, -- Modified: metodo_pago to payment_method and values to english
+    payment_method ENUM('efectivo', 'tarjeta', 'QR') NOT NULL, -- Modified: metodo_pago to payment_method
     amount DECIMAL(10,2) NOT NULL, -- Modified: monto to amount
     payment_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Modified: fecha_pago to payment_date
     payment_reference VARCHAR(100), -- Modified: referencia_pago to payment_reference
@@ -141,7 +141,7 @@ CREATE TABLE payments (
     FOREIGN KEY (id_company) REFERENCES companies(id_company),
     FOREIGN KEY (id_movement) REFERENCES movements(id_movement),
     FOREIGN KEY (id_user) REFERENCES users(id_user),
-    CONSTRAINT chk_payment_method CHECK (payment_method IN ('cash', 'card', 'QR')),
+    CONSTRAINT chk_payment_method CHECK (payment_method IN ('efectivo', 'tarjeta', 'QR')),
     CONSTRAINT chk_positive_amount CHECK (amount > 0)
 ) ENGINE=InnoDB;
 
@@ -243,7 +243,7 @@ CREATE TABLE shifts (
     total_general DECIMAL(12,2),
     difference DECIMAL(12,2), -- Modified: diferencia to difference
     closing_observation VARCHAR(255), -- Modified: observacion_cierre to closing_observation
-    status ENUM('open','closed') NOT NULL DEFAULT 'open', -- Modified: estado to status and values to english
+    status ENUM('abierto','cerrado') NOT NULL DEFAULT 'abierto', -- Modified: estado to status
     FOREIGN KEY (id_company) REFERENCES companies(id_company),
     FOREIGN KEY (id_user) REFERENCES users(id_user),
     INDEX idx_active_shift (id_company, id_user, status)
@@ -265,6 +265,6 @@ VALUES (1, 'Administrator', 'admin', '$2a$10$8GB5OFGTizEbMiuu1TSDWeAls/TRzA0l8Ej
 -- Sample rates for company 1
 INSERT INTO rates (id_company, vehicle_type, hourly_rate, minute_rate, full_day_rate, active)
 VALUES
-(1, 'car', 6000.00, 120.00, 30000.00, TRUE),
-(1, 'motorcycle', 3000.00, 60.00, 15000.00, TRUE),
-(1, 'bicycle', 1500.00, 30.00, 8000.00, TRUE);
+(1, 'carro', 6000.00, 120.00, 30000.00, TRUE),
+(1, 'moto', 3000.00, 60.00, 15000.00, TRUE),
+(1, 'bicicleta', 1500.00, 30.00, 8000.00, TRUE);

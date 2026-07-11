@@ -86,22 +86,16 @@
 		'<div class="container-fluid px-3 text-center">',
 			'<div class="mx-auto" style="max-width: 980px">',
 				'<p class="mb-2 small lh-base">',
-					'Este software es totalmente gratuito. Si necesitas asesoría, capacitación o deseas realizar algún cambio, ponte en contacto con el desarrollador ',
-					'<a class="'+linkClass+'" href="https://ciscodedev.netlify.app/" target="_blank" rel="noopener">Ciscode</a>. ',
-					'Además, si te gustó y deseas apoyar, puedes hacer tu donación a través de ',
-					'<a class="'+linkClass+'" href="https://www.paypal.com/donate/?hosted_button_id=8HMKJZY4E29RY" target="_blank" rel="noopener">este enlace</a>. ',
-					'Esto me ayudará a seguir creando software de calidad sin costo. ',
+					'Este software es totalmente gratuito. Si necesitas asesoría, capacitación o deseas realizar algún cambio, puedes contactarme al ',
+					'<a class="'+linkClass+'" href="mailto:cristiancamilopala@gmail.com">correo electrónico</a>. ',
 					'Y recuerda que el código de este sistema está completamente abierto en ',
-					'<a class="'+linkClass+'" href="https://github.com/Cristiancano1236/sistema-parqueadero" target="_blank" rel="noopener">GitHub</a>.',
+					'<a class="'+linkClass+'" href="https://github.com/palacio9876/parking" target="_blank" rel="noopener">GitHub</a>.',
 				'</p>',
 				'<div class="d-grid gap-2 d-sm-flex justify-content-center flex-wrap">',
-					'<a class="btn btn-sm '+outlineBtn+'" href="https://ciscodedev.netlify.app/" target="_blank" rel="noopener" aria-label="Sitio del desarrollador">',
-						'<i class="bi bi-globe2 me-1"></i> Soporte'
+					'<a class="btn btn-sm '+solidBtn+'" href="mailto:cristiancamilopala@gmail.com" aria-label="Enviar correo">',
+						'<i class="bi bi-envelope-fill me-1"></i> Contacto'
 					,'</a>',
-					'<a class="btn btn-sm '+solidBtn+'" href="https://www.paypal.com/donate/?hosted_button_id=8HMKJZY4E29RY" target="_blank" rel="noopener" aria-label="Donar en PayPal">',
-						'<i class="bi bi-heart-fill me-1"></i> Donar'
-					,'</a>',
-					'<a class="btn btn-sm '+outlineBtn+'" href="https://github.com/Cristiancano1236/sistema-parqueadero" target="_blank" rel="noopener" aria-label="Repositorio en GitHub">',
+					'<a class="btn btn-sm '+outlineBtn+'" href="https://github.com/palacio9876/parking" target="_blank" rel="noopener" aria-label="Repositorio en GitHub">',
 						'<i class="bi bi-github me-1"></i> Código'
 					,'</a>',
 				'</div>',

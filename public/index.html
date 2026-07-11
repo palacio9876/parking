@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="login.title">ParkSystem - Inicio de Sesión</title>
+    <title>ParkSystem - Inicio de Sesión</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/tailwind.css" rel="stylesheet">
@@ -21,12 +21,12 @@
     </div>
 </div>
                         <h2 class="text-2xl font-bold text-primary">ParkSystem</h2>
-                        <p class="text-gray-500 text-sm mt-1" data-i18n="login.subtitle">Sistema de Gestión de Parqueadero</p>
+                        <p class="text-gray-500 text-sm mt-1">Sistema de Gestión de Parqueadero</p>
                     </div>
 
                     <form id="loginForm" class="needs-validation" novalidate>
                         <div class="mb-5">
-                            <label for="tax_id" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="login.taxId">NIT Empresa</label>
+                            <label for="tax_id" class="block text-sm font-medium text-gray-700 mb-1">NIT Empresa</label>
                             <div class="flex">
                                 <span class="inline-flex items-center px-3 bg-primary text-white rounded-l-lg">
                                     <i class="fas fa-building"></i>
@@ -36,59 +36,59 @@
                                        id="tax_id"
                                        name="tax_id"
                                        required
-                                       data-i18n="login.taxIdPlaceholder" data-i18n-attr="placeholder"
+                                      
                                        placeholder="Ej: 900123456-7"
                                        value="900123456-7">
                             </div>
-                            <div class="invalid-feedback" data-i18n="login.taxIdRequired">
+                            <div class="invalid-feedback">
                                 Por favor ingrese el NIT de la empresa
                             </div>
                         </div>
 
                         <div class="mb-5">
-                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="login.username">Usuario</label>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
                             <div class="flex">
                                 <span class="inline-flex items-center px-3 bg-primary text-white rounded-l-lg">
                                     <i class="fas fa-user"></i>
                                 </span>
                                 <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 text-sm" id="username" name="username" required
-                                       data-i18n="login.username" data-i18n-attr="placeholder"
+                                      
                                        placeholder="Usuario">
                             </div>
-                            <div class="invalid-feedback" data-i18n="login.usernameRequired">
+                            <div class="invalid-feedback">
                                 Por favor ingrese su usuario
                             </div>
                         </div>
 
                         <div class="mb-5">
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="login.password">Contraseña</label>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                             <div class="flex">
                                 <span class="inline-flex items-center px-3 bg-primary text-white rounded-l-lg">
                                     <i class="fas fa-lock"></i>
                                 </span>
                                 <input type="password" class="w-full px-4 py-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 text-sm" id="password" name="password" required
-                                       data-i18n="login.password" data-i18n-attr="placeholder"
+                                      
                                        placeholder="Contraseña">
                                 <button class="inline-flex items-center justify-center px-3 border border-l-0 border-gray-200 bg-white text-primary rounded-r-lg hover:bg-gray-50 transition-all duration-300" type="button" id="togglePassword">
                                     <i class="fas fa-eye" id="toggleIcon"></i>
                                 </button>
                             </div>
-                            <div class="invalid-feedback" data-i18n="login.passwordRequired">
+                            <div class="invalid-feedback">
                                 Por favor ingrese su contraseña
                             </div>
                         </div>
 
                         <div class="flex items-center mb-5">
                             <input type="checkbox" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary" id="recordar">
-                            <label class="ml-2 text-sm text-gray-600" for="recordar" data-i18n="login.remember">Recordar sesión</label>
+                            <label class="ml-2 text-sm text-gray-600" for="recordar">Recordar sesión</label>
                         </div>
 
                         <button type="submit" class="w-full bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-                            <span data-i18n="login.button">Iniciar Sesión</span>
+                            <span>Iniciar Sesión</span>
                         </button>
 
                         <div class="text-center mt-6">
-                            <small class="text-sm text-gray-500" data-i18n="login.forgot">
+                            <small class="text-sm text-gray-500">
                                 ¿Olvidaste tu contraseña? Contacta al administrador
                             </small>
                         </div>
@@ -98,7 +98,7 @@
 
             <footer class="text-center mt-8">
                 <div class="social-links"></div>
-                <p class="mt-2 text-sm text-gray-500" data-i18n="footer.developedBy">Desarrollado por <span data-i18n="footer.company">Cristian Palacio</span></p>
+                <p class="mt-2 text-sm text-gray-500">Desarrollado por <span>Cristian Palacio</span></p>
             </footer>
         </div>
     </div>
