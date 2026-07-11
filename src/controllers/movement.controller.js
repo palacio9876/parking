@@ -10,12 +10,27 @@ class MovementController {
   async recordEntry(req, res, next) {
     try {
       const result = await movementService.recordEntry(
-        req.t,
         req.user.id_company,
         req.user.id_user,
         req.body
       )
       res.status(201).json(result)
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  /**
+   * POST /api/movements/calculate-exit
+   * Calcula el total a pagar sin registrar la salida
+   */
+  async calculateExit(req, res, next) {
+    try {
+      const result = await movementService.calculateExit(
+        req.user.id_company,
+        req.body
+      )
+      res.json(result)
     } catch (err) {
       next(err)
     }
@@ -28,7 +43,6 @@ class MovementController {
   async recordExit(req, res, next) {
     try {
       const result = await movementService.recordExit(
-        req.t,
         req.user.id_company,
         req.user.id_user,
         req.body
@@ -46,7 +60,7 @@ class MovementController {
   async getDetail(req, res, next) {
     try {
       const { id } = req.params
-      const result = await movementService.getDetail(req.t, id, req.user.id_company)
+      const result = await movementService.getDetail(id, req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)

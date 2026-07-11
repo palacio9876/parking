@@ -12,10 +12,10 @@ class ShiftService {
    * @param {object} data - { initial_base, opening_observation }
    * @returns {object} { success, message, data }
    */
-  async openShift(t, id_company, id_user, { initial_base, opening_observation }) {
+  async openShift(id_company, id_user, { initial_base, opening_observation }) {
     const existing = await shiftRepo.getOpenShift(id_company)
     if (existing) {
-      throw new AppError(409, t('server.shift.alreadyOpen'))
+      throw new AppError(409, 'Ya hay un turno abierto')
     }
 
     const shift = await shiftRepo.createShift({
@@ -24,10 +24,10 @@ class ShiftService {
       initial_base: Number(initial_base || 0),
       opening_observation,
       opening_date: new Date(),
-      status: 'open'
+      status: 'abierto'
     })
 
-    return { success: true, message: t('server.shift.opened'), data: shift }
+    return { success: true, message: 'Turno abierto exitosamente', data: shift }
   }
 
   /**
@@ -38,10 +38,10 @@ class ShiftService {
    * @param {object} data - { total_cash, total_card, total_qr, closing_observation }
    * @returns {object} { success, message, data: { shift, base, userTotals, expected, difference, stats } }
    */
-  async closeShift(t, id_company, id_user, { total_cash, total_card, total_qr, closing_observation }) {
+  async closeShift(id_company, id_user, { total_cash, total_card, total_qr, closing_observation }) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {
-      throw new AppError(404, t('server.shift.noOpenShift'))
+      throw new AppError(404, 'No se encontró un turno abierto')
     }
 
     const cash    = Number(total_cash  || 0)
@@ -58,16 +58,16 @@ class ShiftService {
       difference,
       closing_observation,
       closing_date: new Date(),
-      status: 'closed'
+      status: 'cerrado'
     })
 
     if (!affectedRows) {
-      throw new AppError(500, t('server.shift.errorClosing'))
+      throw new AppError(500, 'Error al cerrar el turno')
     }
 
     return {
       success: true,
-      message: t('server.shift.closed'),
+      message: 'Turno cerrado exitosamente',
       data: {
         shift:      { id_shift: shift.id_shift, user: id_user },
         base:       shift.initial_base,
@@ -85,10 +85,10 @@ class ShiftService {
    * @param {number} id_company - ID de la empresa
    * @returns {object} { success, data }
    */
-  async getCurrent(t, id_company) {
+  async getCurrent(id_company) {
     const shift = await shiftRepo.getOpenShift(id_company)
     if (!shift) {
-      throw new AppError(404, t('server.shift.noOpenShift'))
+      throw new AppError(404, 'No se encontró un turno abierto')
     }
     return { success: true, data: shift }
   }

@@ -10,10 +10,10 @@ class CompanyService {
    * @param {number} id_company - ID de la empresa
    * @returns {object} { success, data }
    */
-  async getCompany(t, id_company) {
+  async getCompany(id_company) {
     const company = await companyRepo.findById(id_company)
     if (!company) {
-      throw new AppError(404, t('server.company.notFound'))
+      throw new AppError(404, 'Empresa no encontrada')
     }
     return {
       success: true,
@@ -27,10 +27,10 @@ class CompanyService {
    * @param {number} id_company - ID de la empresa
    * @returns {object} { success, data }
    */
-  async getSettings(t, id_company) {
+  async getSettings(id_company) {
     const settings = await companyRepo.findSettings(id_company)
     if (!settings) {
-      throw new AppError(404, t('server.company.settingsNotFound'))
+      throw new AppError(404, 'Configuración no encontrada')
     }
     return {
       success: true,
@@ -45,15 +45,15 @@ class CompanyService {
    * @param {object} updates - Campos a actualizar
    * @returns {object} { success, message }
    */
-  async updateCompany(t, id_company, updates) {
+  async updateCompany(id_company, updates) {
     const company = await companyRepo.findById(id_company)
     if (!company) {
-      throw new AppError(404, t('server.company.notFound'))
+      throw new AppError(404, 'Empresa no encontrada')
     }
     await companyRepo.updateCompany(id_company, updates)
     return {
       success: true,
-      message: t('server.company.updated')
+      message: 'Empresa actualizada exitosamente'
     }
   }
 
@@ -64,24 +64,24 @@ class CompanyService {
    * @param {object} updates - Campos de configuración
    * @returns {object} { success, message, data? }
    */
-  async updateSettings(t, id_company, updates) {
+  async updateSettings(id_company, updates) {
     const settings = await companyRepo.findSettings(id_company)
     if (!settings) {
       const newSettings = await companyRepo.createSettings(id_company, updates)
       return {
         success: true,
-        message: t('server.company.settingsCreated'),
+        message: 'Configuración creada exitosamente',
         data: newSettings
       }
     }
 
     const affectedRows = await companyRepo.updateSettings(id_company, updates)
     if (affectedRows === 0 && !settings) {
-      throw new AppError(404, t('server.company.settingsNotFound'))
+      throw new AppError(404, 'Configuración no encontrada')
     }
     return {
       success: true,
-      message: t('server.company.settingsUpdated')
+      message: 'Configuración actualizada exitosamente'
     }
   }
 
@@ -105,17 +105,17 @@ class CompanyService {
    * @param {Buffer} buffer - Datos binarios del logo
    * @returns {object} { success, message }
    */
-  async uploadLogo(t, id_company, buffer) {
+  async uploadLogo(id_company, buffer) {
     if (!buffer) {
-      throw new AppError(400, t('server.company.noLogoFile'))
+      throw new AppError(400, 'No se proporcionó un archivo de logo')
     }
     const affectedRows = await companyRepo.updateCompany(id_company, { logo_url: buffer })
     if (affectedRows === 0) {
-      throw new AppError(404, t('server.company.notFound'))
+      throw new AppError(404, 'Empresa no encontrada')
     }
     return {
       success: true,
-      message: t('server.company.logoUploaded')
+      message: 'Logo subido exitosamente'
     }
   }
 }

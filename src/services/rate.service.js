@@ -24,20 +24,20 @@ class RateService {
    * @param {object} data - Datos de la tarifa (vehicle_type, hourly_rate, minute_rate, etc.)
    * @returns {object} { success, message, data: { id_rate } }
    */
-  async createOrUpdate(t, id_company, data) {
+  async createOrUpdate(id_company, data) {
     const { billing_mode, hourly_rate, minute_rate, full_day_rate } = data
 
-    if (billing_mode === 'minute' && !minute_rate) {
-      throw new AppError(400, t('server.rate.minuteRequired'))
+    if (billing_mode === 'minuto' && !minute_rate) {
+      throw new AppError(400, 'tarifa_por_minuto requerida para cobro por minuto')
     }
-    if (billing_mode === 'hour' && !hourly_rate) {
-      throw new AppError(400, t('server.rate.hourlyRequired'))
+    if (billing_mode === 'hora' && !hourly_rate) {
+      throw new AppError(400, 'tarifa_por_hora requerida para cobro por hora')
     }
-    if (billing_mode === 'day' && !full_day_rate) {
-      throw new AppError(400, t('server.rate.dayRequired'))
+    if (billing_mode === 'dia' && !full_day_rate) {
+      throw new AppError(400, 'tarifa_por_día requerida para cobro por día')
     }
-    if (billing_mode === 'mixed' && (!hourly_rate || !minute_rate || !full_day_rate)) {
-      throw new AppError(400, t('server.rate.allRequired'))
+    if (billing_mode === 'mixto' && (!hourly_rate || !minute_rate || !full_day_rate)) {
+      throw new AppError(400, 'Todas las tarifas requeridas para cobro mixto')
     }
 
     // Desactivar tarifa anterior para este tipo de vehículo
@@ -50,7 +50,7 @@ class RateService {
 
     return {
       success: true,
-      message: t('server.rate.updated'),
+      message: 'Tarifa actualizada exitosamente',
       data: {
         id_rate: rate.id_rate
       }

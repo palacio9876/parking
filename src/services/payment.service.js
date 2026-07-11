@@ -12,9 +12,9 @@ class PaymentService {
    * @param {object} data - { id_movement, payments: Array<{ payment_method, amount }> }
    * @returns {object} { success, message, data: { payment_count } }
    */
-  async recordPayments(t, id_company, id_user, { id_movement, payments }) {
+  async recordPayments(id_company, id_user, { id_movement, payments }) {
     if (!payments || !Array.isArray(payments) || payments.length === 0) {
-      throw new AppError(400, t('server.payment.invalidData'))
+      throw new AppError(400, 'Datos de pago inválidos')
     }
 
     const paymentRecords = payments.map(p => ({
@@ -30,7 +30,7 @@ class PaymentService {
 
     return {
       success: true,
-      message: t('server.payment.recorded'),
+      message: 'Pagos registrados exitosamente',
       data: {
         payment_count: created.length
       }

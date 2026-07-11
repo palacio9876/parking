@@ -3,6 +3,10 @@ const reportService = require('../services/report.service')
 const ExcelJS = require('exceljs')
 const PDFDocument = require('pdfkit')
 
+const vehicleTypes = { carro: 'Carro', moto: 'Moto', bicicleta: 'Bicicleta' }
+const statusMap = { activo: 'Activo', completado: 'Finalizado', inactive: 'Inactivo' }
+const paymentMethods = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', QR: 'QR' }
+
 class ReportController {
 
   /**
@@ -99,19 +103,19 @@ class ReportController {
       const shifts = result.data
 
       const workbook = new ExcelJS.Workbook()
-      const sheet = workbook.addWorksheet(req.t('reports.shifts'))
+      const sheet = workbook.addWorksheet('Turnos')
 
       sheet.columns = [
         { header: '#', key: 'index', width: 6 },
-        { header: req.t('reports.opening'), key: 'opening_date', width: 22 },
-        { header: req.t('reports.closing'), key: 'closing_date', width: 22 },
-        { header: req.t('reports.user'), key: 'user', width: 20 },
-        { header: req.t('reports.base'), key: 'initial_base', width: 14 },
-        { header: req.t('payment.cash'), key: 'total_cash', width: 14 },
-        { header: req.t('payment.card'), key: 'total_card', width: 14 },
-        { header: req.t('payment.qr'), key: 'total_qr', width: 14 },
-        { header: req.t('common.total'), key: 'total_general', width: 14 },
-        { header: req.t('reports.difference'), key: 'difference', width: 14 }
+        { header: 'Apertura', key: 'opening_date', width: 22 },
+        { header: 'Cierre', key: 'closing_date', width: 22 },
+        { header: 'Usuario', key: 'user', width: 20 },
+        { header: 'Base', key: 'initial_base', width: 14 },
+        { header: 'Efectivo', key: 'total_cash', width: 14 },
+        { header: 'Tarjeta', key: 'total_card', width: 14 },
+        { header: 'QR', key: 'total_qr', width: 14 },
+        { header: 'Total', key: 'total_general', width: 14 },
+        { header: 'Diferencia', key: 'difference', width: 14 }
       ]
 
       shifts.forEach((s, i) => {
@@ -153,26 +157,26 @@ class ReportController {
       )
 
       const workbook = new ExcelJS.Workbook()
-      const sheet = workbook.addWorksheet(req.t('reports.movements'))
+      const sheet = workbook.addWorksheet('Movimientos')
 
       sheet.columns = [
-        { header: req.t('reports.movNumber'), key: 'id', width: 8 },
-        { header: req.t('reports.plate'), key: 'license_plate', width: 14 },
-        { header: req.t('reports.type'), key: 'type', width: 14 },
-        { header: req.t('reports.entry'), key: 'entry_date', width: 22 },
-        { header: req.t('reports.exit'), key: 'exit_date', width: 22 },
-        { header: req.t('reports.status'), key: 'status', width: 12 },
-        { header: req.t('reports.total'), key: 'total_to_pay', width: 14 }
+        { header: '#Mov', key: 'id', width: 8 },
+        { header: 'Placa', key: 'license_plate', width: 14 },
+        { header: 'Tipo', key: 'type', width: 14 },
+        { header: 'Entrada', key: 'entry_date', width: 22 },
+        { header: 'Salida', key: 'exit_date', width: 22 },
+        { header: 'Estado', key: 'status', width: 12 },
+        { header: 'Total', key: 'total_to_pay', width: 14 }
       ]
 
       movements.forEach(m => {
         sheet.addRow({
           id: m.id,
           license_plate: m.license_plate,
-          type: req.t(`vehicleType.${m.type}`),
+          type: vehicleTypes[m.type] || m.type,
           entry_date: m.entry_date,
           exit_date: m.exit_date || '',
-          status: req.t(`status.${m.status}`),
+          status: statusMap[m.status] || m.status,
           total_to_pay: m.total_to_pay != null ? Number(m.total_to_pay) : ''
         })
       })
@@ -205,29 +209,28 @@ class ReportController {
       res.setHeader('Content-Disposition', `attachment; filename=reporte_${from}_${to}.pdf`)
       doc.pipe(res)
 
-      const lang = req.query.lang || 'es'
+      const locale = 'es-CO'
       // -- Header --
-      doc.fontSize(18).font('Helvetica-Bold').text(req.t('app.name').toUpperCase(), { align: 'center' })
-      doc.fontSize(10).font('Helvetica').text(`${req.t('reports.from')}: ${from} ${req.t('reports.to')}: ${to}`, { align: 'center' })
+      doc.fontSize(18).font('Helvetica-Bold').text('PARKSYSTEM', { align: 'center' })
+      doc.fontSize(10).font('Helvetica').text(`Desde: ${from} Hasta: ${to}`, { align: 'center' })
       doc.moveDown(0.5)
 
-      const generatedAt = new Date().toLocaleString(lang === 'en' ? 'en-US' : 'es-CO')
-      doc.fontSize(8).fillColor('#666').text(`${req.t('dashboard.printDate')}: ${generatedAt}`, { align: 'center' })
+      const generatedAt = new Date().toLocaleString(locale)
+      doc.fontSize(8).fillColor('#666').text(`Fecha impresión: ${generatedAt}`, { align: 'center' })
       doc.fillColor('#000')
       doc.moveDown()
 
       // -- KPIs --
-      doc.fontSize(14).font('Helvetica-Bold').text(req.t('reports.income'))
+      doc.fontSize(14).font('Helvetica-Bold').text('Ingresos')
       doc.moveDown(0.3)
 
       const kpis = data.kpis
-      const locale = lang === 'en' ? 'en-US' : 'es-CO'
       const kpiData = [
-        { label: req.t('reports.income'), value: `$${Number(kpis.income || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}` },
-        { label: req.t('reports.tickets'), value: String(kpis.tickets || 0) },
-        { label: req.t('reports.averageTicket'), value: `$${Number(kpis.averageTicket || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}` },
-        { label: req.t('reports.occupancy'), value: `${kpis.occupancy || 0}%` },
-        { label: `${req.t('dashboard.currentVehicles')} (${req.t('reports.active')})`, value: String(kpis.activeCount || 0) }
+        { label: 'Ingresos', value: `$${Number(kpis.income || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}` },
+        { label: 'Tickets', value: String(kpis.tickets || 0) },
+        { label: 'Promedio Ticket', value: `$${Number(kpis.averageTicket || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}` },
+        { label: 'Ocupación', value: `${kpis.occupancy || 0}%` },
+        { label: 'Vehículos Actuales (por tipo) (Activos)', value: String(kpis.activeCount || 0) }
       ]
 
       kpiData.forEach(k => {
@@ -237,31 +240,31 @@ class ReportController {
       doc.moveDown()
 
       // -- Income by Payment Method --
-      doc.fontSize(14).font('Helvetica-Bold').text(req.t('reports.incomeByMethod'))
+      doc.fontSize(14).font('Helvetica-Bold').text('Ingresos por método')
       doc.moveDown(0.3)
 
       if (data.incomeByMethod.length > 0) {
         const methodTable = {
-          headers: [req.t('reports.type'), req.t('common.total'), req.t('reports.tickets')],
+          headers: ['Tipo', 'Total', 'Tickets'],
           rows: data.incomeByMethod.map(r => [
-            req.t(`payment.${r.payment_method}`),
+            paymentMethods[r.payment_method] || r.payment_method,
             `$${Number(r.total || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}`,
             String(r.count || 0)
           ])
         }
         drawTable(doc, methodTable)
       } else {
-        doc.fontSize(10).font('Helvetica').text(req.t('common.noRecords'))
+        doc.fontSize(10).font('Helvetica').text('Sin registros')
       }
       doc.moveDown()
 
       // -- Income by Day --
-      doc.fontSize(14).font('Helvetica-Bold').text(req.t('reports.incomeByDay'))
+      doc.fontSize(14).font('Helvetica-Bold').text('Ingresos por día')
       doc.moveDown(0.3)
 
       if (data.incomeByDay.length > 0) {
         const dayTable = {
-          headers: [req.t('reports.from'), req.t('common.total')],
+          headers: ['Desde', 'Total'],
           rows: data.incomeByDay.map(r => [
             r.date,
             `$${Number(r.total || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}`
@@ -269,22 +272,22 @@ class ReportController {
         }
         drawTable(doc, dayTable)
       } else {
-        doc.fontSize(10).font('Helvetica').text(req.t('common.noRecords'))
+        doc.fontSize(10).font('Helvetica').text('Sin registros')
       }
       doc.moveDown()
 
       // -- Top Plates --
-      doc.fontSize(14).font('Helvetica-Bold').text(req.t('reports.topPlates'))
+      doc.fontSize(14).font('Helvetica-Bold').text('Top Placas')
       doc.moveDown(0.3)
 
       if (data.topPlates.length > 0) {
         const topTable = {
-          headers: [req.t('reports.plate'), req.t('reports.type'), req.t('reports.visits'), req.t('common.total')],
+          headers: ['Placa', 'Tipo', 'Visitas', 'Total'],
           rows: data.topPlates.map(r => {
             const vtype = r['vehicle.type'] || r.type || ''
             return [
               r['vehicle.license_plate'] || r.license_plate || '',
-              vtype ? req.t(`vehicleType.${vtype}`) : '',
+              vtype ? (vehicleTypes[vtype] || vtype) : '',
               String(r.visits || 0),
               `$${Number(r.total || 0).toLocaleString(locale, { minimumFractionDigits: 2 })}`
             ]
@@ -292,30 +295,30 @@ class ReportController {
         }
         drawTable(doc, topTable)
       } else {
-        doc.fontSize(10).font('Helvetica').text(req.t('common.noRecords'))
+        doc.fontSize(10).font('Helvetica').text('Sin registros')
       }
       doc.moveDown()
 
       // -- Movements --
-      doc.fontSize(14).font('Helvetica-Bold').text(`${req.t('reports.movements')} (${data.movements.length})`)
+      doc.fontSize(14).font('Helvetica-Bold').text(`Movimientos (${data.movements.length})`)
       doc.moveDown(0.3)
 
       if (data.movements.length > 0) {
         const movTable = {
-          headers: [req.t('reports.movNumber'), req.t('reports.plate'), req.t('reports.type'), req.t('reports.entry'), req.t('reports.exit'), req.t('reports.status'), req.t('reports.total')],
+          headers: ['#Mov', 'Placa', 'Tipo', 'Entrada', 'Salida', 'Estado', 'Total'],
           rows: data.movements.map(m => [
             String(m.id),
             m.license_plate || '',
-            req.t(`vehicleType.${m.type}`),
+            vehicleTypes[m.type] || m.type,
             m.entry_date ? new Date(m.entry_date).toLocaleString(locale) : '',
             m.exit_date ? new Date(m.exit_date).toLocaleString(locale) : '',
-            req.t(`status.${m.status}`),
+            statusMap[m.status] || m.status,
             m.total_to_pay != null ? `$${Number(m.total_to_pay).toLocaleString(locale, { minimumFractionDigits: 2 })}` : ''
           ])
         }
         drawTable(doc, movTable)
       } else {
-        doc.fontSize(10).font('Helvetica').text(req.t('common.noRecords'))
+        doc.fontSize(10).font('Helvetica').text('Sin registros')
       }
 
       doc.end()

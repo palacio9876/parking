@@ -1,5 +1,5 @@
 // Repositorio de vehículos: operaciones CRUD sobre el registro de vehículos
-const { Vehicle, Movement } = require('../models')
+const { Vehicle, Movement, Payment } = require('../models')
 const { Op } = require('sequelize')
 
 class VehicleRepository {
@@ -21,7 +21,7 @@ class VehicleRepository {
       const active = await Movement.count({ where: { id_vehicle: v.id_vehicle, exit_date: null } })
       return {
         ...v.get(),
-        status: active > 0 ? 'active' : 'inactive'
+        status: active > 0 ? 'activo' : 'inactive'
       }
     }))
 
@@ -150,7 +150,7 @@ class VehicleRepository {
     const activeMovements = await this.countActiveMovements(id_vehicle)
     return {
       ...vehicle.get(),
-      status: activeMovements > 0 ? 'active' : 'inactive'
+      status: activeMovements > 0 ? 'activo' : 'inactive'
     }
   }
 
@@ -162,7 +162,7 @@ class VehicleRepository {
    * @returns {Promise<Array>}
    */
   async getVehicleHistory(id_vehicle, limit = 50, offset = 0) {
-    return Movement.findAll({
+    const movements = await Movement.findAll({
       where: { id_vehicle },
       order: [['entry_date', 'DESC']],
       limit,
@@ -178,8 +178,29 @@ class VehicleRepository {
         {
           association: 'rate',
           attributes: ['vehicle_type', 'hourly_rate', 'minute_rate', 'full_day_rate']
+        },
+        {
+          association: 'payments',
+          attributes: ['amount']
         }
       ]
+    })
+
+    return movements.map((movement) => {
+      const data = movement.toJSON()
+      const payments = Array.isArray(data.payments) ? data.payments : []
+      const total_paid = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
+
+      return {
+        id_movement: data.id_movement,
+        entry_date: data.entry_date,
+        exit_date: data.exit_date,
+        total_to_pay: data.total_to_pay != null ? Number(data.total_to_pay) : 0,
+        status: data.status,
+        total_paid,
+        payments: payments.length,
+        rate: data.rate
+      }
     })
   }
 }

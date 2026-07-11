@@ -24,10 +24,10 @@ class VehicleService {
    * @param {number} id_company - ID de la empresa
    * @returns {object} { success, data }
    */
-  async getById(t, id_vehicle, id_company) {
+  async getById(id_vehicle, id_company) {
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, t('server.vehicle.notFound'))
+      throw new AppError(404, 'Vehículo no encontrado')
     }
     return {
       success: true,
@@ -42,10 +42,10 @@ class VehicleService {
    * @param {object} vehicleData - { license_plate, type, color, model }
    * @returns {object} { success, message, data: { id_vehicle } }
    */
-  async create(t, id_company, vehicleData) {
+  async create(id_company, vehicleData) {
     const existing = await vehicleRepo.findByLicensePlate(vehicleData.license_plate, id_company)
     if (existing) {
-      throw new AppError(409, t('server.vehicle.alreadyExists'))
+      throw new AppError(409, 'Ya existe un vehículo con esta placa')
     }
 
     const vehicle = await vehicleRepo.create({
@@ -55,7 +55,7 @@ class VehicleService {
 
     return {
       success: true,
-      message: t('server.vehicle.created'),
+      message: 'Vehículo creado exitosamente',
       data: {
         id_vehicle: vehicle.id_vehicle
       }
@@ -70,10 +70,10 @@ class VehicleService {
    * @param {object} updates - Campos a actualizar
    * @returns {object} { success, message }
    */
-  async update(t, id_vehicle, id_company, updates) {
+  async update(id_vehicle, id_company, updates) {
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, t('server.vehicle.notFound'))
+      throw new AppError(404, 'Vehículo no encontrado')
     }
 
     if (updates.license_plate && updates.license_plate !== vehicle.license_plate) {
@@ -83,18 +83,18 @@ class VehicleService {
         id_vehicle
       )
       if (existing) {
-        throw new AppError(409, t('server.vehicle.alreadyExists'))
+        throw new AppError(409, 'Ya existe un vehículo con esta placa')
       }
     }
 
     const affectedRows = await vehicleRepo.update(id_vehicle, id_company, updates)
     if (affectedRows === 0) {
-      throw new AppError(404, t('server.vehicle.notFound'))
+      throw new AppError(404, 'Vehículo no encontrado')
     }
 
     return {
       success: true,
-      message: t('server.vehicle.updated')
+      message: 'Vehículo actualizado exitosamente'
     }
   }
 
@@ -105,25 +105,25 @@ class VehicleService {
    * @param {number} id_company - ID de la empresa
    * @returns {object} { success, message }
    */
-  async delete(t, id_vehicle, id_company) {
+  async delete(id_vehicle, id_company) {
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, t('server.vehicle.notFound'))
+      throw new AppError(404, 'Vehículo no encontrado')
     }
 
     const totalMovements = await vehicleRepo.countMovements(id_vehicle)
     if (totalMovements > 0) {
-      throw new AppError(400, t('server.vehicle.cannotDeleteWithMovements'))
+      throw new AppError(400, 'No se puede eliminar un vehículo con historial de movimientos')
     }
 
     const deletedRows = await vehicleRepo.delete(id_vehicle, id_company)
     if (deletedRows === 0) {
-      throw new AppError(404, t('server.vehicle.notFound'))
+      throw new AppError(404, 'Vehículo no encontrado')
     }
 
     return {
       success: true,
-      message: t('server.vehicle.deleted')
+      message: 'Vehículo eliminado exitosamente'
     }
   }
 
@@ -136,10 +136,10 @@ class VehicleService {
    * @param {number} offset - Desplazamiento
    * @returns {object} { success, data }
    */
-  async getHistory(t, id_vehicle, id_company, limit = 50, offset = 0) {
+  async getHistory(id_vehicle, id_company, limit = 50, offset = 0) {
     const vehicle = await vehicleRepo.findById(id_vehicle, id_company)
     if (!vehicle) {
-      throw new AppError(404, t('server.vehicle.notFound'))
+      throw new AppError(404, 'Vehículo no encontrado')
     }
 
     const history = await vehicleRepo.getVehicleHistory(id_vehicle, limit, offset)
