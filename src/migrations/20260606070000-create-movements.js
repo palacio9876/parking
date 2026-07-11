@@ -57,8 +57,8 @@ module.exports = {
         comment: 'Usuario que registró salida',
       },
       status: {
-        type: Sequelize.ENUM('active', 'completed'),
-        defaultValue: 'active',
+        type: Sequelize.ENUM('activo', 'completado'),
+        defaultValue: 'activo',
         comment: 'Estado: active (dentro) / completed (fuera)',
       },
     })

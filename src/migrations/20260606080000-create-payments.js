@@ -27,7 +27,7 @@ module.exports = {
         comment: 'Movimiento asociado',
       },
       payment_method: {
-        type: Sequelize.ENUM('cash', 'card', 'QR'),
+        type: Sequelize.ENUM('efectivo', 'tarjeta', 'QR'),
         allowNull: false,
         comment: 'Método de pago: cash, card, QR',
       },

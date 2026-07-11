@@ -10,7 +10,7 @@ class ShiftRepository {
    */
   getOpenShift(id_company) {
     return Shift.findOne({
-      where: { id_company, status: 'open' }
+      where: { id_company, status: 'abierto' }
     })
   }
 

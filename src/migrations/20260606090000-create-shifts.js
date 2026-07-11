@@ -45,9 +45,9 @@ module.exports = {
       difference: Sequelize.DECIMAL(12, 2),
       closing_observation: Sequelize.STRING(255),
       status: {
-        type: Sequelize.ENUM('open', 'closed'),
+        type: Sequelize.ENUM('abierto', 'cerrado'),
         allowNull: false,
-        defaultValue: 'open',
+        defaultValue: 'abierto',
         comment: 'Estado: open (abierto) / closed (cerrado)',
       },
     })

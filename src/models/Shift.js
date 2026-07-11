@@ -55,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       total_general: {
         type: DataTypes.DECIMAL(12, 2),
-        comment: 'Total general recaudado (cash + card + qr)',
+        comment: 'Total general recaudado (efectivo + tarjeta + QR)',
       },
       difference: {
         type: DataTypes.DECIMAL(12, 2),
@@ -66,10 +66,10 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Observación al cerrar el turno',
       },
       status: {
-        type: DataTypes.ENUM('open', 'closed'),
+        type: DataTypes.ENUM('abierto', 'cerrado'),
         allowNull: false,
-        defaultValue: 'open',
-        comment: 'Estado del turno: open (abierto) o closed (cerrado)',
+        defaultValue: 'abierto',
+        comment: 'Estado del turno: abierto o cerrado',
       },
     },
     {

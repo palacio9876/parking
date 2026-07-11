@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Empresa a la que pertenece la tarifa',
       },
       vehicle_type: {
-        type: DataTypes.ENUM('car', 'motorcycle', 'bicycle'),
+        type: DataTypes.ENUM('carro', 'moto', 'bicicleta'),
         allowNull: false,
         comment: 'Tipo de vehículo al que aplica esta tarifa',
       },
@@ -54,10 +54,10 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Indica si la tarifa está activa',
       },
       billing_mode: {
-        type: DataTypes.ENUM('minute', 'hour', 'day', 'mixed'),
+        type: DataTypes.ENUM('minuto', 'hora', 'dia', 'mixto'),
         allowNull: false,
-        defaultValue: 'mixed',
-        comment: 'Modo de cobro: minute, hour, day o mixed (mixto)',
+        defaultValue: 'mixto',
+        comment: 'Modo de cobro: minuto, hora, día o mixto',
       },
       minutes_to_hours_threshold: {
         type: DataTypes.INTEGER,
@@ -72,16 +72,16 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Horas a partir de las cuales se cobra como día (0 = sin umbral)',
       },
       hourly_rounding: {
-        type: DataTypes.ENUM('up', 'exact'),
+        type: DataTypes.ENUM('arriba', 'exacto'),
         allowNull: false,
-        defaultValue: 'up',
-        comment: 'Redondeo de horas: up (redondear hacia arriba) o exact (exacto)',
+        defaultValue: 'arriba',
+        comment: 'Redondeo de horas: arriba (redondear hacia arriba) o exacto',
       },
       daily_rounding: {
-        type: DataTypes.ENUM('up', 'exact'),
+        type: DataTypes.ENUM('arriba', 'exacto'),
         allowNull: false,
-        defaultValue: 'up',
-        comment: 'Redondeo de días: up (redondear hacia arriba) o exact (exacto)',
+        defaultValue: 'arriba',
+        comment: 'Redondeo de días: arriba (redondear hacia arriba) o exacto',
       },
     },
     {

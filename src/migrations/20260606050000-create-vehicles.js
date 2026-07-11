@@ -24,7 +24,7 @@ module.exports = {
         comment: 'Placa del vehículo',
       },
       type: {
-        type: Sequelize.ENUM('car', 'motorcycle', 'bicycle'),
+        type: Sequelize.ENUM('carro', 'moto', 'bicicleta'),
         allowNull: false,
         comment: 'Tipo: car (carro), motorcycle (moto), bicycle (bicicleta)',
       },

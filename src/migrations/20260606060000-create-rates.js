@@ -19,7 +19,7 @@ module.exports = {
         comment: 'Empresa asociada',
       },
       vehicle_type: {
-        type: Sequelize.ENUM('car', 'motorcycle', 'bicycle'),
+        type: Sequelize.ENUM('carro', 'moto', 'bicicleta'),
         allowNull: false,
         comment: 'Tipo de vehículo',
       },
@@ -50,9 +50,9 @@ module.exports = {
         comment: 'Tarifa activa',
       },
       billing_mode: {
-        type: Sequelize.ENUM('minute', 'hour', 'day', 'mixed'),
+        type: Sequelize.ENUM('minuto', 'hora', 'dia', 'mixto'),
         allowNull: false,
-        defaultValue: 'mixed',
+        defaultValue: 'mixto',
         comment: 'Modo de cobro',
       },
       minutes_to_hours_threshold: {
@@ -68,15 +68,15 @@ module.exports = {
         comment: 'Umbral horas->día',
       },
       hourly_rounding: {
-        type: Sequelize.ENUM('up', 'exact'),
+        type: Sequelize.ENUM('arriba', 'exacto'),
         allowNull: false,
-        defaultValue: 'up',
+        defaultValue: 'arriba',
         comment: 'Redondeo de horas',
       },
       daily_rounding: {
-        type: Sequelize.ENUM('up', 'exact'),
+        type: Sequelize.ENUM('arriba', 'exacto'),
         allowNull: false,
-        defaultValue: 'up',
+        defaultValue: 'arriba',
         comment: 'Redondeo de días',
       },
     })

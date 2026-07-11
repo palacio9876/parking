@@ -59,9 +59,9 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Fecha de expiración del plan/suscripción',
       },
       plan: {
-        type: DataTypes.ENUM('basic', 'premium', 'enterprise'),
+        type: DataTypes.ENUM('basico', 'premium', 'empresarial'),
         allowNull: false,
-        comment: 'Plan de suscripción: básico, premium o enterprise',
+        comment: 'Plan de suscripción: básico, premium o empresarial',
       },
     },
     {

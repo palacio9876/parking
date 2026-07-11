@@ -1,5 +1,5 @@
 // Funciones de sanitización para validar y limpiar valores de entrada
-const allowedVehicleTypes = new Set(['car', 'motorcycle', 'bicycle'])
+const allowedVehicleTypes = new Set(['carro', 'moto', 'bicicleta'])
 
 /**
  * Convierte un valor a entero seguro dentro de un rango
@@ -48,7 +48,7 @@ function sanitizeReportFilters(req, res, next) {
     const q = req.query || {}
     const from     = typeof q.from  === 'string' && q.from.length  >= 8 ? q.from  : new Date().toISOString().slice(0, 10)
     const to       = typeof q.to    === 'string' && q.to.length    >= 8 ? q.to    : new Date().toISOString().slice(0, 10)
-    const status   = q.status === 'active' ? 'active' : (q.status === 'completed' ? 'completed' : null)
+    const status   = q.status === 'activo' ? 'activo' : (q.status === 'completado' ? 'completado' : null)
     const type     = toSafeVehicleType(q.type)
     const plateLike= q.plate ? toSafeLike(String(q.plate)) : null
     const page     = toSafeInt(q.page,     { min: 0,  max: 100000, fallback: 0  })

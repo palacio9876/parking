@@ -23,9 +23,9 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Placa del vehículo',
       },
       type: {
-        type: DataTypes.ENUM('car', 'motorcycle', 'bicycle'),
+        type: DataTypes.ENUM('carro', 'moto', 'bicicleta'),
         allowNull: false,
-        comment: 'Tipo de vehículo: car (carro), motorcycle (moto), bicycle (bicicleta)',
+        comment: 'Tipo de vehículo: carro, moto, bicicleta',
       },
       color: {
         type: DataTypes.STRING(30),

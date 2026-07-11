@@ -41,7 +41,7 @@ class DashboardRepository {
       return Movement.findOne({
       where: {
         id_company,
-        status: 'completed',
+        status: 'completado',
         exit_date: {
           [Op.gte]: today,
           [Op.lt]: tomorrow

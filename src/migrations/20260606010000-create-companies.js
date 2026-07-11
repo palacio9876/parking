@@ -37,7 +37,7 @@ module.exports = {
       },
       expiration_date: Sequelize.DATE,
       plan: {
-        type: Sequelize.ENUM('basic', 'premium', 'enterprise'),
+        type: Sequelize.ENUM('basico', 'premium', 'empresarial'),
         allowNull: false,
         comment: 'Plan de suscripción',
       },

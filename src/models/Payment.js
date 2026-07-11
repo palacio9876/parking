@@ -23,9 +23,9 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Movimiento asociado al pago',
       },
       payment_method: {
-        type: DataTypes.ENUM('cash', 'card', 'QR'),
+        type: DataTypes.ENUM('efectivo', 'tarjeta', 'QR'),
         allowNull: false,
-        comment: 'Método de pago: cash (efectivo), card (tarjeta), QR',
+        comment: 'Método de pago: efectivo, tarjeta, QR',
       },
       amount: {
         type: DataTypes.DECIMAL(10, 2),

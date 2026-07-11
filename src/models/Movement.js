@@ -51,10 +51,10 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Usuario que registró la salida (null si sigue dentro)',
       },
       status: {
-        type: DataTypes.ENUM('active', 'completed'),
+        type: DataTypes.ENUM('activo', 'completado'),
         allowNull: false,
-        defaultValue: 'active',
-        comment: 'Estado: active (dentro) o completed (fuera)',
+        defaultValue: 'activo',
+        comment: 'Estado: activo (dentro) o completado (fuera)',
       },
     },
     {
