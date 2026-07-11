@@ -138,7 +138,7 @@
 }
 
 .btn-check:checked+.btn {
-    border-color: #1a237e;
+    border-color: #151b60;
     color: #fff;
     background-color: #1a237e;
     box-shadow: 0 0 0 .2rem rgba(26,35,126,.15);
@@ -195,6 +195,8 @@
 .btn-password:hover { background-color: #fef3c7; }
 .btn-view { background-color: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
 .btn-view:hover { background-color: #dcfce7; }
+.btn-warning { background-color: #ffea96; color: #9c8500; border-color: #9c8500; }
+.btn-warning:hover { background-color: rgb(236, 199, 85); color: #111827; }
 .btn-print { background-color: #f8fafc; color: #475569; border-color: #e2e8f0; }
 .btn-print:hover { background-color: #f1f5f9; }
 .btn-primary { background-color: #1a237e; color: #fff; border-color: #1a237e; }
@@ -240,7 +242,7 @@
 .modal.show { display: block; }
 .modal.fade .modal-dialog { transition: transform .3s ease-out; transform: translate(0,-50px); }
 .modal.show .modal-dialog { transform: none; }
-.modal-dialog { position: relative; width: auto; margin: 1.75rem auto; max-width: 500px; padding: 0 1rem; }
+.modal-dialog { position: relative; width: auto; margin: 1.75rem auto; max-width: 560px; padding: 0.5rem; }
 .modal-dialog.modal-lg { max-width: 800px; }
 .modal-dialog.modal-xl { max-width: 1140px; }
 .modal-backdrop { position: fixed; top: 0; left: 0; z-index: 1050; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
