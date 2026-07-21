@@ -82,6 +82,7 @@ async function loadSettings(){
 async function saveCompany(){
     const payload = {
         name: document.getElementById('e_name').value.trim(),
+        tax_id: document.getElementById('e_tax_id').value.trim(),
         address: document.getElementById('e_address').value.trim(),
         phone: document.getElementById('e_phone').value.trim(),
         email: document.getElementById('e_email').value.trim()

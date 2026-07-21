@@ -29,7 +29,7 @@ async function loadUsers(){
             <tr>
                 <td>${u.name}</td>
                 <td>${u.username}</td>
-                <td><span class="badge bg-${u.role==='admin'?'primary':'secondary'} text-uppercase">${u.role}</span></td>
+                <td><span class="text-sm text-gray-700">${u.role === 'admin' ? 'Administrador' : 'Operador'}</span></td>
                 <td>${u.active ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>'}</td>
                 <td>${fmtDate(u.last_access)}</td>
                 <td>

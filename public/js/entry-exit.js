@@ -1,9 +1,14 @@
-const token = localStorage.getItem('token');
+const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
 let empresaInfo = null;
 let ultimoIngreso = null;
 let ultimaSalida = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+function getApiErrorMessage(data, fallback) {
+    return data?.error || data?.message || fallback;
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
     if (!token) return;
     if (localStorage.getItem('userRole') !== 'admin') {
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('d-none'));
@@ -38,7 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const qr = JSON.stringify({ t: 'exit', e: empresaInfo?.tax_id, m: ultimaSalida.id_movement, p: ultimaSalida.license_plate, fs: ultimaSalida.exit_date, total: ultimaSalida.total_to_pay });
         imprimirHTML(document.getElementById('compSalidaBody').innerHTML, 'Factura de Salida', 80, qr);
     });
-});
+  });
+}
 
 async function loadEmpresaInfo() {
     try {
@@ -116,7 +122,11 @@ async function handleEntry(e) {
         body: JSON.stringify({ license_plate, type })
     });
     const data = await res.json();
-    if (!res.ok) { showToast('Error', data.message || 'Error al registrar ingreso', 'error'); return; }
+    if (!res.ok) {
+        const message = getApiErrorMessage(data, 'Error al registrar ingreso');
+        showToast('Entrada no permitida', message, 'warning');
+        return;
+    }
     const b = data.data;
     ultimoIngreso = b;
     showToast('Ingreso registrado', `Vehículo ${b.license_plate} ingresó correctamente`, 'success');
@@ -355,7 +365,13 @@ function abrirModalPago(factura, metodoPorDefecto) {
     };
 }
 
-window.abrirModalPago = abrirModalPago;
-window.renderReceipt = renderComprobante;
-window.printHTML = imprimirHTML;
-window.formatCurrency = formatCurrencyEE;
+if (typeof window !== 'undefined') {
+    window.abrirModalPago = abrirModalPago;
+    window.renderReceipt = renderComprobante;
+    window.printHTML = imprimirHTML;
+    window.formatCurrency = formatCurrencyEE;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { getApiErrorMessage };
+}
