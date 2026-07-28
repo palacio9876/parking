@@ -39,7 +39,7 @@ async function loadUsers(){
                 </td>
             </tr>
         `).join('');
-    }catch(err){ toast('Error', err.message, 'error'); }
+    }catch(err){ showToast('Error', err.message, 'error'); }
 }
 
 function editUser(u){
@@ -60,9 +60,9 @@ async function deactivateUser(id){
         const res = await fetch(`/api/users/${id}`, { method:'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||'Error');
-        toast('Éxito','Usuario desactivado','success');
+        showToast('Éxito','Usuario desactivado','success');
         loadUsers();
-    }catch(err){ toast('Error', err.message, 'error'); }
+    }catch(err){ showToast('Error', err.message, 'error'); }
 }
 
 async function saveUser(){
@@ -100,7 +100,7 @@ async function saveUser(){
         });
         const j = await res.json();
         if(!res.ok) throw new Error(j.message||'Error saving user');
-        toast('Éxito', id ? 'Usuario actualizado' : 'Usuario creado', 'success');
+        showToast('Éxito', id ? 'Usuario actualizado' : 'Usuario creado', 'success');
         document.getElementById('userForm').reset();
         document.getElementById('userId').value='';
         document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
@@ -111,29 +111,6 @@ async function saveUser(){
         btn.disabled = false;
         btn.innerHTML = prevHtml;
     }
-}
-
-function toast(title, message, type){
-    const container = document.getElementById('toastContainer');
-    const id = 't_' + Date.now();
-    const typeClass = type==='success' ? 'toast-success' : type==='warning' ? 'toast-warning' : type==='info' ? 'toast-info' : 'toast-error';
-    const el = document.createElement('div');
-    el.className = `toast align-items-center toast-custom ${typeClass}`;
-    el.id = id;
-    el.role = 'alert';
-    el.ariaLive = 'assertive';
-    el.ariaAtomic = 'true';
-    el.innerHTML = `
-      <div class="toast-header">
-        <strong class="me-auto">${title}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">${message}</div>
-    `;
-    container.appendChild(el);
-    const t = new bootstrap.Toast(el, { delay: 3500 });
-    t.show();
-    el.addEventListener('hidden.bs.toast', () => el.remove());
 }
 
 // UI helpers for form errors

@@ -153,6 +153,18 @@ async function uploadLogo(){
         const j = await r.json();
         if (!r.ok) throw new Error(j.message||'Error subiendo logo');
         setAlert('alertCompany','success','Logo subido y guardado.');
+        const sidebarImg = document.getElementById('sidebarLogo');
+        if (sidebarImg) {
+            const lr = await fetch('/api/companies/logo', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+            if (lr.ok) {
+                const blob = await lr.blob();
+                const dataUrl = await new Promise(resolve => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.readAsDataURL(blob); });
+                sidebarImg.src = dataUrl;
+                sidebarImg.style.display = 'block';
+                const text = sidebarImg.parentElement.querySelector('.logo-text');
+                if (text) text.style.display = 'none';
+            }
+        }
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
