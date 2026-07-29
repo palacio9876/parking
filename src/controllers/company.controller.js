@@ -1,43 +1,64 @@
+// Controlador de empresa: maneja solicitudes de datos, configuración y logo
 const companyService = require('../services/company.service')
 
 class CompanyController {
 
+  /**
+   * GET /api/companies/me
+   * Obtiene datos de la empresa del usuario autenticado
+   */
   async getCompany(req, res, next) {
     try {
-      const result = await companyService.getCompany(req.t, req.user.id_company)
+      const result = await companyService.getCompany(req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)
     }
   }
 
+  /**
+   * GET /api/companies/config
+   * Obtiene la configuración de la empresa (capacidades, horarios, etc.)
+   */
   async getSettings(req, res, next) {
     try {
-      const result = await companyService.getSettings(req.t, req.user.id_company)
+      const result = await companyService.getSettings(req.user.id_company)
       res.json(result)
     } catch (err) {
       next(err)
     }
   }
 
+  /**
+   * PUT /api/companies/
+   * Actualiza los datos generales de la empresa (solo admin)
+   */
   async updateCompany(req, res, next) {
     try {
-      const result = await companyService.updateCompany(req.t, req.user.id_company, req.body)
+      const result = await companyService.updateCompany(req.user.id_company, req.body)
       res.json(result)
     } catch (err) {
       next(err)
     }
   }
 
+  /**
+   * PUT /api/companies/config
+   * Actualiza la configuración de la empresa (solo admin)
+   */
   async updateSettings(req, res, next) {
     try {
-      const result = await companyService.updateSettings(req.t, req.user.id_company, req.body)
+      const result = await companyService.updateSettings(req.user.id_company, req.body)
       res.json(result)
     } catch (err) {
       next(err)
     }
   }
 
+  /**
+   * GET /api/companies/logo
+   * Obtiene el logo de la empresa como imagen
+   */
   async getLogo(req, res, next) {
     try {
       const result = await companyService.getLogo(req.user.id_company)
@@ -45,16 +66,20 @@ class CompanyController {
         res.set('Content-Type', 'image/png')
         res.send(result.data.logo_url)
       } else {
-        res.status(404).json({ success: false, error: req.t('server.company.logoNotFound') })
+        res.status(404).json({ success: false, error: 'Logo no encontrado' })
       }
     } catch (err) {
       next(err)
     }
   }
 
+  /**
+   * POST /api/companies/logo
+   * Sube/actualiza el logo de la empresa (solo admin)
+   */
   async uploadLogo(req, res, next) {
     try {
-      const result = await companyService.uploadLogo(req.t, req.user.id_company, req.file?.buffer)
+      const result = await companyService.uploadLogo(req.user.id_company, req.file?.buffer)
       res.json(result)
     } catch (err) {
       next(err)

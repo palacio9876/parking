@@ -1,3 +1,4 @@
+// Rutas de turnos: apertura, cierre y consulta de turnos de caja
 const { Router }  = require('express')
 const shiftController = require('../controllers/shift.controller')
 const { auth }    = require('../middlewares/auth')

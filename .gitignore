@@ -16,3 +16,5 @@ public/uploads/
 .parcel-cache/
 *.local
 *.log
+MODELO_NEGOCIO.md
+public/css/tailwind.css

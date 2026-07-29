@@ -11,13 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const mode = document.getElementById('billing_mode');
     const fToggle = () => {
         const m = mode.value;
-        const inMin = m === 'minute' || m === 'mixed';
-        const inHour = m === 'hour' || m === 'mixed';
-        const inDay = m === 'day' || m === 'mixed';
+        const inMin = m === 'minuto' || m === 'mixto';
+        const inHour = m === 'hora' || m === 'mixto';
+        const inDay = m === 'dia' || m === 'mixto';
         document.getElementById('minute_rate').disabled = !inMin;
         document.getElementById('hourly_rate').disabled = !inHour;
         document.getElementById('full_day_rate').disabled = !inDay;
-        const scales = m === 'mixed';
+        const scales = m === 'mixto';
         document.getElementById('minute_to_hour_threshold').disabled = !scales;
         document.getElementById('hour_to_day_threshold').disabled = !scales;
         document.getElementById('hour_rounding').disabled = !scales;
@@ -46,11 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(body)
             });
             const j = await res.json();
-            if(!res.ok) throw new Error(j.message||'Could not save');
-            showToast(t('common.success'),t('rates.saved'),'success');
+            if(!res.ok) throw new Error(j.error||'Could not save');
+            showToast('Éxito','Tarifa guardada','success');
             loadRates();
         }catch(err){
-            showToast(t('common.error'), err.message, 'error');
+            showToast('Error', err.message, 'error');
         }
     });
 });
@@ -59,42 +59,21 @@ async function loadRates(){
     try{
         const res = await fetch('/api/rates/current', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('rates.loadError'));
+        if(!res.ok) throw new Error(j.error||'Error cargando tarifas');
         const ul = document.getElementById('ratesList');
-        ul.innerHTML = j.data.map(t => `
+        ul.innerHTML = j.data.map(r => `
             <li class="list-group-item d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-center">
-                    <strong class="text-capitalize">${t.vehicle_type}</strong>
-                    <span class="badge bg-primary">${t.billing_mode}</span>
+                    <strong class="text-capitalize">${r.vehicle_type}</strong>
+                    <span class="badge bg-primary">${r.billing_mode}</span>
                 </div>
-                <small>${t('rates.min')}: ${t.minute_rate} | ${t('rates.hour')}: ${t.hourly_rate} | ${t('rates.day')}: ${t.full_day_rate}</small>
-                <small>${t('rates.scales')} → min→hr: ${t.minutes_to_hours_threshold} min, hr→day: ${t.hours_to_days_threshold} h</small>
+                <small>Min: ${r.minute_rate} | Hora: ${r.hourly_rate} | Día: ${r.full_day_rate}</small>
+                <small>Escalas → min→hr: ${r.minutes_to_hours_threshold} min, hr→day: ${r.hours_to_days_threshold} h</small>
             </li>
         `).join('');
     }catch(err){
-        showToast(t('common.error'), err.message, 'error');
+        showToast('Error', err.message, 'error');
     }
 }
 
-function showToast(title, message, type) {
-    const container = document.getElementById('toastContainer');
-    const id = 't_' + Date.now();
-    const typeClass = type==='success' ? 'toast-success' : type==='warning' ? 'toast-warning' : type==='info' ? 'toast-info' : 'toast-error';
-    const el = document.createElement('div');
-    el.className = `toast align-items-center toast-custom ${typeClass}`;
-    el.id = id;
-    el.role = 'alert';
-    el.ariaLive = 'assertive';
-    el.ariaAtomic = 'true';
-    el.innerHTML = `
-      <div class="toast-header">
-        <strong class="me-auto">${title}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">${message}</div>
-    `;
-    container.appendChild(el);
-    const toast = new bootstrap.Toast(el, { delay: 3500 });
-    toast.show();
-    el.addEventListener('hidden.bs.toast', () => el.remove());
-}
+

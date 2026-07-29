@@ -1,7 +1,9 @@
+// Migración: crea vistas para consultas frecuentes (movimientos activos e ingresos diarios)
 'use strict'
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    // Vista: movimientos activos (vehículos dentro del parqueadero)
     await queryInterface.sequelize.query(`
       CREATE OR REPLACE VIEW v_active_movements AS
       SELECT
@@ -18,6 +20,7 @@ module.exports = {
       WHERE m.exit_date IS NULL
     `)
 
+    // Vista: ingresos diarios agrupados por método de pago
     await queryInterface.sequelize.query(`
       CREATE OR REPLACE VIEW v_daily_income AS
       SELECT
@@ -27,7 +30,7 @@ module.exports = {
         COUNT(*) AS payment_count,
         SUM(p.amount) AS total_income
       FROM payments p
-      GROUP BY p.id_company, DATE(p.payment_date), p.payment_method
+      GROUP BY p.id_company, DATE(payment_date), p.payment_method
     `)
   },
 

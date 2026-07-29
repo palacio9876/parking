@@ -1,3 +1,4 @@
+// DTO de dashboard: esquema de validación para parámetros de consulta de estadísticas
 const { z } = require('zod')
 
 const queryStatsDto = z.object({

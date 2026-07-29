@@ -1,3 +1,4 @@
+// Modelo de Vehículo: registro de vehículos que ingresan al parqueadero
 const { Model } = require('sequelize')
 
 module.exports = (sequelize, DataTypes) => {
@@ -9,30 +10,37 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+        comment: 'Identificador único del vehículo',
       },
       id_company: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        comment: 'Empresa propietaria del registro',
       },
       license_plate: {
         type: DataTypes.STRING(10),
         allowNull: false,
+        comment: 'Placa del vehículo',
       },
       type: {
-        type: DataTypes.ENUM('car', 'motorcycle', 'bicycle'),
+        type: DataTypes.ENUM('carro', 'moto', 'bicicleta'),
         allowNull: false,
+        comment: 'Tipo de vehículo: carro, moto, bicicleta',
       },
       color: {
         type: DataTypes.STRING(30),
         allowNull: false,
+        comment: 'Color del vehículo',
       },
       model: {
         type: DataTypes.STRING(50),
+        comment: 'Modelo/marca del vehículo',
       },
       registration_date: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
+        comment: 'Fecha de registro del vehículo en el sistema',
       },
     },
     {

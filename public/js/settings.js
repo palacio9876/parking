@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!f) { preview.src=''; preview.classList.add('d-none'); return; }
             const max = 2 * 1024 * 1024;
             const okType = ['image/png','image/jpeg','image/jpg','image/gif'].includes(f.type);
-            if (!okType) { setAlert('alertCompany','danger',t('settings.logoTypeError')); fileInput.value=''; return; }
-            if (f.size > max) { setAlert('alertCompany','danger',t('settings.logoSizeError')); fileInput.value=''; return; }
+            if (!okType) { setAlert('alertCompany','danger','Tipo de archivo no permitido. Usa PNG/JPG.'); fileInput.value=''; return; }
+            if (f.size > max) { setAlert('alertCompany','danger','El archivo excede 2MB.'); fileInput.value=''; return; }
             const reader = new FileReader();
             reader.onload = e => { preview.src = e.target.result; preview.classList.remove('d-none'); };
             reader.readAsDataURL(f);
@@ -39,7 +39,7 @@ async function loadCompany(){
     try{
         const r = await fetch('/api/companies/me',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||t('settings.loadCompanyError'));
+        if(!r.ok) throw new Error(j.error||'Error cargando empresa');
         const e = j.data;
         document.getElementById('e_name').value = e.name || '';
         document.getElementById('e_tax_id').value = e.tax_id || '';
@@ -60,7 +60,7 @@ async function loadSettings(){
     try{
         const r = await fetch('/api/companies/config',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||t('settings.loadSettingsError'));
+        if(!r.ok) throw new Error(j.error||'Error cargando configuración');
         const c = j.data;
         document.getElementById('c_cars').value = c.car_total_capacity || 0;
         document.getElementById('c_motos').value = c.motorcycle_total_capacity || 0;
@@ -82,19 +82,20 @@ async function loadSettings(){
 async function saveCompany(){
     const payload = {
         name: document.getElementById('e_name').value.trim(),
+        tax_id: document.getElementById('e_tax_id').value.trim(),
         address: document.getElementById('e_address').value.trim(),
         phone: document.getElementById('e_phone').value.trim(),
         email: document.getElementById('e_email').value.trim()
     };
     const btn = document.getElementById('btnSaveCompany');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.saving'));
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Guardando...');
     try{
         const r = await fetch('/api/companies',{
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error saving');
-        setAlert('alertCompany', 'success', t('settings.saved'));
+        if(!r.ok) throw new Error(j.error||'Error saving');
+        setAlert('alertCompany', 'success', 'Datos de empresa actualizados.');
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
@@ -112,14 +113,14 @@ async function saveSettings(){
         operation_24h: document.getElementById('c_24h').checked
     };
     const btn = document.getElementById('btnSaveSettings');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.saving'));
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Guardando...');
     try{
         const r = await fetch('/api/companies/config',{
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error saving');
-        setAlert('alertSettings', 'success', t('settings.settingsSaved'));
+        if(!r.ok) throw new Error(j.error||'Error saving');
+        setAlert('alertSettings', 'success', 'Configuración actualizada.');
     }catch(err){ setAlert('alertSettings','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }
@@ -142,16 +143,28 @@ function spinner(text){
 
 async function uploadLogo(){
     const file = document.getElementById('e_logo_file') && document.getElementById('e_logo_file').files[0];
-    if (!file) { setAlert('alertCompany','warning',t('settings.selectLogo')); return; }
+    if (!file) { setAlert('alertCompany','warning','Selecciona un archivo de logo.'); return; }
     const btn = document.getElementById('btnUploadLogo');
-    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner(t('common.uploading'));
+    const prev = btn.innerHTML; btn.disabled = true; btn.innerHTML = spinner('Subiendo...');
     try{
         const form = new FormData();
         form.append('logo', file);
         const r = await fetch('/api/companies/logo', { method:'POST', headers:{ 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: form });
         const j = await r.json();
-        if (!r.ok) throw new Error(j.message||t('settings.logoUploadError'));
-        setAlert('alertCompany','success',t('settings.logoUploaded'));
+        if (!r.ok) throw new Error(j.error||'Error subiendo logo');
+        setAlert('alertCompany','success','Logo subido y guardado.');
+        const sidebarImg = document.getElementById('sidebarLogo');
+        if (sidebarImg) {
+            const lr = await fetch('/api/companies/logo', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+            if (lr.ok) {
+                const blob = await lr.blob();
+                const dataUrl = await new Promise(resolve => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.readAsDataURL(blob); });
+                sidebarImg.src = dataUrl;
+                sidebarImg.style.display = 'block';
+                const text = sidebarImg.parentElement.querySelector('.logo-text');
+                if (text) text.style.display = 'none';
+            }
+        }
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
 }

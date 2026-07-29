@@ -1,3 +1,4 @@
+// Configuración del logger usando Winston para registro estructurado
 const winston = require('winston')
 
 const logger = winston.createLogger({

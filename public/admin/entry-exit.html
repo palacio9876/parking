@@ -3,111 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="entryExit.title">ParkSystem - Ingreso / Salida</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>ParkSystem - Ingreso / Salida</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/tailwind.css" rel="stylesheet">
     <link href="/css/dashboard.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
-    <style>
-        body{font-family:'Poppins',sans-serif}.card{border:none;box-shadow:0 0 15px rgba(0,0,0,.05)}.receipt{font-size:.95rem}.receipt h6{font-weight:600}.print-area{background:#fff}@media print{.no-print{display:none!important}.print-area{box-shadow:none!important}}.veh-tipo-toggle .btn{border-width:2px;padding:0.5rem 0.75rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;flex:1 0 110px;min-width:110px;white-space:nowrap}.veh-tipo-toggle .btn i{font-size:1.1rem}.btn-check:checked+.btn{border-color:var(--bs-primary);color:#fff;background-color:var(--bs-primary);box-shadow:0 0 0 .2rem rgba(13,110,253,.15)}.veh-tipo-toggle{gap:.5rem;width:100%;display:flex;flex-wrap:wrap}
-    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script>if(!localStorage.getItem('token')){window.location.href='/';}</script>
 </head>
-<body>
+<body class="font-poppins bg-gray-100">
     <div class="sidebar">
         <div class="sidebar-header">
-            <div class="logo-container"><div class="logo-circle"><span class="logo-text">PS</span></div></div>
-            <h5 class="mt-3 text-white">ParkSystem</h5>
+            <div class="logo-container"><div class="logo-circle"><img id="sidebarLogo" src="" alt="Logo" style="display:none"><span class="logo-text">PS</span></div></div>
+            <h5 class="mt-3 text-white text-lg font-semibold">ParkSystem</h5>
         </div>
         <nav class="sidebar-nav">
-            <ul class="nav flex-column">
-                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span data-i18n="sidebar.dashboard">Dashboard</span></a></li>
-                <li class="nav-item"><a href="/admin/vehicles" class="nav-link"><i class="fas fa-car"></i><span data-i18n="sidebar.vehicles">Vehículos</span></a></li>
-                <li class="nav-item"><a href="/admin/entry-exit" class="nav-link active"><i class="fas fa-right-left"></i><span data-i18n="sidebar.entryExit">Ingreso / Salida</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/settings" class="nav-link"><i class="fas fa-gear"></i><span data-i18n="sidebar.settings">Configuración</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/rates" class="nav-link"><i class="fas fa-money-bill-wave"></i><span data-i18n="sidebar.rates">Tarifas</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/users" class="nav-link"><i class="fas fa-users"></i><span data-i18n="sidebar.users">Usuarios</span></a></li>
-                <li class="nav-item admin-only"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i><span data-i18n="sidebar.reports">Reportes</span></a></li>
+            <ul class="flex flex-col">
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="/admin/vehicles" class="nav-link"><i class="fas fa-car"></i><span>Vehículos</span></a></li>
+                <li class="nav-item"><a href="/admin/entry-exit" class="nav-link active"><i class="fas fa-right-left"></i><span>Ingreso / Salida</span></a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="openShiftModal(); return false;"><i class="fas fa-cash-register"></i><span>Turnos</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/settings" class="nav-link"><i class="fas fa-gear"></i><span>Configuración</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/rates" class="nav-link"><i class="fas fa-money-bill-wave"></i><span>Tarifas</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/users" class="nav-link"><i class="fas fa-users"></i><span>Usuarios</span></a></li>
+                <li class="nav-item admin-only"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i><span>Reportes</span></a></li>
             </ul>
         </nav>
-        <div class="sidebar-footer"><a href="#" class="nav-link" id="btnLogout"><i class="fas fa-sign-out-alt"></i><span data-i18n="sidebar.logout">Cerrar Sesión</span></a></div>
+        <div class="sidebar-footer"><a href="#" class="nav-link" id="btnLogout"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></div>
     </div>
 
     <div class="main-content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-            <div class="container-fluid">
-                <button class="btn btn-link sidebar-toggle"><i class="fas fa-bars"></i></button>
-                <div class="navbar-collapse"><ul class="navbar-nav ms-auto"><li class="nav-item"><span class="nav-link"><i class="fas fa-user-circle me-2"></i><span id="userName">Usuario</span></span></li></ul></div>
+        <nav class="navbar-custom bg-white shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <button class="sidebar-toggle px-4 py-2 text-primary hover:text-primary-dark transition-colors" title="Toggle sidebar">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 px-4">
+                <div class="h-5 w-px bg-gray-200"></div>
+                <span class="flex items-center gap-2 text-gray-700 text-sm font-medium">
+                    <i class="fas fa-user-circle text-lg text-primary"></i>
+                    <span id="userName">Usuario</span>
+                </span>
             </div>
         </nav>
 
-        <div class="container-fluid py-4">
-            <div class="row g-4">
-                <div class="col-12 col-lg-6">
-                    <div class="card">
-                        <div class="card-header bg-white"><h5 class="mb-0"><i class="fas fa-right-to-bracket me-2 text-success"></i><span data-i18n="entryExit.entry">Ingreso rápido</span></h5></div>
-                        <div class="card-body">
-                            <form id="formIngreso" class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label" data-i18n="entryExit.plate">Placa</label>
-                                    <input type="text" id="ingPlaca" class="form-control" data-i18n="entryExit.platePlaceholder" data-i18n-attr="placeholder" placeholder="ABC123" required>
+        <div class="w-full px-6 py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-0"><i class="fas fa-right-to-bracket mr-2 text-green-500"></i><span>Ingreso rápido</span></h5>
+                    </div>
+                    <div class="p-6">
+                        <form id="formIngreso" class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-5">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Placa</label>
+                                <input type="text" id="ingPlaca" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" placeholder="ABC123" required>
+                            </div>
+                            <div class="col-span-12 md:col-span-5">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                <div class="veh-tipo-toggle flex gap-2">
+                                    <input type="radio" class="btn-check hidden" name="ingTipo" id="tipoCarro" autocomplete="off" value="carro">
+                                    <label class="flex items-center justify-center px-3 py-2 border-2 border-primary text-primary rounded-lg cursor-pointer hover:bg-primary hover:text-white transition-colors text-sm gap-1 flex-1 min-w-[90px] btn" for="tipoCarro" title="Carro"><i class="fas fa-car-side"></i><span>Carro</span></label>
+                                    <input type="radio" class="btn-check hidden" name="ingTipo" id="tipoMoto" autocomplete="off" value="moto">
+                                    <label class="flex items-center justify-center px-3 py-2 border-2 border-primary text-primary rounded-lg cursor-pointer hover:bg-primary hover:text-white transition-colors text-sm gap-1 flex-1 min-w-[90px] btn" for="tipoMoto" title="Moto"><i class="fas fa-motorcycle"></i><span>Moto</span></label>
+                                    <input type="radio" class="btn-check hidden" name="ingTipo" id="tipoBici" autocomplete="off" value="bicicleta">
+                                    <label class="flex items-center justify-center px-3 py-2 border-2 border-primary text-primary rounded-lg cursor-pointer hover:bg-primary hover:text-white transition-colors text-sm gap-1 flex-1 min-w-[90px] btn" for="tipoBici" title="Bicicleta"><i class="fas fa-bicycle"></i><span>Bicicleta</span></label>
                                 </div>
-                                <div class="col-12 col-md-6 col-lg-5">
-                                    <label class="form-label" data-i18n="entryExit.type">Tipo</label>
-                                    <div class="veh-tipo-toggle d-flex">
-                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoCarro" autocomplete="off" value="car">
-                                        <label class="btn btn-outline-primary" for="tipoCarro" title="Carro"><i class="fas fa-car-side"></i><span class="d-none d-md-inline" data-i18n="entryExit.car">Carro</span></label>
-                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoMoto" autocomplete="off" value="motorcycle">
-                                        <label class="btn btn-outline-primary" for="tipoMoto" title="Moto"><i class="fas fa-motorcycle"></i><span class="d-none d-md-inline" data-i18n="entryExit.motorcycle">Moto</span></label>
-                                        <input type="radio" class="btn-check" name="ingTipo" id="tipoBici" autocomplete="off" value="bicycle">
-                                        <label class="btn btn-outline-primary" for="tipoBici" title="Bicicleta"><i class="fas fa-bicycle"></i><span class="d-none d-md-inline" data-i18n="entryExit.bicycle">Bici</span></label>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-3 col-lg-2 d-flex align-items-end mt-2 mt-md-0">
-                                    <button class="btn btn-success w-100" type="submit"><i class="fas fa-play me-2"></i><span data-i18n="entryExit.enter">Ingresar</span></button>
-                                </div>
-                            </form>
-                            <div id="compIngreso" class="mt-4 d-none print-area">
-                                <h6 data-i18n="entryExit.receiptEntry">Comprobante de Ingreso</h6>
-                                <div class="receipt" id="compIngresoBody"></div>
-                                <div class="no-print mt-2 d-flex gap-2">
-                                    <button class="btn btn-outline-secondary btn-sm" id="btnPrintIngreso58"><i class="fas fa-print me-1"></i><span data-i18n="entryExit.print58">Imprimir 58mm</span></button>
-                                    <button class="btn btn-outline-secondary btn-sm" id="btnPrintIngreso80"><i class="fas fa-print me-1"></i><span data-i18n="entryExit.print80">Imprimir 80mm</span></button>
-                                </div>
+                            </div>
+                            <div class="col-span-12 md:col-span-2 flex items-end">
+                                <button class="w-full bg-green-500 text-white font-medium px-4 py-2.5 rounded-lg hover:bg-green-600 transition-colors text-sm" type="submit"><i class="fas fa-play mr-2"></i><span>Ingresar</span></button>
+                            </div>
+                        </form>
+                        <div id="compIngreso" class="mt-6 d-none print-area">
+                            <h6 class="font-semibold">Comprobante de Ingreso</h6>
+                            <div class="receipt" id="compIngresoBody"></div>
+                            <div class="no-print mt-2 flex gap-2">
+                                <button class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" id="btnPrintIngreso58"><i class="fas fa-print mr-1"></i><span>Imprimir 58mm</span></button>
+                                <button class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" id="btnPrintIngreso80"><i class="fas fa-print mr-1"></i><span>Imprimir 80mm</span></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-lg-6">
-                    <div class="card">
-                        <div class="card-header bg-white"><h5 class="mb-0"><i class="fas fa-right-from-bracket me-2 text-danger"></i><span data-i18n="entryExit.exit">Salida y cobro</span></h5></div>
-                        <div class="card-body">
-                            <form id="formSalida" class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label" data-i18n="entryExit.plate">Placa</label>
-                                    <input type="text" id="salPlaca" class="form-control" data-i18n="entryExit.platePlaceholder" data-i18n-attr="placeholder" placeholder="ABC123" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label" data-i18n="entryExit.paymentMethod">Método de pago</label>
-                                    <select id="salMetodo" class="form-select">
-                                        <option value="cash" data-i18n="entryExit.cash">Efectivo</option>
-                                        <option value="card" data-i18n="entryExit.card">Tarjeta</option>
-                                        <option value="QR" data-i18n="entryExit.qr">QR</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button class="btn btn-danger w-100" type="submit"><i class="fas fa-stop me-2"></i><span data-i18n="entryExit.finish">Finalizar</span></button>
-                                </div>
-                            </form>
-                            <div id="compSalida" class="mt-4 d-none print-area">
-                                <h6 data-i18n="entryExit.receiptExit">Factura</h6>
-                                <div class="receipt" id="compSalidaBody"></div>
-                                <div class="no-print mt-2 d-flex gap-2">
-                                    <button class="btn btn-outline-secondary btn-sm" id="btnPrintSalida58"><i class="fas fa-print me-1"></i><span data-i18n="entryExit.print58">Imprimir 58mm</span></button>
-                                    <button class="btn btn-outline-secondary btn-sm" id="btnPrintSalida80"><i class="fas fa-print me-1"></i><span data-i18n="entryExit.print80">Imprimir 80mm</span></button>
-                                </div>
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-0"><i class="fas fa-right-from-bracket mr-2 text-red-500"></i><span>Salida y cobro</span></h5>
+                    </div>
+                    <div class="p-6">
+                        <form id="formSalida" class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-5">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Placa</label>
+                                <input type="text" id="salPlaca" list="salPlacaList" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm" placeholder="ABC123" required>
+                                <datalist id="salPlacaList"></datalist>
+                            </div>
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Método de pago</label>
+                                <select id="salMetodo" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="QR">QR</option>
+                                </select>
+                            </div>
+                            <div class="col-span-12 md:col-span-3 flex items-end">
+                                <button class="w-full bg-red-500 text-white font-medium px-4 py-2.5 rounded-lg hover:bg-red-600 transition-colors text-sm" type="submit"><i class="fas fa-stop mr-2"></i><span>Finalizar</span></button>
+                            </div>
+                        </form>
+                        <div id="compSalida" class="mt-6 d-none print-area">
+                            <h6 class="font-semibold">Factura</h6>
+                            <div class="receipt" id="compSalidaBody"></div>
+                            <div class="no-print mt-2 flex gap-2">
+                                <button class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" id="btnPrintSalida58"><i class="fas fa-print mr-1"></i><span>Imprimir 58mm</span></button>
+                                <button class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" id="btnPrintSalida80"><i class="fas fa-print mr-1"></i><span>Imprimir 80mm</span></button>
                             </div>
                         </div>
                     </div>
@@ -117,27 +124,40 @@
     </div>
 
     <div class="modal fade" id="pagoModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="entryExit.registerPayment">Registrar Pago</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-2"><strong data-i18n="common.total">Total:</strong> <span id="pagoTotal"></span></div>
-                    <div class="mb-3">
-                        <label class="form-label" data-i18n="entryExit.addPaymentMethod">Agregar medios de pago</label>
-                        <div id="pagosContainer" class="d-flex flex-column gap-2"></div>
-                        <button class="btn btn-outline-primary btn-sm mt-2" id="btnAddPago"><i class="fas fa-plus me-1"></i><span data-i18n="entryExit.addPayment">Agregar pago</span></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden w-full" style="max-width:520px">
+                <div style="padding:1.5rem 2rem 0" class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-xl font-bold text-gray-900">Registrar Pago</h5>
+                        <p style="color:#6b7280;font-size:.875rem;margin-top:.25rem">Selecciona los medios de pago para completar la salida</p>
                     </div>
-                    <div class="alert alert-info py-2">
-                        <div><span data-i18n="entryExit.paid">Pagado:</span> <strong id="pagoSum"></strong></div>
-                        <div><span data-i18n="entryExit.difference">Diferencia:</span> <strong id="pagoDiff"></strong></div>
-                    </div>
+                    <button type="button" style="width:36px;height:36px" class="flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors" data-bs-dismiss="modal"><i class="fas fa-times text-sm"></i></button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancelar</button>
-                    <button type="button" class="btn btn-success" id="btnConfirmPagos" data-i18n="entryExit.confirmPayments">Confirmar pagos</button>
+                <div style="padding:1.5rem 2rem;border-top:1px solid #f3f4f6">
+                    <label class="block text-sm font-semibold text-gray-700" style="margin-bottom:.5rem">Métodos de pago</label>
+                    <p style="color:#6b7280;font-size:.75rem;margin-bottom:1rem">Puedes combinar varios métodos para completar el pago. El sistema suma automáticamente cada monto.</p>
+                    <div id="pagosContainer" style="display:flex;flex-direction:column;gap:.75rem"></div>
+                    <button style="margin-top:1rem;width:100%;padding:.75rem;border:2px dashed #d1d5db;border-radius:.75rem;background:transparent;color:#6b7280;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='#1a237e';this.style.color='#1a237e'" onmouseout="this.style.borderColor='#d1d5db';this.style.color='#6b7280'" id="btnAddPago">
+                        <i class="fas fa-plus text-xs"></i><span style="margin-left:.5rem">Agregar otro medio de pago</span>
+                    </button>
+                </div>
+                <div style="padding:0 2rem 2rem;border-top:1px solid #f3f4f6">
+                    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:.75rem;padding:1.25rem;margin-top:1.5rem">
+                        <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:.875rem;margin-bottom:.5rem">
+                            <span style="color:#6b7280">Pagado <strong id="pagoSum" class="text-gray-900 font-semibold">$0</strong></span>
+                            <strong id="pagoDiff" class="text-sm text-green-600">$0</strong>
+                        </div>
+                        <div style="color:#6b7280;font-size:.75rem;margin-top:.25rem">Total a pagar: <span id="pagoTotalResumen" class="font-semibold text-gray-700">$0</span></div>
+                        <div style="height:8px;width:100%;background:#e5e7eb;border-radius:9999px;overflow:hidden;margin-top:.75rem">
+                            <div id="pagoProgress" style="height:100%;background:#1a237e;border-radius:9999px;transition:width .3s;width:0%"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:.75rem;margin-top:1.5rem">
+                        <button type="button" style="padding:.625rem 1.25rem;background:#f3f4f6;color:#374151;font-size:.875rem;font-weight:600;border-radius:.75rem;border:none;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" style="padding:.625rem 1.25rem;background:#22c55e;color:#fff;font-size:.875rem;font-weight:600;border-radius:.75rem;border:none;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.5rem" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'" id="btnConfirmPagos">
+                            <i class="fas fa-check text-xs"></i>Confirmar pagos
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,9 +165,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="/js/i18n.js"></script>
+    <script src="/js/toast.js"></script>
     <script src="/js/footer.js"></script>
     <script src="/js/shifts.js"></script>
     <script src="/js/entry-exit.js"></script>
+    <script src="/js/sidebar-logo.js"></script>
 </body>
 </html>

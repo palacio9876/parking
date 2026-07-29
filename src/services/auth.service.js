@@ -1,3 +1,4 @@
+// Servicio de autenticación: lógica de negocio para inicio de sesión
 const bcrypt   = require('bcryptjs')
 const jwt      = require('jsonwebtoken')
 const authRepo = require('../repositories/auth.repository')
@@ -5,12 +6,19 @@ const { AppError } = require('../utils/AppError')
 
 class AuthService {
 
-  async login(t, { tax_id, username, password, ip_address }) {
+  /**
+   * Procesa el inicio de sesión de un usuario
+   * @param {function} t - Función de traducción
+   * @param {object} params - { tax_id, username, password, ip_address }
+   * @returns {object} { success, message, data: { token, user } }
+   * @throws {AppError} 401 si credenciales inválidas, 429 si demasiados intentos
+   */
+  async login({ tax_id, username, password, ip_address }) {
 
     // 1. Verificar empresa
     const company = await authRepo.findCompanyByTaxId(tax_id)
     if (!company) {
-      throw new AppError(401, t('server.auth.companyNotFound'))
+      throw new AppError(401, 'Empresa no encontrada o inactiva')
     }
 
     // 2. Verificar intentos fallidos (máx 5 en 15 min)
@@ -24,7 +32,7 @@ class AuthService {
         successful: false,
         ip_address
       })
-      throw new AppError(429, t('server.auth.tooManyAttempts'))
+      throw new AppError(429, 'Demasiados intentos fallidos. Intente de nuevo más tarde.')
     }
 
     // 3. Verificar usuario
@@ -36,7 +44,7 @@ class AuthService {
         successful: false,
         ip_address
       })
-      throw new AppError(401, t('server.auth.invalidCredentials'))
+      throw new AppError(401, 'Credenciales inválidas')
     }
 
     // 4. Verificar contraseña
@@ -48,7 +56,7 @@ class AuthService {
         successful: false,
         ip_address
       })
-      throw new AppError(401, t('server.auth.invalidCredentials'))
+      throw new AppError(401, 'Credenciales inválidas')
     }
 
     // 5. Actualizar último acceso y registrar intento exitoso
@@ -60,7 +68,7 @@ class AuthService {
       ip_address
     })
 
-    // 6. Generar token
+    // 6. Generar token JWT con expiración de 8 horas
     const token = jwt.sign(
       {
         id_user:    user.id_user,
@@ -74,7 +82,7 @@ class AuthService {
 
     return {
       success: true,
-      message: t('server.auth.loginSuccess'),
+      message: 'Inicio de sesión exitoso',
       data: {
         token,
         user: {

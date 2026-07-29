@@ -1,3 +1,4 @@
+// DTOs de turno: esquemas de validación para apertura y cierre de caja
 const { z } = require('zod')
 
 const openShiftDto = z.object({

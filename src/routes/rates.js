@@ -1,3 +1,4 @@
+// Rutas de tarifas: consulta y actualización de tarifas
 const { Router } = require('express')
 const rateController = require('../controllers/rate.controller')
 const { auth, requireAdmin } = require('../middlewares/auth')

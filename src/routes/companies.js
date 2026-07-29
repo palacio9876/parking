@@ -1,3 +1,4 @@
+// Rutas de empresa: consulta/actualización de datos, configuración y logo
 const { Router } = require('express')
 const multer = require('multer')
 const companyController = require('../controllers/company.controller')

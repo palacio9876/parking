@@ -1,3 +1,4 @@
+// Rutas de reportes: KPIs, ingresos, movimientos, turnos y exportación
 const { Router } = require('express')
 const reportController = require('../controllers/report.controller')
 const { auth }   = require('../middlewares/auth')
@@ -13,5 +14,6 @@ router.get('/top-plates',              (req, res, next) => reportController.getT
 router.get('/shifts',                  (req, res, next) => reportController.getShifts(req, res, next))
 router.get('/shifts/export/xlsx',      (req, res, next) => reportController.exportShiftsXlsx(req, res, next))
 router.get('/export/xlsx',             (req, res, next) => reportController.exportMovementsXlsx(req, res, next))
+router.get('/export/pdf',              (req, res, next) => reportController.exportPDF(req, res, next))
 
 module.exports = router

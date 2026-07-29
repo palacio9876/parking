@@ -1,9 +1,15 @@
+// Servicio de usuarios: lógica de negocio para CRUD de usuarios del sistema
 const bcrypt = require('bcryptjs')
 const userRepo = require('../repositories/user.repository')
 const { AppError } = require('../utils/AppError')
 
 class UserService {
 
+  /**
+   * Obtiene todos los usuarios activos de una empresa
+   * @param {number} id_company - ID de la empresa
+   * @returns {object} { success, data }
+   */
   async getAll(id_company) {
     const users = await userRepo.findAllByCompany(id_company)
     return {
@@ -12,10 +18,17 @@ class UserService {
     }
   }
 
-  async getById(t, id_user, id_company) {
+  /**
+   * Obtiene un usuario por ID
+   * @param {function} t - Función de traducción
+   * @param {number} id_user - ID del usuario
+   * @param {number} id_company - ID de la empresa
+   * @returns {object} { success, data }
+   */
+  async getById(id_user, id_company) {
     const user = await userRepo.findById(id_user, id_company)
     if (!user) {
-      throw new AppError(404, t('server.user.notFound'))
+      throw new AppError(404, 'Usuario no encontrado')
     }
     return {
       success: true,
@@ -30,14 +43,19 @@ class UserService {
     }
   }
 
-  async create(t, id_company, userData) {
-    // Verificar si usuario ya existe
+  /**
+   * Crea un nuevo usuario con contraseña hasheada
+   * @param {function} t - Función de traducción
+   * @param {number} id_company - ID de la empresa
+   * @param {object} userData - { name, username, password, role, active }
+   * @returns {object} { success, message, data: { id_user } }
+   */
+  async create(id_company, userData) {
     const existing = await userRepo.findByUsername(userData.username, id_company)
     if (existing) {
-      throw new AppError(409, t('server.user.alreadyExists'))
+      throw new AppError(409, 'El usuario ya existe para esta empresa')
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(userData.password, 10)
 
     const user = await userRepo.create({
@@ -51,21 +69,26 @@ class UserService {
 
     return {
       success: true,
-      message: t('server.user.created'),
+      message: 'Usuario creado exitosamente',
       data: {
         id_user: user.id_user
       }
     }
   }
 
-  async update(t, id_user, id_company, updates) {
-    // Verificar que usuario existe
+  /**
+   * Actualiza un usuario existente (incluye cambio de contraseña con hash)
+   * @param {number} id_user - ID del usuario
+   * @param {number} id_company - ID de la empresa
+   * @param {object} updates - Campos a actualizar
+   * @returns {object} { success, message }
+   */
+  async update(id_user, id_company, updates) {
     const user = await userRepo.findById(id_user, id_company)
     if (!user) {
-      throw new AppError(404, t('server.user.notFound'))
+      throw new AppError(404, 'Usuario no encontrado')
     }
 
-    // Si actualiza username, verificar que no exista otro con el mismo
     if (updates.username && updates.username !== user.username) {
       const existing = await userRepo.findByUsernameExcluding(
         updates.username,
@@ -73,11 +96,10 @@ class UserService {
         id_user
       )
       if (existing) {
-        throw new AppError(409, t('server.user.alreadyExists'))
+        throw new AppError(409, 'El usuario ya existe para esta empresa')
       }
     }
 
-    // Hash password si se proporciona
     const updateData = { ...updates }
     if (updates.password) {
       updateData.password = await bcrypt.hash(updates.password, 10)
@@ -85,35 +107,41 @@ class UserService {
 
     const affectedRows = await userRepo.update(id_user, id_company, updateData)
     if (affectedRows === 0) {
-      throw new AppError(404, t('server.user.notFound'))
+      throw new AppError(404, 'Usuario no encontrado')
     }
 
     return {
       success: true,
-      message: t('server.user.updated')
+      message: 'Usuario actualizado exitosamente'
     }
   }
 
-  async deactivate(t, id_user, id_company, currentUserId) {
-    // Verificar que usuario existe
+  /**
+   * Desactiva un usuario (borrado lógico). No permite desactivarse a sí mismo.
+   * @param {function} t - Función de traducción
+   * @param {number} id_user - ID del usuario a desactivar
+   * @param {number} id_company - ID de la empresa
+   * @param {number} currentUserId - ID del usuario que realiza la acción
+   * @returns {object} { success, message }
+   */
+  async deactivate(id_user, id_company, currentUserId) {
     const user = await userRepo.findById(id_user, id_company)
     if (!user) {
-      throw new AppError(404, t('server.user.notFound'))
+      throw new AppError(404, 'Usuario no encontrado')
     }
 
-    // No permitir desactivar tu propio usuario
     if (Number(id_user) === Number(currentUserId)) {
-      throw new AppError(400, t('server.user.cannotDeactivateSelf'))
+      throw new AppError(400, 'No puedes desactivar tu propio usuario')
     }
 
     const affectedRows = await userRepo.deactivate(id_user, id_company)
     if (affectedRows === 0) {
-      throw new AppError(404, t('server.user.notFound'))
+      throw new AppError(404, 'Usuario no encontrado')
     }
 
     return {
       success: true,
-      message: t('server.user.deactivated')
+      message: 'Usuario desactivado exitosamente'
     }
   }
 }

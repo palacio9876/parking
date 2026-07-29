@@ -1,3 +1,4 @@
+// DTO de autenticación: esquema de validación para el inicio de sesión
 const { z } = require('zod')
 
 const loginDto = z.object({

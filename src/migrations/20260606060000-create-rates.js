@@ -1,3 +1,4 @@
+// Migración: crea la tabla de tarifas (rates)
 'use strict'
 
 module.exports = {
@@ -7,6 +8,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+        comment: 'Identificador único de la tarifa',
       },
       id_company: {
         type: Sequelize.INTEGER,
@@ -14,56 +16,68 @@ module.exports = {
         references: { model: 'companies', key: 'id_company' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
+        comment: 'Empresa asociada',
       },
       vehicle_type: {
-        type: Sequelize.ENUM('car', 'motorcycle', 'bicycle'),
+        type: Sequelize.ENUM('carro', 'moto', 'bicicleta'),
         allowNull: false,
+        comment: 'Tipo de vehículo',
       },
       hourly_rate: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
+        comment: 'Valor por hora',
       },
       minute_rate: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
+        comment: 'Valor por minuto',
       },
       full_day_rate: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
+        comment: 'Valor por día completo',
       },
       effective_from: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        comment: 'Inicio de vigencia',
       },
       effective_until: Sequelize.DATE,
       active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
+        comment: 'Tarifa activa',
       },
       billing_mode: {
-        type: Sequelize.ENUM('minute', 'hour', 'day', 'mixed'),
+        type: Sequelize.ENUM('minuto', 'hora', 'dia', 'mixto'),
         allowNull: false,
-        defaultValue: 'mixed',
+        defaultValue: 'mixto',
+        comment: 'Modo de cobro',
       },
       minutes_to_hours_threshold: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
+        comment: 'Umbral minutos->hora',
       },
       hours_to_days_threshold: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
+        comment: 'Umbral horas->día',
       },
       hourly_rounding: {
-        type: Sequelize.ENUM('up', 'exact'),
+        type: Sequelize.ENUM('arriba', 'exacto'),
         allowNull: false,
-        defaultValue: 'up',
+        defaultValue: 'arriba',
+        comment: 'Redondeo de horas',
       },
       daily_rounding: {
-        type: Sequelize.ENUM('up', 'exact'),
+        type: Sequelize.ENUM('arriba', 'exacto'),
         allowNull: false,
-        defaultValue: 'up',
+        defaultValue: 'arriba',
+        comment: 'Redondeo de días',
       },
     })
   },

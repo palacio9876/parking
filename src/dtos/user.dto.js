@@ -1,3 +1,4 @@
+// DTOs de usuario: esquemas de validación para crear y actualizar usuarios
 const { z } = require('zod')
 
 const createUserDto = z.object({

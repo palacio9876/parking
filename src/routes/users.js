@@ -1,3 +1,4 @@
+// Rutas de usuarios: CRUD de usuarios (solo admin)
 const { Router } = require('express')
 const userController = require('../controllers/user.controller')
 const { auth, requireAdmin } = require('../middlewares/auth')
@@ -10,27 +11,27 @@ const router = Router()
 // Todas las rutas requieren autenticación y rol admin
 router.use(auth, requireAdmin)
 
-// Listar usuarios de la empresa
+// GET /api/users - Listar usuarios de la empresa
 router.get(
   '/',
   (req, res, next) => userController.getAll(req, res, next)
 )
 
-// Crear nuevo usuario
+// POST /api/users - Crear nuevo usuario
 router.post(
   '/',
   validate(createUserDto),
   (req, res, next) => userController.create(req, res, next)
 )
 
-// Obtener un usuario específico
+// GET /api/users/:id - Obtener un usuario específico
 router.get(
   '/:id',
   sanitizeIdParam('id'),
   (req, res, next) => userController.getById(req, res, next)
 )
 
-// Actualizar usuario
+// PUT /api/users/:id - Actualizar usuario
 router.put(
   '/:id',
   sanitizeIdParam('id'),
@@ -38,7 +39,7 @@ router.put(
   (req, res, next) => userController.update(req, res, next)
 )
 
-// Desactivar usuario
+// DELETE /api/users/:id - Desactivar usuario (borrado lógico)
 router.delete(
   '/:id',
   sanitizeIdParam('id'),

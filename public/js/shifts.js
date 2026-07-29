@@ -12,59 +12,59 @@
 			'<div class="modal-dialog">',
 				'<div class="modal-content">',
 					'<div class="modal-header">',
-						'<h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i>' + t('shifts.title') + '</h5>',
+						'<h5 class="modal-title"><i class="fas fa-cash-register me-2"></i>Turno de Caja</h5>',
 						'<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
 					'</div>',
 					'<div class="modal-body">',
 						'<div id="shiftAlert" class="alert d-none" role="alert"></div>',
 						'<div id="viewOpening">',
 							'<div class="mb-3">',
-								'<label class="form-label">' + t('shifts.initialBase') + '</label>',
+								'<label class="form-label">Base inicial</label>',
 								'<input type="number" min="0" step="0.01" id="initialBase" class="form-control" placeholder="0.00" />',
 							'</div>',
 							'<div class="mb-2">',
-								'<label class="form-label">' + t('shifts.observation') + '</label>',
+								'<label class="form-label">Observación (opcional)</label>',
 								'<input type="text" id="obsOpening" class="form-control" maxlength="255" />',
 							'</div>',
-							'<div class="small text-muted">' + t('shifts.youMustOpen') + '</div>',
+							'<div class="small text-muted">Debes abrir un turno para registrar ingresos/salidas.</div>',
 						'</div>',
 						'<div id="viewClosing" class="d-none">',
 							'<div class="row g-2">',
 								'<div class="col-6">',
-									'<label class="form-label">' + t('shifts.cash') + '</label>',
+									'<label class="form-label">Efectivo</label>',
 									'<input type="number" min="0" step="0.01" id="sumCash" class="form-control" placeholder="0.00" />',
 								'</div>',
 								'<div class="col-6">',
-									'<label class="form-label">' + t('shifts.card') + '</label>',
+									'<label class="form-label">Tarjeta</label>',
 									'<input type="number" min="0" step="0.01" id="sumCard" class="form-control" placeholder="0.00" />',
 								'</div>',
 								'<div class="col-6">',
-									'<label class="form-label">' + t('shifts.qr') + '</label>',
+									'<label class="form-label">QR</label>',
 									'<input type="number" min="0" step="0.01" id="sumQR" class="form-control" placeholder="0.00" />',
 								'</div>',
 								'<div class="col-6">',
-									'<label class="form-label">' + t('shifts.total') + '</label>',
+									'<label class="form-label">Total</label>',
 									'<input type="number" min="0" step="0.01" id="sumTotal" class="form-control" placeholder="0.00" readonly />',
 								'</div>',
 							'</div>',
 							'<div class="mt-2">',
 								'<div class="d-flex justify-content-between">',
-									'<div>' + t('shifts.systemExpected') + ' <strong id="sumExpected">$0</strong></div>',
-									'<div>' + t('shifts.difference') + ': <strong id="sumDiffLive">$0</strong></div>',
+									'<div>Sistema (esperado) <strong id="sumExpected">$0</strong></div>',
+									'<div>Diferencia: <strong id="sumDiffLive">$0</strong></div>',
 								'</div>',
-								'<div class="form-text">' + t('shifts.diffHelp') + '</div>',
+								'<div class="form-text">Diferencia = Conteo - Sistema.</div>',
 							'</div>',
 							'<div class="mb-2 mt-2">',
-								'<label class="form-label">' + t('shifts.observationClosing') + '</label>',
+								'<label class="form-label">Observación de cierre</label>',
 								'<input type="text" id="obsClosing" class="form-control" maxlength="255" />',
 							'</div>',
-							'<div class="small text-muted">' + t('shifts.whenClosing') + '</div>',
+							'<div class="small text-muted">Al cerrar, el resumen se guardará y podrás imprimirlo.</div>',
 						'</div>',
 					'</div>',
 					'<div class="modal-footer">',
-						'<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">' + t('common.close') + '</button>',
-						'<button type="button" class="btn btn-primary" id="btnOpenShift">' + t('shifts.open') + '</button>',
-						'<button type="button" class="btn btn-success d-none" id="btnCloseShift">' + t('shifts.close') + '</button>',
+						'<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>',
+						'<button type="button" class="btn btn-primary" id="btnOpenShift">Abrir turno</button>',
+						'<button type="button" class="btn btn-success d-none" id="btnCloseShift">Cerrar y imprimir</button>',
 					'</div>',
 				'</div>',
 			'</div>',
@@ -106,8 +106,8 @@
 	}
 
 	function setEntryExitEnabled(enabled){
-		var inBtn = document.querySelector('#formEntry button[type="submit"]');
-		var outBtn = document.querySelector('#formExit button[type="submit"]');
+		var inBtn = document.querySelector('#formIngreso button[type="submit"]');
+		var outBtn = document.querySelector('#formSalida button[type="submit"]');
 		if (inBtn) inBtn.disabled = !enabled;
 		if (outBtn) outBtn.disabled = !enabled;
 	}
@@ -123,14 +123,14 @@
 		// Entry/exit forms (entry-exit view)
 		document.addEventListener('submit', function(e){
 			var id = (e.target && e.target.id)||'';
-			if ((id==='formEntry' || id==='formExit') && !shiftOpen){ e.preventDefault(); e.stopPropagation(); requireShift(); }
+			if ((id==='formIngreso' || id==='formSalida') && !shiftOpen){ e.preventDefault(); e.stopPropagation(); requireShift(); }
 		}, true);
 		setEntryExitEnabled(shiftOpen);
 
 		// Indicator in topbar if navbar exists
 		let badge = document.getElementById('shiftBadge');
 		if (!badge){
-			const nav = document.querySelector('.navbar .container-fluid .navbar-collapse, .navbar .container-fluid');
+			const nav = document.querySelector('.navbar .container-fluid .navbar-collapse, .navbar .container-fluid, .navbar-custom .flex, .navbar-custom');
 			if (nav){
 				badge = document.createElement('span');
 				badge.id = 'shiftBadge';
@@ -141,14 +141,14 @@
 				quick.id = 'shiftQuickBtn';
 				quick.type = 'button';
 				quick.className = 'btn btn-outline-danger btn-sm ms-2';
-				quick.innerHTML = '<i class="bi bi-door-closed me-1"></i>' + t('shifts.closeQuick');
+				quick.innerHTML = '<i class="fas fa-door-closed me-1"></i>Cerrar turno';
 				nav.appendChild(quick);
 				quick.addEventListener('click', function(){ if (shiftOpen) { openClosingModal(); } else { requireShift(); } });
 			}
 		}
 		if (badge){
-			if (shiftOpen){ badge.className = 'ms-2 badge rounded-pill bg-success'; badge.textContent = t('shifts.shiftOpen'); }
-			else { badge.className = 'ms-2 badge rounded-pill bg-secondary'; badge.textContent = t('shifts.shiftClosed'); }
+			if (shiftOpen){ badge.className = 'ms-2 badge rounded-pill bg-success'; badge.textContent = 'Turno abierto'; }
+			else { badge.className = 'ms-2 badge rounded-pill bg-secondary'; badge.textContent = 'Turno cerrado'; }
 		}
 		var quickBtn = document.getElementById('shiftQuickBtn');
 		if (quickBtn){ quickBtn.classList.toggle('d-none', !shiftOpen); }
@@ -178,8 +178,8 @@
 				body: JSON.stringify({ initial_base: base, opening_observation: obs })
 			});
 			const j = await r.json();
-			if(!r.ok) throw new Error(j.message||'Error opening shift');
-			showAlert('success',t('shifts.opened'));
+			if(!r.ok) throw new Error(j.error||'Error opening shift');
+			showAlert('success','Turno abierto exitosamente.');
 			shiftOpen = true;
 			updateGuardUI();
 			setTimeout(()=>{ modal.hide(); }, 800);
@@ -227,14 +227,14 @@
 			};
 			const r = await fetch('/api/shifts/close', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body: JSON.stringify(payload) });
 			const j = await r.json();
-			if(!r.ok) throw new Error(j.message||'Error closing shift');
+			if(!r.ok) throw new Error(j.error||'Error closing shift');
 			const exp = j.data.expected;
 			const usr = j.data.userTotals;
 			const diff = Number(j.data.difference||0);
 			if (Math.abs(diff) > 0.009){
-				showAlert('warning',t('shifts.warningDiff')+': '+fmt(diff)+'.');
+				showAlert('warning','Advertencia: diferencia entre conteo y sistema'+': '+fmt(diff)+'.');
 			} else {
-				showAlert('success',t('shifts.closed'));
+				showAlert('success','Turno cerrado. Generando ticket...');
 			}
 			shiftOpen = false;
 			updateGuardUI();
@@ -256,33 +256,33 @@
 	function printSummary(res){
 		const html = [
 			'<div style="font-family:Arial,sans-serif;font-size:12px">',
-				'<h3 style="margin:0 0 8px">' + t('shifts.closureTitle') + '</h3>',
+				'<h3 style="margin:0 0 8px">Cierre de Turno</h3>',
 				// Company line
 				('<div><strong>'+esc(localStorage.getItem('companyName')||'')+'</strong>'+(localStorage.getItem('companyTax')? ' - TAX ID: '+esc(localStorage.getItem('companyTax')):'')+'</div>'),
 				(res.shift?('<div>Shift #'+(res.shift.id_shift||'')+' | User: '+esc(res.shift.user||localStorage.getItem('userName')||'')+'</div>'):''),
 				(res.base_initial!=null?('<div>Initial base: <strong>'+fmt(res.base_initial)+'</strong></div>'):''),
-				'<div>' + t('dashboard.printDate') + ': '+fmtDate(new Date())+'</div>',
-				(res.stats?('<div>' + t('reports.totalTickets') + ': <strong>'+Number(res.stats.total||0)+'</strong></div>'):''),
+				'<div>Fecha impresión: '+fmtDate(new Date())+'</div>',
+				(res.stats?('<div>Total tickets: <strong>'+Number(res.stats.total||0)+'</strong></div>'):''),
 				(res.stats?('<div>Cars: '+(res.stats.byType&&res.stats.byType.car||0)+' | Motorcycles: '+(res.stats.byType&&res.stats.byType.motorcycle||0)+' | Bicycles: '+(res.stats.byType&&res.stats.byType.bicycle||0)+'</div>'):''),
 				'<hr/>',
 				'<div style="display:flex;gap:16px">',
 					'<div>',
-						'<div style="font-weight:bold">' + t('reports.userCount') + '</div>',
-						'<div>' + t('payment.cash') + ': '+fmt(res.user.cash)+'</div>',
-						'<div>' + t('payment.card') + ': '+fmt(res.user.card)+'</div>',
-						'<div>' + t('payment.qr') + ': '+fmt(res.user.qr)+'</div>',
-						'<div><strong>' + t('common.total') + ': '+fmt(res.user.total)+'</strong></div>',
+						'<div style="font-weight:bold">Conteo Usuario</div>',
+						'<div>Efectivo: '+fmt(res.user.cash)+'</div>',
+						'<div>Tarjeta: '+fmt(res.user.card)+'</div>',
+						'<div>QR: '+fmt(res.user.qr)+'</div>',
+						'<div><strong>Total: '+fmt(res.user.total)+'</strong></div>',
 					'</div>',
 					'<div>',
-						'<div style="font-weight:bold">' + t('reports.system') + '</div>',
-						'<div>' + t('payment.cash') + ': '+fmt(res.expected.cash)+'</div>',
-						'<div>' + t('payment.card') + ': '+fmt(res.expected.card)+'</div>',
-						'<div>' + t('payment.qr') + ': '+fmt(res.expected.qr)+'</div>',
-						'<div><strong>' + t('common.total') + ': '+fmt(res.expected.total)+'</strong></div>',
+						'<div style="font-weight:bold">Sistema</div>',
+						'<div>Efectivo: '+fmt(res.expected.cash)+'</div>',
+						'<div>Tarjeta: '+fmt(res.expected.card)+'</div>',
+						'<div>QR: '+fmt(res.expected.qr)+'</div>',
+						'<div><strong>Total: '+fmt(res.expected.total)+'</strong></div>',
 					'</div>',
 				'</div>',
 				'<hr/>',
-				'<div><strong>' + t('reports.difference') + ': '+fmt(res.diff)+'</strong></div>',
+				'<div><strong>Diferencia: '+fmt(res.diff)+'</strong></div>',
 				(res.obs?('<div>Obs.: '+escapeHtml(res.obs)+'</div>'):'') ,
 			'</div>'
 		].join('');
@@ -314,18 +314,18 @@
 				'<div class="modal-dialog">',
 					'<div class="modal-content">',
 						'<div class="modal-header">',
-							'<h5 class="modal-title">' + t('reports.selectPrintSize') + '</h5>',
+							'<h5 class="modal-title">Seleccionar tamaño de impresión</h5>',
 							'<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>',
 						'</div>',
 						'<div class="modal-body">',
-							'<p class="mb-2">' + t('reports.printSizeHelp') + '</p>',
+							'<p class="mb-2">Elige el ancho del papel térmico para imprimir el cierre.</p>',
 							'<div class="d-flex gap-2">',
 								'<button type="button" id="btnPrint58" class="btn btn-primary">58 mm</button>',
 								'<button type="button" id="btnPrint80" class="btn btn-outline-primary">80 mm</button>',
 							'</div>',
 						'</div>',
 						'<div class="modal-footer">',
-							'<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">' + t('common.cancel') + '</button>',
+							'<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>',
 						'</div>',
 					'</div>',
 				'</div>',
@@ -338,6 +338,7 @@
 
 	// Gating: block critical actions if no shift
 	window.requireOpenShift = requireShift;
+	window.openShiftModal = function(){ if (shiftOpen) { openClosingModal(); } else { requireShift(); } };
 
 	// Show modal if entering panel without shift
 	setTimeout(requireShift, 200);

@@ -1,3 +1,4 @@
+// Punto central de modelos Sequelize: inicializa todos los modelos y define sus asociaciones
 const { DataTypes } = require('sequelize')
 const sequelize = require('../config/db')
 
@@ -11,7 +12,8 @@ const Movement = require('./Movement')(sequelize, DataTypes)
 const Payment = require('./Payment')(sequelize, DataTypes)
 const Shift = require('./Shift')(sequelize, DataTypes)
 
-// Associations
+// Asociaciones entre modelos
+// Una empresa tiene muchos usuarios, intentos de login, configuraciones, vehículos, tarifas, movimientos, pagos y turnos
 Company.hasMany(User, { foreignKey: 'id_company', as: 'users' })
 User.belongsTo(Company, { foreignKey: 'id_company', as: 'company' })
 
@@ -36,17 +38,21 @@ Payment.belongsTo(Company, { foreignKey: 'id_company', as: 'company' })
 Company.hasMany(Shift, { foreignKey: 'id_company', as: 'shifts' })
 Shift.belongsTo(Company, { foreignKey: 'id_company', as: 'company' })
 
+// Un usuario puede registrar entradas y salidas de movimientos
 User.hasMany(Movement, { foreignKey: 'id_user_entry', as: 'entryMovements' })
 User.hasMany(Movement, { foreignKey: 'id_user_exit', as: 'exitMovements' })
 Movement.belongsTo(User, { foreignKey: 'id_user_entry', as: 'entryUser' })
 Movement.belongsTo(User, { foreignKey: 'id_user_exit', as: 'exitUser' })
 
+// Un vehículo tiene muchos movimientos (entradas/salidas)
 Vehicle.hasMany(Movement, { foreignKey: 'id_vehicle', as: 'movements' })
 Movement.belongsTo(Vehicle, { foreignKey: 'id_vehicle', as: 'vehicle' })
 
+// Una tarifa está asociada a muchos movimientos
 Rate.hasMany(Movement, { foreignKey: 'id_rate', as: 'movements' })
 Movement.belongsTo(Rate, { foreignKey: 'id_rate', as: 'rate' })
 
+// Un movimiento puede tener varios pagos (split de métodos de pago)
 Movement.hasMany(Payment, { foreignKey: 'id_movement', as: 'payments' })
 Payment.belongsTo(Movement, { foreignKey: 'id_movement', as: 'movement' })
 

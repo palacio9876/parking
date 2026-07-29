@@ -1,3 +1,4 @@
+// Rutas de pagos: registro de pagos en lote
 const { Router } = require('express')
 const paymentController = require('../controllers/payment.controller')
 const { auth } = require('../middlewares/auth')

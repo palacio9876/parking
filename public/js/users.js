@@ -8,12 +8,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) { window.location.href = '/'; return; }
     if (role !== 'admin') { window.location.href = '/admin/dashboard'; return; }
 
-    document.getElementById('userName').textContent = localStorage.getItem('userName') || t('users.name');
+    document.getElementById('userName').textContent = localStorage.getItem('userName') || 'Nombre';
     document.querySelector('.sidebar-toggle').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('show'));
     document.getElementById('btnLogout').addEventListener('click',()=>{ localStorage.clear(); location.href='/'; });
 
     // Events
     document.getElementById('btnSaveUser').addEventListener('click', saveUser);
+
+    // Reset user modal on close
+    document.getElementById('userModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
+        clearFormErrors();
+    });
 
     // Load list
     loadUsers();
@@ -23,28 +31,28 @@ async function loadUsers(){
     try{
         const res = await fetch('/api/users', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('users.loadError'));
+        if(!res.ok) throw new Error(j.error||'Error listando usuarios');
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = j.data.map(u => `
             <tr>
                 <td>${u.name}</td>
                 <td>${u.username}</td>
-                <td><span class="badge bg-${u.role==='admin'?'primary':'secondary'} text-uppercase">${u.role}</span></td>
+                <td><span class="text-sm text-gray-700">${u.role === 'admin' ? 'Administrador' : 'Operador'}</span></td>
                 <td>${u.active ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>'}</td>
                 <td>${fmtDate(u.last_access)}</td>
                 <td>
-                    <button class="btn btn-sm btn-info me-1" onclick='editUser(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-warning me-1" onclick='openPasswordChange(${JSON.stringify({id:u.id_user, login:u.username, name:u.name})})'><i class="fas fa-key"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick='deactivateUser(${u.id_user})'><i class="fas fa-user-slash"></i></button>
+                    <button class="btn btn-sm btn-edit" onclick='editUser(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-password" onclick='openPasswordChange(${JSON.stringify({id:u.id_user, login:u.username, name:u.name})})'><i class="fas fa-key"></i></button>
+                    <button class="btn btn-sm btn-delete" onclick='deactivateUser(${u.id_user})'><i class="fas fa-user-slash"></i></button>
                 </td>
             </tr>
         `).join('');
-    }catch(err){ toast(t('common.error'), err.message, 'error'); }
+    }catch(err){ showToast('Error', err.message, 'error'); }
 }
 
 function editUser(u){
     document.getElementById('userId').value = u.id_user;
-    document.getElementById('userModalTitle').textContent = t('users.edit');
+    document.getElementById('userModalTitle').textContent = 'Editar Usuario';
     document.getElementById('name').value = u.name;
     document.getElementById('username').value = u.username;
     document.getElementById('password').value = '';
@@ -55,14 +63,14 @@ function editUser(u){
 }
 
 async function deactivateUser(id){
-    if(!confirm(t('users.deactivateConfirm'))) return;
+    if(!confirm('¿Desactivar este usuario?')) return;
     try{
         const res = await fetch(`/api/users/${id}`, { method:'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error');
-        toast(t('common.success'),t('users.deactivated'),'success');
+        if(!res.ok) throw new Error(j.error||'Error');
+        showToast('Éxito','Usuario desactivado','success');
         loadUsers();
-    }catch(err){ toast(t('common.error'), err.message, 'error'); }
+    }catch(err){ showToast('Error', err.message, 'error'); }
 }
 
 async function saveUser(){
@@ -77,12 +85,12 @@ async function saveUser(){
     // Frontend validations
     const errors = [];
     const usernameRegex = /^[A-Za-z0-9]+$/; // no spaces, dashes or special chars
-    if (!body.name) errors.push(t('users.nameRequired'));
-    if (!body.username) errors.push(t('users.usernameRequired'));
-    if (body.username && !usernameRegex.test(body.username)) errors.push(t('users.usernameRegex'));
-    if (!id && !body.password) errors.push(t('users.passwordRequired'));
-    if (body.password && body.password.length < 6) errors.push(t('users.passwordMinLength'));
-    if (!['admin','operator'].includes(body.role)) errors.push(t('users.roleRequired'));
+    if (!body.name) errors.push('El nombre es requerido.');
+    if (!body.username) errors.push('El usuario es requerido.');
+    if (body.username && !usernameRegex.test(body.username)) errors.push('El usuario solo puede tener letras y números (sin espacios ni guiones).');
+    if (!id && !body.password) errors.push('La contraseña es requerida.');
+    if (body.password && body.password.length < 6) errors.push('La contraseña debe tener al menos 6 caracteres.');
+    if (!['admin','operator'].includes(body.role)) errors.push('Selecciona un rol válido.');
     if (errors.length) { showFormErrors(errors); return; }
     clearFormErrors();
     
@@ -90,7 +98,7 @@ async function saveUser(){
     const btn = document.getElementById('btnSaveUser');
     const prevHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + t('common.saving');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     if (id) { if (!body.password) { delete body.password; } }
     try{
         const res = await fetch(id ? `/api/users/${id}` : '/api/users', {
@@ -99,11 +107,11 @@ async function saveUser(){
             body: JSON.stringify(body)
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error saving user');
-        toast(t('common.success'), id ? t('users.updated') : t('users.created'), 'success');
+        if(!res.ok) throw new Error(j.error||'Error saving user');
+        showToast('Éxito', id ? 'Usuario actualizado' : 'Usuario creado', 'success');
         document.getElementById('userForm').reset();
         document.getElementById('userId').value='';
-        document.getElementById('userModalTitle').textContent = t('users.new');
+        document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
         loadUsers();
     }catch(err){ showFormErrors([err.message]); }
@@ -111,29 +119,6 @@ async function saveUser(){
         btn.disabled = false;
         btn.innerHTML = prevHtml;
     }
-}
-
-function toast(title, message, type){
-    const container = document.getElementById('toastContainer');
-    const id = 't_' + Date.now();
-    const typeClass = type==='success' ? 'toast-success' : type==='warning' ? 'toast-warning' : type==='info' ? 'toast-info' : 'toast-error';
-    const el = document.createElement('div');
-    el.className = `toast align-items-center toast-custom ${typeClass}`;
-    el.id = id;
-    el.role = 'alert';
-    el.ariaLive = 'assertive';
-    el.ariaAtomic = 'true';
-    el.innerHTML = `
-      <div class="toast-header">
-        <strong class="me-auto">${title}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">${message}</div>
-    `;
-    container.appendChild(el);
-    const t = new bootstrap.Toast(el, { delay: 3500 });
-    t.show();
-    el.addEventListener('hidden.bs.toast', () => el.remove());
 }
 
 // UI helpers for form errors
@@ -194,9 +179,9 @@ async function changePassword(){
     const alert = document.getElementById('pwd_alert');
     // Validations
     const msgs = [];
-    if (!pass1) msgs.push(t('users.passwordRequiredMsg'));
-    if (pass1 && pass1.length < 6) msgs.push(t('users.passwordMinMsg'));
-    if (pass1 !== pass2) msgs.push(t('users.passwordMismatch'));
+    if (!pass1) msgs.push('La nueva contraseña es requerida.');
+    if (pass1 && pass1.length < 6) msgs.push('La contraseña debe tener al menos 6 caracteres.');
+    if (pass1 !== pass2) msgs.push('Las contraseñas no coinciden.');
     if (msgs.length){
         alert.className = 'alert alert-danger';
         alert.innerHTML = msgs.map(m=>`<div>${m}</div>`).join('');
@@ -206,7 +191,7 @@ async function changePassword(){
     const btn = document.getElementById('btnPwdSave');
     const prev = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + t('common.saving');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     try{
         const res = await fetch(`/api/users/${id}`,{
             method:'PUT',
@@ -214,9 +199,9 @@ async function changePassword(){
             body: JSON.stringify({ password: pass1 })
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||t('users.updatePasswordError'));
+        if(!res.ok) throw new Error(j.error||'No se pudo actualizar la contraseña');
         alert.className = 'alert alert-success';
-        alert.textContent = t('users.passwordUpdated');
+        alert.textContent = 'Contraseña actualizada exitosamente.';
         setTimeout(()=>{
             bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
         }, 600);

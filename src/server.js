@@ -6,10 +6,6 @@ const path    = require('path')
 const sequelize = require('./config/db')
 require('./models')
 const { errorHandler } = require('./middlewares/errorHandler')
-const { i18nMiddleware } = require('./middlewares/i18n')
-const { loadTranslations } = require('./utils/i18n')
-
-loadTranslations()
 
 const app = express()
 
@@ -20,7 +16,6 @@ const publicDir  = path.join(basePath, 'public')
 app.use(cors())
 app.use(express.json())
 app.use(express.static(publicDir))
-app.use(i18nMiddleware)
 
 app.use('/api/auth',      require('./routes/auth'))
 app.use('/api/vehicles',  require('./routes/vehicles'))
@@ -49,6 +44,7 @@ app.get('/operator/entry-exit',      (req, res) => res.sendFile(path.join(public
 app.get('/operator/entry-exit.html', (req, res) => res.sendFile(path.join(publicDir, 'admin/entry-exit.html')))
 app.get('/operator/ingreso-salida',  (req, res) => res.sendFile(path.join(publicDir, 'admin/entry-exit.html')))
 
+app.use('/api', (req, res) => res.status(404).json({ success: false, error: 'Route not found' }))
 app.use((req, res) => res.status(404).sendFile(path.join(publicDir, '404.html')))
 app.use(errorHandler)
 

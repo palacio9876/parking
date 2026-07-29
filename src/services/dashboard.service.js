@@ -1,7 +1,15 @@
+// Servicio del dashboard: lógica para obtener las estadísticas de la pantalla principal
 const dashboardRepo = require('../repositories/dashboard.repository')
 
 class DashboardService {
 
+  /**
+   * Obtiene estadísticas generales del dashboard en paralelo
+   * @param {number} id_company - ID de la empresa
+   * @param {number} pageSize - Tamaño de página para actividad reciente
+   * @param {number} page - Número de página
+   * @returns {object} { success, data: { currentVehiclesByType, todayIncome, totalUsers, recentActivity, paging } }
+   */
   async getStats(id_company, pageSize = 5, page = 0) {
     const offset = page * pageSize
 
