@@ -44,6 +44,7 @@ app.get('/operator/entry-exit',      (req, res) => res.sendFile(path.join(public
 app.get('/operator/entry-exit.html', (req, res) => res.sendFile(path.join(publicDir, 'admin/entry-exit.html')))
 app.get('/operator/ingreso-salida',  (req, res) => res.sendFile(path.join(publicDir, 'admin/entry-exit.html')))
 
+app.use('/api', (req, res) => res.status(404).json({ success: false, error: 'Route not found' }))
 app.use((req, res) => res.status(404).sendFile(path.join(publicDir, '404.html')))
 app.use(errorHandler)
 

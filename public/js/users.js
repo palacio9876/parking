@@ -15,6 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Events
     document.getElementById('btnSaveUser').addEventListener('click', saveUser);
 
+    // Reset user modal on close
+    document.getElementById('userModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
+        clearFormErrors();
+    });
+
     // Load list
     loadUsers();
 });
@@ -23,7 +31,7 @@ async function loadUsers(){
     try{
         const res = await fetch('/api/users', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error listando usuarios');
+        if(!res.ok) throw new Error(j.error||'Error listando usuarios');
         const tbody = document.querySelector('#usersTable tbody');
         tbody.innerHTML = j.data.map(u => `
             <tr>
@@ -59,7 +67,7 @@ async function deactivateUser(id){
     try{
         const res = await fetch(`/api/users/${id}`, { method:'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error');
+        if(!res.ok) throw new Error(j.error||'Error');
         showToast('Éxito','Usuario desactivado','success');
         loadUsers();
     }catch(err){ showToast('Error', err.message, 'error'); }
@@ -99,7 +107,7 @@ async function saveUser(){
             body: JSON.stringify(body)
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error saving user');
+        if(!res.ok) throw new Error(j.error||'Error saving user');
         showToast('Éxito', id ? 'Usuario actualizado' : 'Usuario creado', 'success');
         document.getElementById('userForm').reset();
         document.getElementById('userId').value='';
@@ -191,7 +199,7 @@ async function changePassword(){
             body: JSON.stringify({ password: pass1 })
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'No se pudo actualizar la contraseña');
+        if(!res.ok) throw new Error(j.error||'No se pudo actualizar la contraseña');
         alert.className = 'alert alert-success';
         alert.textContent = 'Contraseña actualizada exitosamente.';
         setTimeout(()=>{

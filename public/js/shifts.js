@@ -106,8 +106,8 @@
 	}
 
 	function setEntryExitEnabled(enabled){
-		var inBtn = document.querySelector('#formEntry button[type="submit"]');
-		var outBtn = document.querySelector('#formExit button[type="submit"]');
+		var inBtn = document.querySelector('#formIngreso button[type="submit"]');
+		var outBtn = document.querySelector('#formSalida button[type="submit"]');
 		if (inBtn) inBtn.disabled = !enabled;
 		if (outBtn) outBtn.disabled = !enabled;
 	}
@@ -123,14 +123,14 @@
 		// Entry/exit forms (entry-exit view)
 		document.addEventListener('submit', function(e){
 			var id = (e.target && e.target.id)||'';
-			if ((id==='formEntry' || id==='formExit') && !shiftOpen){ e.preventDefault(); e.stopPropagation(); requireShift(); }
+			if ((id==='formIngreso' || id==='formSalida') && !shiftOpen){ e.preventDefault(); e.stopPropagation(); requireShift(); }
 		}, true);
 		setEntryExitEnabled(shiftOpen);
 
 		// Indicator in topbar if navbar exists
 		let badge = document.getElementById('shiftBadge');
 		if (!badge){
-			const nav = document.querySelector('.navbar .container-fluid .navbar-collapse, .navbar .container-fluid');
+			const nav = document.querySelector('.navbar .container-fluid .navbar-collapse, .navbar .container-fluid, .navbar-custom .flex, .navbar-custom');
 			if (nav){
 				badge = document.createElement('span');
 				badge.id = 'shiftBadge';
@@ -178,7 +178,7 @@
 				body: JSON.stringify({ initial_base: base, opening_observation: obs })
 			});
 			const j = await r.json();
-			if(!r.ok) throw new Error(j.message||'Error opening shift');
+			if(!r.ok) throw new Error(j.error||'Error opening shift');
 			showAlert('success','Turno abierto exitosamente.');
 			shiftOpen = true;
 			updateGuardUI();
@@ -227,7 +227,7 @@
 			};
 			const r = await fetch('/api/shifts/close', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body: JSON.stringify(payload) });
 			const j = await r.json();
-			if(!r.ok) throw new Error(j.message||'Error closing shift');
+			if(!r.ok) throw new Error(j.error||'Error closing shift');
 			const exp = j.data.expected;
 			const usr = j.data.userTotals;
 			const diff = Number(j.data.difference||0);
@@ -338,6 +338,7 @@
 
 	// Gating: block critical actions if no shift
 	window.requireOpenShift = requireShift;
+	window.openShiftModal = function(){ if (shiftOpen) { openClosingModal(); } else { requireShift(); } };
 
 	// Show modal if entering panel without shift
 	setTimeout(requireShift, 200);

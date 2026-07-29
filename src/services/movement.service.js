@@ -49,7 +49,11 @@ class MovementService {
       data: {
         id_movement: movement.id_movement,
         license_plate: vehicle.license_plate,
-        entry_date: movement.entry_date
+        type: vehicle.type,
+        entry_date: movement.entry_date,
+        minute_rate: Number(rate.minute_rate),
+        hourly_rate: Number(rate.hourly_rate),
+        full_day_rate: Number(rate.full_day_rate)
       }
     }
   }

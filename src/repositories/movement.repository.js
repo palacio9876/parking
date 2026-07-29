@@ -1,5 +1,5 @@
 // Repositorio de movimientos: operaciones sobre entradas, salidas y tarifas activas
-const { Movement, Vehicle, Rate, User } = require('../models')
+const { Movement, Vehicle, Rate, User, Payment } = require('../models')
 const { Op } = require('sequelize')
 
 class MovementRepository {
@@ -37,7 +37,11 @@ class MovementRepository {
   findById(id_movement, id_company) {
     return Movement.findOne({
       where: { id_movement, id_company },
-      include: [{ model: Vehicle, as: 'vehicle' }]
+      include: [
+        { model: Vehicle, as: 'vehicle' },
+        { model: Rate, as: 'rate' },
+        { model: Payment, as: 'payments' }
+      ]
     })
   }
 

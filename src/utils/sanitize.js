@@ -60,7 +60,7 @@ function sanitizeReportFilters(req, res, next) {
     })
     next()
   } catch (e) {
-    return res.status(400).json({ success: false, message: 'Invalid parameters' })
+    return res.status(400).json({ success: false, error: 'Invalid parameters' })
   }
 }
 
@@ -73,7 +73,7 @@ function sanitizeIdParam(paramName = 'id') {
   return function (req, res, next) {
     const raw = req.params && req.params[paramName]
     const id  = toSafeInt(raw, { min: 1, max: Number.MAX_SAFE_INTEGER, fallback: 0 })
-    if (!id) return res.status(400).json({ success: false, message: `Invalid ${paramName}` })
+    if (!id) return res.status(400).json({ success: false, error: `Invalid ${paramName}` })
     req.params[paramName] = id
     next()
   }

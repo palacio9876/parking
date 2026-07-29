@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(body)
             });
             const j = await res.json();
-            if(!res.ok) throw new Error(j.message||'Could not save');
+            if(!res.ok) throw new Error(j.error||'Could not save');
             showToast('Éxito','Tarifa guardada','success');
             loadRates();
         }catch(err){
@@ -59,7 +59,7 @@ async function loadRates(){
     try{
         const res = await fetch('/api/rates/current', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }});
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error cargando tarifas');
+        if(!res.ok) throw new Error(j.error||'Error cargando tarifas');
         const ul = document.getElementById('ratesList');
         ul.innerHTML = j.data.map(r => `
             <li class="list-group-item d-flex flex-column">

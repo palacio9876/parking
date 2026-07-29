@@ -195,7 +195,7 @@ class ReportRepository {
    * @returns {Promise<Array>}
    */
   async getAllTopPlates(id_company, from, to) {
-    return Movement.findAll({
+    const rows = await Movement.findAll({
       where: {
         id_company,
         entry_date: { [Op.between]: [`${from} 00:00:00`, `${to} 23:59:59`] }
@@ -213,6 +213,12 @@ class ReportRepository {
       order: [[fn('COUNT', col('Movement.id_movement')), 'DESC']],
       raw: true
     })
+    return rows.map(r => ({
+      license_plate: r['vehicle.license_plate'] || r.license_plate,
+      type: r['vehicle.type'] || r.type,
+      visits: r.visits,
+      total: r.total
+    }))
   }
 
   /**
@@ -224,7 +230,7 @@ class ReportRepository {
    * @returns {Promise<Array>}
    */
   async getTopPlates(id_company, from, to, limit = 10) {
-    return Movement.findAll({
+    const rows = await Movement.findAll({
       where: {
         id_company,
         entry_date: { [Op.between]: [`${from} 00:00:00`, `${to} 23:59:59`] }
@@ -243,6 +249,12 @@ class ReportRepository {
       limit,
       raw: true
     })
+    return rows.map(r => ({
+      license_plate: r['vehicle.license_plate'] || r.license_plate,
+      type: r['vehicle.type'] || r.type,
+      visits: r.visits,
+      total: r.total
+    }))
   }
 
   /**

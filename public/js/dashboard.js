@@ -144,7 +144,7 @@ async function setOcupacionKpi(){
         const hoy = `${yyyy}-${mm}-${dd}`;
         const res = await fetch(`/api/reports/kpis?from=${hoy}&to=${hoy}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.message||'Error KPIs');
+        if (!res.ok) throw new Error(j.error||'Error KPIs');
         const ocup = (j.data && j.data.occupancy!=null) ? j.data.occupancy : 0;
         const el = document.getElementById('kpiOcupacionDash');
         if (el) el.textContent = `${ocup}%`;
@@ -183,7 +183,7 @@ window.viewDetails = async function(idMovement) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'No fue posible obtener el detalle');
+        if (!res.ok) throw new Error(data.error || 'No fue posible obtener el detalle');
 
         const m = data.data;
         const plate = m.vehicle?.license_plate || m.license_plate || '';
@@ -265,7 +265,7 @@ window.checkoutVehicle = async function(idMovement) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const det = await resDet.json();
-        if (!resDet.ok) throw new Error(det.message || 'Error');
+        if (!resDet.ok) throw new Error(det.error || 'Error');
         const m = det.data;
         const plate = m.vehicle?.license_plate || m.license_plate || '';
         const vehType = m.vehicle?.type || m.type || '';
@@ -326,10 +326,10 @@ window.checkoutVehicle = async function(idMovement) {
                 const data = await res.json();
                 if (!res.ok) {
                     if (res.status === 404) {
-                        showToast('Advertencia', data.message || 'El vehículo no tiene ingreso activo', 'warning');
+                        showToast('Advertencia', data.error || 'El vehículo no tiene ingreso activo', 'warning');
                         return;
                     }
-                    throw new Error(data.message || 'No fue posible finalizar el movimiento');
+                    throw new Error(data.error || 'No fue posible finalizar el movimiento');
                 }
 
                 // Refrescar dashboard
@@ -398,7 +398,8 @@ function renderExitTicket(exitData, company){
         <hr/>
         <div>Total a pagar: <strong>${formatCurrency(total)}</strong></div>
         <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
-        <div>Fecha impresión: ${fmtDate(new Date())}</div>`;
+        <div>Fecha impresión: ${fmtDate(new Date())}</div>
+        <div class="barcode" style="text-align:center;margin-top:6px"><svg id="barcodeSvg"></svg><div style="font-size:12px">${plate}</div></div>`;
 }
 
 // Ventana de impresión tipo ticket con QR opcional
@@ -414,9 +415,11 @@ function printHTML(html, titulo, anchoMM, qrPayload){
             hr{ border:none; border-top:1px dashed #999; margin:6px 0 }
             img{ display:block; margin:0 auto 6px; max-width:100% }
             .qr{ display:none; justify-content:center; margin-top:6px }
+            .barcode{ display:flex; justify-content:center; margin-top:6px }
         </style>
     </head><body><div class="wrap">${html}<div class="qr"><div id="qrcode"></div></div></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
     <script>(function(){
         var payload = {};
         var enableQR = false;
@@ -433,6 +436,8 @@ function printHTML(html, titulo, anchoMM, qrPayload){
                 }
             }catch(_){ }
         }
+        var svg = document.getElementById('barcodeSvg');
+        if (svg) { JsBarcode(svg, (payload && (payload.p || payload.placa)) || '', {format:'code128', displayValue:false, height:40}); }
         setTimeout(function(){ window.print(); window.close(); }, 400);
     })();<\/script>
     </body></html>`;

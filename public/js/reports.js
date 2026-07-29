@@ -107,19 +107,16 @@ async function loadAll(){
 // --------- View: Shift Closures (Modal) ---------
 function initShiftsView(){
     const token = localStorage.getItem('token');
-    const container = document.querySelector('.container-fluid');
-    if (!container || document.getElementById('shiftsModal')) {
-        return;
-    }
+    if (document.getElementById('shiftsModal')) return;
 
-    // Button in main filters header
-    const filtrosHeader = document.querySelector('.card.mb-4 .card-header') || container.querySelector('.card .card-header');
-    if (filtrosHeader && !document.getElementById('btnShiftsModal')){
+    // Button in filter panel alongside PDF/Excel export buttons
+    const filterButtons = document.querySelector('#filterPanel .flex.flex-wrap.gap-2');
+    if (filterButtons && !document.getElementById('btnShiftsModal')){
         const btn = document.createElement('button');
         btn.id = 'btnShiftsModal';
-        btn.className = 'btn btn-outline-dark btn-sm ms-2';
-        btn.innerHTML = '<i class="fas fa-cash-register me-1"></i>Cierres de Turno';
-        filtrosHeader.appendChild(btn);
+        btn.className = 'inline-flex items-center px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors';
+        btn.innerHTML = '<i class="fas fa-cash-register mr-2"></i><span>Cierres de Turno</span>';
+        filterButtons.appendChild(btn);
         btn.addEventListener('click', ()=>{ loadShifts(); new bootstrap.Modal(document.getElementById('shiftsModal')).show(); });
     }
 
@@ -185,16 +182,17 @@ function initShiftsView(){
       });
       const r = await fetch('/api/reports/shifts?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
       const j = await r.json();
-      if (!r.ok) { toast('Error', j.message||'Error listando turnos', 'error'); return; }
+      if (!r.ok) { toast('Error', j.error||'Error listando turnos', 'error'); return; }
       const tb = document.querySelector('#tbShifts tbody');
       tb.innerHTML = '';
       j.data.forEach((t, idx)=>{
+        _shiftData[t.id_shift] = t;
         const tr = document.createElement('tr');
         tr.innerHTML = [
           `<td>${idx+1}</td>`,
           `<td>${fmtDate(t.opening_date)}</td>`,
           `<td>${fmtDate(t.closing_date)||''}</td>`,
-          `<td>${escHtml(t.user||t.username||'')}</td>`,
+          `<td>${escHtml(t.user?.username||t.user?.name||t.username||'')}</td>`,
           `<td>${fmt(t.initial_base)}</td>`,
           `<td>${fmt(t.total_cash)}</td>`,
           `<td>${fmt(t.total_card)}</td>`,
@@ -226,20 +224,21 @@ function initShiftsView(){
         lang
       });
       const res = await fetch('/api/reports/shifts/export/xlsx?'+params.toString(), { headers:{ 'Authorization':'Bearer '+token } });
-      if (!res.ok) { const j = await res.json().catch(()=>({message:'Error exportando'})); toast('Error', j.message||'Error exportando', 'error'); return; }
+        if (!res.ok) { const j = await res.json().catch(()=>({error:'Error exportando'})); toast('Error', j.error||'Error exportando', 'error'); return; }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = `shift_closures_${Date.now()}.xlsx`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     });
 
+    const _shiftData = {};
     // Shift reprint
     async function reprintShift(id){
       try{
-        const r = await fetch('/api/shifts/detail/'+id, { headers:{ 'Authorization':'Bearer '+token } });
-        const j = await r.json(); if(!r.ok) throw new Error(j.message||'Error');
-        const t = j.data.shift; const exp = j.data.expected||{ total:0, cash:0, card:0, qr:0 }; const stats = j.data.stats||{ total:0, byType:{car:0,motorcycle:0,bicycle:0}};
-        const res = { user:{ cash:t.total_cash||0, card:t.total_card||0, qr:t.total_qr||0, total:t.total_general||0 }, expected: exp, diff: Number((Number(t.total_general||0) - Number(exp.total||0)).toFixed(2)), obs: t.closing_observation, base_initial: t.initial_base, shift:{ id_shift:t.id_shift, user: (t.user||t.username||'') }, stats };
+        const t = _shiftData[id]; if (!t) { toast('Error', 'Datos del turno no disponibles', 'error'); return; }
+        const exp = { total: t.total_general||0, cash: t.total_cash||0, card: t.total_card||0, qr: t.total_qr||0 };
+        const stats = { total: 0, byType: { car:0, motorcycle:0, bicycle:0 } };
+        const res = { user:{ cash:t.total_cash||0, card:t.total_card||0, qr:t.total_qr||0, total:t.total_general||0 }, expected: exp, diff: Number((Number(t.total_general||0) - Number(exp.total||0)).toFixed(2)), obs: t.closing_observation, base_initial: t.initial_base, shift:{ id_shift:t.id_shift, user: (t.user?.username||t.user?.name||t.username||'') }, stats };
         if (window.printSummary){ window.printSummary(res); return; }
         const html = `
           <div style="font-family:Arial,sans-serif;font-size:12px">
@@ -326,7 +325,7 @@ async function loadKPIs(){
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error KPIs');
+        if(!res.ok) throw new Error(j.error||'Error KPIs');
         const d = j.data || {};
         document.getElementById('kpiIncome').textContent = formatCurrency(d.income||0);
         document.getElementById('kpiTickets').textContent = String(d.tickets||0);
@@ -343,7 +342,7 @@ async function loadChartIncome(){
         if (paymentMethod) q.append('paymentMethod', paymentMethod);
         const res = await fetch(`/api/reports/income-by-day?${q.toString()}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error ingresos por día');
+        if(!res.ok) throw new Error(j.error||'Error ingresos por día');
         const labels = j.data.map(r=>r.date);
         const data = j.data.map(r=>Number(r.total||0));
         renderLineChart('chartIncome', labels, data, 'Ingresos');
@@ -355,7 +354,7 @@ async function loadChartPaymentMethod(){
         const { from, to } = baseParams();
         const res = await fetch(`/api/reports/income-by-payment-method?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error ingresos por método');
+        if(!res.ok) throw new Error(j.error||'Error ingresos por método');
         const labels = j.data.map(r=>paymentMethodRep[r.payment_method] || r.payment_method);
         const data = j.data.map(r=>Number(r.total||0));
         renderDoughnut('chartPaymentMethod', labels, data);
@@ -374,7 +373,7 @@ async function loadMovements(){
         if (plate) q.append('plate', plate);
         const res = await fetch(`/api/reports/movements?${q.toString()}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error movimientos');
+        if(!res.ok) throw new Error(j.error||'Error movimientos');
         const tb = document.getElementById('tbMov');
         if (!j.data || j.data.length === 0){
             tb.innerHTML = '<tr><td colspan="7" class="text-center">Sin registros</td></tr>';
@@ -406,12 +405,27 @@ async function loadMovements(){
 // Reprint exit ticket from reports
 window.reprintExit = async function(idMovement){
     try{
-        // Get invoice with entry-exit structure
-        const res = await fetch(`/api/movements/invoice/${idMovement}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
+        const res = await fetch(`/api/movements/${idMovement}`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.message||'Reimpresión de Salida');
-        const f = j.data;
-        // Company, logo (DataURL) and settings
+        if (!res.ok) throw new Error(j.error||'Reimpresión de Salida');
+        const m = j.data;
+        const plate = m.vehicle?.license_plate || m.license_plate || '';
+        const vtype = m.vehicle?.type || m.type || '';
+        const f = {
+            id_movement: m.id_movement,
+            license_plate: plate,
+            type: vtype,
+            entry_date: m.entry_date,
+            exit_date: m.exit_date,
+            minute_rate: m.rate?.minute_rate || 0,
+            hourly_rate: m.rate?.hourly_rate || 0,
+            full_day_rate: m.rate?.full_day_rate || 0,
+            total_to_pay: m.total_to_pay || 0,
+            paymentsList: (m.payments || []).map(p => ({
+                payment_method: p.payment_method,
+                amount: p.amount
+            }))
+        };
         const company = await fetch('/api/companies/me',{ headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} }).then(r=>r.json()).then(x=>x.data).catch(()=>null);
         let logoUrl = '';
         try{
@@ -422,13 +436,11 @@ window.reprintExit = async function(idMovement){
         try{ cfg = await fetch('/api/companies/config',{headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`}}).then(r=>r.json()).then(x=>x.data); }catch(_){ }
         const companyInfo = Object.assign({}, company, { logo_url: logoUrl||company?.logo_url }, cfg||{});
 
-        // Reuse same entry-exit render if available
         if (window.renderReceipt && window.printHTML){
             const htmlTicket = renderReceipt('EXIT', null, f, companyInfo);
-            printHTML(htmlTicket, 'Factura de Salida', 80, { t:'exit', e:companyInfo?.tax_id, m:f.movementId, p:f.license_plate, fs:f.exitDate, total: f.total });
+            printHTML(htmlTicket, 'Factura de Salida', 80, { t:'exit', e:companyInfo?.tax_id, m:f.id_movement, p:f.license_plate, fs:f.exit_date, total: f.total_to_pay });
             return;
         }
-        // Simple fallback (if reports is opened in isolation)
         const header = `
             <div style="text-align:center">
                 ${companyInfo.logo_url ? `<img src="${companyInfo.logo_url}" alt="logo" style="max-height:60px">` : ''}
@@ -443,27 +455,29 @@ window.reprintExit = async function(idMovement){
             ? `<div><strong>Pagos</strong></div>` + f.paymentsList.map(p=>`<div>${p.payment_method}: <strong>${formatCurrency(Number(p.amount||0))}</strong></div>`).join('')
             : '';
         const body = `
-            <div>Movimiento: <strong>#${f.movementId}</strong></div>
+            <div>Movimiento: <strong>#${f.id_movement}</strong></div>
             <div>Placa: <strong>${f.license_plate}</strong></div>
             <div>Tipo: <strong>${f.type}</strong></div>
-            <div>Entrada: <strong>${fmtDate(f.entryDate)}</strong></div>
-            <div>Salida: <strong>${fmtDate(f.exitDate)}</strong></div>
+            <div>Entrada: <strong>${fmtDate(f.entry_date)}</strong></div>
+            <div>Salida: <strong>${fmtDate(f.exit_date)}</strong></div>
             <hr/>
-            <div>Rates</div>
-            <div>Minute: <strong>${f.rate.minute_rate}</strong></div>
-            <div>Hour: <strong>${f.rate.hourly_rate}</strong></div>
-            <div>Day: <strong>${f.rate.full_day_rate}</strong></div>
+            <div>Tarifas</div>
+            <div>Minuto: <strong>${f.minute_rate}</strong></div>
+            <div>Hora: <strong>${f.hourly_rate}</strong></div>
+            <div>Día: <strong>${f.full_day_rate}</strong></div>
             <hr/>
-            <div>Total a pagar: <strong>${formatCurrency(f.total)}</strong></div>
+            <div>Total a pagar: <strong>${formatCurrency(f.total_to_pay)}</strong></div>
             ${paymentsHtml}
             <div>Atendido por: ${localStorage.getItem('userName')||''}</div>
-            <div>Fecha impresión: ${fmtDate(new Date())}</div>`;
+            <div>Fecha impresión: ${fmtDate(new Date())}</div>
+            <div class="barcode" style="text-align:center;margin-top:6px"><svg id="barcodeSvg"></svg><div style="font-size:12px">${f.license_plate || ''}</div></div>`;
         const printWin = window.open('','_blank','width=420,height=700');
         const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Reprint</title>
-            <style>@page{ size:80mm auto; margin: 3mm } body{ width:80mm; font-family: Arial, sans-serif; font-size:11px; margin:0 } .wrap{ padding:4mm } hr{ border:none; border-top:1px dashed #999; margin:6px 0 } img{ display:block; margin:0 auto 6px; max-width:100% } .qr{ display:flex; justify-content:center; margin-top:6px }</style>
+            <style>@page{ size:80mm auto; margin: 3mm } body{ width:80mm; font-family: Arial, sans-serif; font-size:11px; margin:0 } .wrap{ padding:4mm } hr{ border:none; border-top:1px dashed #999; margin:6px 0 } img{ display:block; margin:0 auto 6px; max-width:100% } .qr{ display:flex; justify-content:center; margin-top:6px } .barcode{ display:flex; justify-content:center; margin-top:6px }</style>
             </head><body><div class="wrap">${header+body}<div class="qr"><div id="qrcode"></div></div></div>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-            <script>(function(){ try{ new QRCode(document.getElementById('qrcode'), {text:'https://yoursite.com/', width:96, height:96}); }catch(e){} setTimeout(function(){ window.print(); window.close(); }, 400); })();<\/script>
+            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
+            <script>(function(){ try{ new QRCode(document.getElementById('qrcode'), {text:'https://yoursite.com/', width:96, height:96}); }catch(e){} var svg=document.getElementById('barcodeSvg'); if(svg){ JsBarcode(svg, '${f.license_plate || ''}', {format:'code128', displayValue:false, height:40}); } setTimeout(function(){ window.print(); window.close(); }, 400); })();<\/script>
             </body></html>`;
         printWin.document.write(doc);
         printWin.document.close();
@@ -478,7 +492,7 @@ async function loadTopPlates(){
         const { from, to } = baseParams();
         const res = await fetch(`/api/reports/top-plates?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&limit=10`, { headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`} });
         const j = await res.json();
-        if(!res.ok) throw new Error(j.message||'Error top placas');
+        if(!res.ok) throw new Error(j.error||'Error top placas');
         const tb = document.getElementById('tbTop');
         if (!j.data || j.data.length === 0){
             tb.innerHTML = '<tr><td colspan="4" class="text-center">Sin registros</td></tr>';
@@ -532,7 +546,7 @@ async function exportToPDF(){
         if (plate) q.append('plate', plate);
         toast('Información', 'Generando PDF...', 'info');
         const res = await fetch(`/api/reports/export/pdf?${q.toString()}`, { headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` } });
-        if (!res.ok) { const j = await res.json().catch(()=>({message:'Error'})); toast('Error', j.message||'Error exportando', 'error'); return; }
+        if (!res.ok) { const j = await res.json().catch(()=>({error:'Error'})); toast('Error', j.error||'Error exportando', 'error'); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -555,7 +569,7 @@ async function exportToExcelBackend(){
         if (status) q.append('status', status);
         if (plate) q.append('plate', plate);
         const res = await fetch(`/api/reports/export/xlsx?${q.toString()}`, { headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` } });
-        if (!res.ok) { const j = await res.json().catch(()=>({message:'Error'})); toast('Error', j.message||'Error exportando', 'error'); return; }
+        if (!res.ok) { const j = await res.json().catch(()=>({error:'Error'})); toast('Error', j.error||'Error exportando', 'error'); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

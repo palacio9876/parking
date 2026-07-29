@@ -3,6 +3,12 @@ const statusLabelsV = { active: 'Activo', completed: 'Finalizado', inactive: 'In
 
 let vehiclesTable;
 
+function resetVehicleForm() {
+    document.getElementById('vehicleForm').reset();
+    document.getElementById('vehicleId').value = '';
+    document.getElementById('modalTitle').textContent = 'Nuevo Vehículo';
+}
+
 function initDataTable() {
   if (vehiclesTable) {
     vehiclesTable.destroy();
@@ -78,6 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('btnLogout').addEventListener('click', closeSession);
   document.getElementById('logoutDropdown').addEventListener('click', closeSession);
 
+  $('#vehicleModal').on('hidden.bs.modal', resetVehicleForm);
+  document.querySelector('[data-bs-target="#vehicleModal"]').addEventListener('click', resetVehicleForm);
+
   document.getElementById('userName').textContent = localStorage.getItem('userName') || 'User';
   if (localStorage.getItem('userRole') !== 'admin') {
     document.querySelectorAll('.admin-only').forEach(function(el) { el.classList.add('d-none'); });
@@ -133,8 +142,9 @@ async function saveVehicle() {
       },
       body: JSON.stringify(vehicle)
     });
+    const j = await response.json();
     if (!response.ok) {
-      throw new Error('Error guardando vehículo');
+      throw new Error(j.error || 'Error guardando vehículo');
     }
     $('#vehicleModal').modal('hide');
     loadVehicles();
@@ -150,10 +160,10 @@ async function editVehicle(id) {
     const response = await fetch('/api/vehicles/' + id, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
-    if (!response.ok) {
-      throw new Error('Error cargando datos del vehículo');
-    }
     const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Error cargando datos del vehículo');
+    }
     const vehicle = result.data || result;
     document.getElementById('vehicleId').value = vehicle.id_vehicle;
     document.getElementById('license_plate').value = vehicle.license_plate;
@@ -175,8 +185,9 @@ async function deleteVehicle(id) {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
+    const j = await response.json();
     if (!response.ok) {
-      throw new Error('Error eliminando vehículo');
+      throw new Error(j.error || 'Error eliminando vehículo');
     }
     loadVehicles();
     showSuccess('Vehículo eliminado');
@@ -205,7 +216,7 @@ async function viewHistory(idVehicle, plate) {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
     const j = await res.json();
-    if (!res.ok) throw new Error(j.message || 'Error obteniendo historial');
+    if (!res.ok) throw new Error(j.error || 'Error obteniendo historial');
     const histEl = document.getElementById('histPlate');
     const tb = document.getElementById('historyBody');
     if (!histEl || !tb) { showToast('Error', 'Error', 'error'); return; }

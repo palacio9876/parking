@@ -22,6 +22,9 @@ if (typeof document !== 'undefined') {
 
     document.getElementById('formIngreso').addEventListener('submit', handleEntry);
     document.getElementById('formSalida').addEventListener('submit', handleExit);
+    document.getElementById('pagoModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('pagosContainer').innerHTML = '';
+    });
 
     document.getElementById('btnPrintIngreso58').addEventListener('click', () => {
         if (!ultimoIngreso) return;
@@ -130,11 +133,9 @@ async function handleEntry(e) {
     const b = data.data;
     ultimoIngreso = b;
     showToast('Ingreso registrado', `Vehículo ${b.license_plate} ingresó correctamente`, 'success');
-    document.getElementById('compIngresoBody').innerHTML = renderComprobante('INGRESO', b, null, empresaInfo);
-    document.getElementById('compIngreso').classList.remove('d-none');
-    document.getElementById('ingPlaca').value = '';
+    imprimirHTML(renderComprobante('INGRESO', b, null, empresaInfo), 'Comprobante de Ingreso', 58, { t: 'entry', e: empresaInfo?.tax_id, m: b.id_movement, p: b.license_plate, fe: b.entry_date });
+    document.getElementById('formIngreso').reset();
     document.getElementById('ingPlaca').focus();
-    if (checkedTipo) checkedTipo.checked = true;
     cargarPlacasActivas();
 }
 
@@ -149,7 +150,7 @@ async function handleExit(e) {
         body: JSON.stringify({ license_plate })
     });
     const data = await res.json();
-    if (!res.ok) { showToast('Error', data.message || 'Error al calcular salida', 'error'); return; }
+    if (!res.ok) { showToast('Error', data.error || 'Error al calcular salida', 'error'); return; }
     const f = data.data;
     abrirModalPago(f, metodoPref);
 }
@@ -180,7 +181,8 @@ function renderComprobante(tipo, ingreso, salida, empresa) {
             <div>Día: <strong>${ingreso.full_day_rate || ''}</strong></div>
             <hr/>
             <div>Atendido por: ${localStorage.getItem('userName') || ''}</div>
-            <div>Fecha impresión: ${fmtDate(new Date())}</div>`;
+            <div>Fecha impresión: ${fmtDate(new Date())}</div>
+            <div class="barcode" style="text-align:center;margin-top:6px"><svg id="barcodeSvg"></svg><div style="font-size:12px">${ingreso.license_plate}</div></div>`;
     }
 
     const pagosHtml = (salida.paymentsList && salida.paymentsList.length)
@@ -201,7 +203,8 @@ function renderComprobante(tipo, ingreso, salida, empresa) {
         <div>Total a pagar: <strong>${fmtCurrency(salida.total_to_pay)}</strong></div>
         ${pagosHtml}
         <div>Atendido por: ${localStorage.getItem('userName') || ''}</div>
-        <div>Fecha impresión: ${fmtDate(new Date())}</div>`;
+        <div>Fecha impresión: ${fmtDate(new Date())}</div>
+        <div class="barcode" style="text-align:center;margin-top:6px"><svg id="barcodeSvg"></svg><div style="font-size:12px">${salida.license_plate}</div></div>`;
 }
 
 function formatCurrencyEE(amount) {
@@ -220,9 +223,11 @@ function imprimirHTML(html, titulo, anchoMM, qrPayload) {
             hr{ border:none; border-top:1px dashed #999; margin:6px 0 }
             img{ display:block; margin:0 auto 6px; max-width:100% }
             .qr{ display:none; justify-content:center; margin-top:6px }
+            .barcode{ display:flex; justify-content:center; margin-top:6px }
         </style>
     </head><body><div class="wrap">${html}<div class="qr"><div id="qrcode"></div></div></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
     <script>(function(){
         var payload = {};
         var enableQR = false;
@@ -239,6 +244,8 @@ function imprimirHTML(html, titulo, anchoMM, qrPayload) {
                 }
             }catch(_){ }
         }
+        var svg = document.getElementById('barcodeSvg');
+        if (svg) { JsBarcode(svg, (payload && (payload.p || payload.placa)) || '', {format:'code128', displayValue:false, height:40}); }
         setTimeout(function(){ window.print(); window.close(); }, 400);
     })();<\/script>
     </body></html>`;
@@ -341,7 +348,7 @@ function abrirModalPago(factura, metodoPorDefecto) {
                 body: JSON.stringify({ license_plate: factura.license_plate })
             });
             const exitData = await exitRes.json();
-            if (!exitRes.ok) throw new Error(exitData.message || 'Error al registrar salida');
+            if (!exitRes.ok) throw new Error(exitData.error || 'Error al registrar salida');
 
             const res = await fetch('/api/payments/bulk', {
                 method: 'POST',
@@ -349,12 +356,10 @@ function abrirModalPago(factura, metodoPorDefecto) {
                 body: JSON.stringify({ id_movement: factura.id_movement, payments: pagos })
             });
             const j = await res.json();
-            if (!res.ok) throw new Error(j.message || 'Error registrando pagos');
+            if (!res.ok) throw new Error(j.error || 'Error registrando pagos');
             showToast('Salida completada', `Vehículo ${factura.license_plate} - Pago registrado correctamente`, 'success');
             const salidaFinal = Object.assign({}, exitData.data, { paymentsList: pagos });
             ultimaSalida = salidaFinal;
-            document.getElementById('compSalidaBody').innerHTML = renderComprobante('SALIDA', null, salidaFinal, empresaInfo);
-            document.getElementById('compSalida').classList.remove('d-none');
             document.getElementById('formSalida').reset();
             imprimirHTML(renderComprobante('SALIDA', null, salidaFinal, empresaInfo), 'Factura de Salida', 80, { t: 'exit', e: empresaInfo?.tax_id, m: salidaFinal.id_movement, p: salidaFinal.license_plate, fs: salidaFinal.exit_date, total: salidaFinal.total_to_pay });
             modal.hide();

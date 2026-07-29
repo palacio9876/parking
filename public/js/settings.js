@@ -39,7 +39,7 @@ async function loadCompany(){
     try{
         const r = await fetch('/api/companies/me',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error cargando empresa');
+        if(!r.ok) throw new Error(j.error||'Error cargando empresa');
         const e = j.data;
         document.getElementById('e_name').value = e.name || '';
         document.getElementById('e_tax_id').value = e.tax_id || '';
@@ -60,7 +60,7 @@ async function loadSettings(){
     try{
         const r = await fetch('/api/companies/config',{ headers:{ 'Authorization':`Bearer ${localStorage.getItem('token')}` }});
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error cargando configuración');
+        if(!r.ok) throw new Error(j.error||'Error cargando configuración');
         const c = j.data;
         document.getElementById('c_cars').value = c.car_total_capacity || 0;
         document.getElementById('c_motos').value = c.motorcycle_total_capacity || 0;
@@ -94,7 +94,7 @@ async function saveCompany(){
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error saving');
+        if(!r.ok) throw new Error(j.error||'Error saving');
         setAlert('alertCompany', 'success', 'Datos de empresa actualizados.');
     }catch(err){ setAlert('alertCompany','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
@@ -119,7 +119,7 @@ async function saveSettings(){
             method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('token')}`}, body: JSON.stringify(payload)
         });
         const j = await r.json();
-        if(!r.ok) throw new Error(j.message||'Error saving');
+        if(!r.ok) throw new Error(j.error||'Error saving');
         setAlert('alertSettings', 'success', 'Configuración actualizada.');
     }catch(err){ setAlert('alertSettings','danger', err.message); }
     finally{ btn.disabled=false; btn.innerHTML = prev; }
@@ -151,7 +151,7 @@ async function uploadLogo(){
         form.append('logo', file);
         const r = await fetch('/api/companies/logo', { method:'POST', headers:{ 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: form });
         const j = await r.json();
-        if (!r.ok) throw new Error(j.message||'Error subiendo logo');
+        if (!r.ok) throw new Error(j.error||'Error subiendo logo');
         setAlert('alertCompany','success','Logo subido y guardado.');
         const sidebarImg = document.getElementById('sidebarLogo');
         if (sidebarImg) {

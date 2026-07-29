@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Error en el inicio de sesión');
+                    throw new Error(data.error || 'Error en el inicio de sesión');
                 }
 
                 // Guardar token y datos del usuario
